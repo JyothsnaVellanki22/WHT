@@ -1,0 +1,353 @@
+/* --- CSS Reset & Variables --- */
+:root {
+  /* WHT Sunset Palette */
+  --bg-color: #FAFAFA; /* Off-white main background */
+  --text-main: #111111;
+  --text-muted: #555555;
+  
+  --color-pink: #FF66A1;
+  --color-yellow: #FFCF2A;
+  --color-peach: #FF9A76;
+  --color-red: #E63946;
+  
+  --gradient-wht: linear-gradient(135deg, #FF66A1 0%, #FF9A76 50%, #FFCF2A 100%);
+  
+  /* Brutalist UI */
+  --border-thick: 3px solid #111111;
+  --shadow-block: 4px 4px 0px #111111;
+  --shadow-hover: 8px 8px 0px #111111;
+  
+  --font-display: 'Anton', sans-serif;
+  --font-body: 'Inter', sans-serif;
+  --font-script: 'Caveat', cursive;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background-color: var(--bg-color);
+  background-image: radial-gradient(#d4d4d4 2px, transparent 2px);
+  background-size: 40px 40px;
+  color: var(--text-main);
+  font-family: var(--font-body);
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  cursor: url('data:image/svg+xml;utf8,<svg fill="%23ab00ff" stroke="black" stroke-width="2" width="24" height="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M5.5 3.21V20.8c0 .45.54.67.85.35l4.86-4.86a.5.5 0 0 1 .35-.15h6.74c.45 0 .67-.54.35-.85L5.5 3.21z"/></svg>') 0 0, auto;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-display);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 1rem;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+/* --- Layout --- */
+.container {
+  max-width: 1300px;
+  margin: 0 auto;
+  padding: 0 5%;
+}
+
+/* --- Navbar Redesign --- */
+.navbar {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: white;
+  border-bottom: var(--border-thick);
+  padding: 1rem 0;
+}
+
+.nav-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.nav-links {
+  display: flex;
+  gap: 2.5rem;
+}
+
+.nav-links a {
+  font-weight: 800;
+  font-size: 1rem;
+  text-transform: uppercase;
+  position: relative;
+  transition: transform 0.2s;
+}
+
+.nav-links a:hover {
+  transform: translateY(-2px);
+  color: var(--color-red);
+}
+
+/* The custom WHT Logo styled via CSS */
+.logo-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.logo-wht {
+  display: flex;
+  align-items: flex-end;
+  font-family: var(--font-display);
+  font-size: 3.5rem;
+  line-height: 0.8;
+  letter-spacing: -0.05em;
+  margin-bottom: 0.2rem;
+}
+
+.w-letter {
+  color: var(--color-yellow);
+}
+
+.h-letter {
+  color: var(--color-red);
+}
+
+.t-letter {
+  color: white;
+  text-shadow: 2px 2px 0px var(--color-red), 4px 4px 0px var(--color-red), 6px 6px 0px var(--color-red);
+}
+
+.logo-script {
+  font-family: var(--font-script);
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #111;
+  text-align: center;
+  margin-top: 5px;
+  letter-spacing: 0.05em;
+}
+
+/* --- Hero Section Refit --- */
+.hero {
+  padding: 6rem 0;
+  background: var(--gradient-wht);
+  border-bottom: var(--border-thick);
+  position: relative;
+  overflow: hidden;
+}
+
+.hero-inner {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 2rem;
+  align-items: center;
+}
+
+.title-huge {
+  font-size: clamp(4rem, 10vw, 8rem);
+  line-height: 0.9;
+  color: #111;
+  margin-bottom: 1.5rem;
+}
+
+.hero p {
+  font-size: 1.5rem;
+  font-weight: 600;
+  max-width: 600px;
+  margin-bottom: 2rem;
+}
+
+/* --- Buttons --- */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  background: white;
+  color: #111;
+  padding: 1rem 2rem;
+  border: var(--border-thick);
+  box-shadow: var(--shadow-block);
+  font-weight: 900;
+  font-family: var(--font-display);
+  font-size: 1.2rem;
+  letter-spacing: 0.05em;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn:active, .btn:hover {
+  transform: translate(2px, 2px);
+  box-shadow: 2px 2px 0px #111;
+  background: var(--color-yellow);
+}
+
+.btn-dark {
+  background: #111;
+  color: white;
+}
+.btn-dark:hover {
+  background: var(--color-red);
+  color: white;
+}
+
+/* --- Grids & Cards (Brutalist) --- */
+.grid-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 3rem;
+}
+
+.grid-3 {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 2.5rem;
+}
+
+.card {
+  background: white;
+  border: var(--border-thick);
+  box-shadow: var(--shadow-block);
+  padding: 2rem;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  display: flex;
+  flex-direction: column;
+}
+
+.card:hover {
+  transform: translate(-4px, -4px);
+  box-shadow: var(--shadow-hover);
+}
+
+.card-tag {
+  align-self: flex-start;
+  background: var(--color-pink);
+  color: #111;
+  font-weight: 900;
+  font-family: var(--font-display);
+  padding: 0.25rem 0.75rem;
+  border: 2px solid #111;
+  margin-bottom: 1rem;
+  font-size: 0.9rem;
+}
+
+.card h3 {
+  font-size: 2rem;
+  line-height: 1.1;
+  margin-bottom: 1rem;
+}
+
+.card p {
+  color: var(--text-muted);
+  font-weight: 500;
+  margin-bottom: 1.5rem;
+  flex-grow: 1;
+}
+
+/* --- Section Utilities --- */
+.section-title {
+  font-size: 4rem;
+  margin-bottom: 3rem;
+  line-height: 1;
+}
+
+.section-padding {
+  padding: 6rem 0;
+  border-bottom: var(--border-thick);
+}
+
+/* --- Newsletter Refit --- */
+.newsletter-section {
+  background: var(--color-yellow);
+}
+
+.newsletter-form {
+  display: flex;
+  max-width: 600px;
+  margin: 0 auto;
+  border: var(--border-thick);
+  box-shadow: var(--shadow-block);
+  background: white;
+}
+
+.newsletter-form input {
+  flex: 1;
+  padding: 1rem 1.5rem;
+  font-family: var(--font-body);
+  font-size: 1.1rem;
+  font-weight: 600;
+  border: none;
+  border-right: var(--border-thick);
+  outline: none;
+}
+
+.newsletter-form button {
+  border: none;
+  background: var(--color-red);
+  color: white;
+  padding: 0 2rem;
+  font-family: var(--font-display);
+  font-size: 1.2rem;
+  cursor: pointer;
+}
+
+.newsletter-form button:hover {
+  background: #111;
+}
+
+/* --- Footer --- */
+.footer {
+  background: var(--gradient-wht);
+  padding: 4rem 0;
+  text-align: center;
+}
+
+/* --- Floating Menu --- */
+.floating-menu {
+  position: fixed;
+  top: 50%;
+  right: -15px;
+  transform: translateY(-50%);
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  z-index: 1000;
+  align-items: flex-end;
+}
+
+.float-item {
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+  padding: 0.4rem 1.2rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  transform-origin: right center;
+  transform: rotate(var(--hover-rotate));
+  transition: transform 0.2s ease, filter 0.2s ease;
+  box-shadow: -4px 4px 0px rgba(0,0,0,0.3);
+  text-decoration: none;
+  line-height: 1.2;
+}
+
+.float-item:hover {
+  transform: rotate(0deg) scale(1.05) translateX(-10px);
+  filter: brightness(1.1);
+  z-index: 10;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .hero { padding: 4rem 0; }
+  .grid-2 { grid-template-columns: 1fr; }
+  .nav-links { display: none; }
+  .newsletter-form { flex-direction: column; }
+  .newsletter-form input { border-right: none; border-bottom: var(--border-thick); }
+  .newsletter-form button { padding: 1rem; }
+  .floating-menu { display: none; } /* Hide floating menu on mobile */
+}
