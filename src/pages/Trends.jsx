@@ -10,11 +10,8 @@ export default function Trends() {
 
   return (
     <div className="page-fade section-padding container">
-      <h1 className="title-huge" style={{ fontSize: '4rem', textAlign: 'center', marginBottom: '1rem' }}>Tech & Job Market Trends</h1>
-      <p style={{ textAlign: 'center', color: 'var(--text-muted)', marginBottom: '4rem', fontSize: '1.2rem' }}>
-        Layoffs, hiring shifts, and the macro environment decoded.
-      </p>
-      
+      <h1 className="title-huge" style={{ fontSize: '4rem', textAlign: 'center', marginBottom: '1rem' }}>Tech Trends</h1>
+
       <div className="grid-2">
         {posts.map((post, i) => <ContentCard key={i} {...post} />)}
       </div>

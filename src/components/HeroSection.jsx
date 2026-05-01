@@ -7,17 +7,17 @@ export default function HeroSection() {
       <div className="container hero-inner">
         <div>
           <h1 className="title-huge">
-            WHT IS<br/>HAPPENING<br/>IN TECH?
+            WHT IS<br />HAPPENING<br />IN TECH?
           </h1>
           <p>
-            The game has changed. Decode the Job Market. Crack the Interview. Built for Gen Z and international students.
+            Decode Tech! <br />Built for the next gen engineers
           </p>
           <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
             <Link to="/playbook" className="btn">
-              START THE PLAYBOOK <ArrowRight size={24} style={{strokeWidth: 3}} />
+              START THE PLAYBOOK <ArrowRight size={24} style={{ strokeWidth: 3 }} />
             </Link>
             <Link to="/agentic-ai" className="btn btn-dark">
-              <Terminal size={24} style={{strokeWidth: 3}} /> AI WORKFLOWS
+              <Terminal size={24} style={{ strokeWidth: 3 }} /> AI WORKFLOWS
             </Link>
           </div>
         </div>

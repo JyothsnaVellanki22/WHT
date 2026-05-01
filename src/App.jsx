@@ -5,8 +5,9 @@ import FloatingMenu from './components/FloatingMenu';
 
 // Pages
 import Home from './pages/Home';
-import Trends from './pages/Trends';
-import AgenticAI from './pages/AgenticAI';
+import TrendsPage from './pages/TrendsPage';
+import AgenticAIPage from './pages/AgenticAIPage';
+import ArticleDetailPage from './pages/ArticleDetailPage';
 import Playbook from './pages/Playbook';
 import ModuleDetail from './pages/ModuleDetail';
 import CaseStudies from './pages/CaseStudies';
@@ -20,8 +21,9 @@ function App() {
       <main>
         <Routes>
           <Route path="/" element={<Home />} />
-          <Route path="/trends" element={<Trends />} />
-          <Route path="/agentic-ai" element={<AgenticAI />} />
+          <Route path="/trends" element={<TrendsPage />} />
+          <Route path="/agentic-ai" element={<AgenticAIPage />} />
+          <Route path="/article/:slug" element={<ArticleDetailPage />} />
           <Route path="/playbook" element={<Playbook />} />
           <Route path="/playbook/:slug" element={<ModuleDetail />} />
           <Route path="/case-studies" element={<CaseStudies />} />
