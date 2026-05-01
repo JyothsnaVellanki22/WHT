@@ -9,7 +9,7 @@ export default function CaseStudies() {
 
   useEffect(() => {
     // Fetch from new intelligence API
-    fetch('http://localhost:8000/api/signals')
+    fetch('/_/backend/api/signals')
       .then(res => res.json())
       .then(data => {
         setSignals(data);

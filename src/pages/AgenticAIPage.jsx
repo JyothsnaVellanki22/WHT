@@ -7,7 +7,7 @@ const AgenticAIPage = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch("http://localhost:8000/api/agentic-ai")
+    fetch("/_/backend/api/agentic-ai")
       .then(res => res.json())
       .then(data => {
         setArticles(data);

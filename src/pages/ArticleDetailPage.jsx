@@ -9,7 +9,7 @@ const ArticleDetailPage = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch(`http://localhost:8000/api/articles/${slug}`)
+    fetch(`/_/backend/api/articles/${slug}`)
       .then(res => res.json())
       .then(data => {
         setArticle(data);

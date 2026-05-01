@@ -8,7 +8,7 @@ export default function Playbook() {
   const [atsScore, setAtsScore] = useState(null);
 
   useEffect(() => {
-    fetch('http://localhost:8000/api/career-path')
+    fetch('/_/backend/api/career-path')
       .then(r => r.json()).then(setCareerData).catch(e => {
         setCareerData({
           role: 'backend', readiness: 63,
@@ -17,7 +17,7 @@ export default function Playbook() {
         });
       });
       
-    fetch('http://localhost:8000/api/market/trends')
+    fetch('/_/backend/api/market/trends')
       .then(r => r.json()).then(setMarketData).catch(e => {
         setMarketData({ rising_skills: ['LangGraph', 'CUDA'], dying_skills: ['Basic React', 'REST'], salary_trend: '+15% AI roles' });
       });
@@ -25,7 +25,7 @@ export default function Playbook() {
 
   const handleResumeScan = async () => {
     try {
-      const res = await fetch('http://localhost:8000/api/resume/analyze', { method: 'POST' });
+      const res = await fetch('/_/backend/api/resume/analyze', { method: 'POST' });
       const data = await res.json();
       setAtsScore(data);
     } catch (e) {

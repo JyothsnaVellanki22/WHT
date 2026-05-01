@@ -11,7 +11,7 @@ export default function TrendDetail() {
   useEffect(() => {
     const fetchArticle = async () => {
       try {
-        const res = await fetch(`http://localhost:8000/api/trends/${slug}`);
+        const res = await fetch(`/_/backend/api/trends/${slug}`);
         if (!res.ok) throw new Error("Article not found");
         const data = await res.json();
         setArticle(data);

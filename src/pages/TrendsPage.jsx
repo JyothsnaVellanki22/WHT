@@ -7,7 +7,7 @@ const TrendsPage = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch("http://localhost:8000/api/trends")
+    fetch("/_/backend/api/trends")
       .then(res => res.json())
       .then(data => {
         setArticles(data);
