@@ -1,28 +1,57 @@
-import { Linkedin, Instagram, Youtube } from 'lucide-react';
+import { Linkedin, Instagram, Youtube, Twitter } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 export default function Footer() {
   return (
-    <footer className="footer">
+    <footer className="footer-editorial">
       <div className="container">
-        <div className="logo-container" style={{ marginBottom: '2rem' }}>
-          <div className="logo-wht">
-            <span className="w-letter">W</span>
-            <span className="h-letter">H</span>
-            <span className="t-letter">T</span>
+        <div className="footer-inner">
+          <div>
+            <Link to="/" className="logo-container" style={{ marginBottom: '0.8rem' }}>
+              <div className="logo-wht">
+                <span className="w-letter">W</span>
+                <span className="h-letter">H</span>
+                <span className="t-letter">T</span>
+              </div>
+              <span className="logo-script">What's Happening in Tech</span>
+            </Link>
+
+            <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', maxWidth: '380px' }}>
+              Tracking daily tech shifts and publishing weekly essays on software, AI, and silicon for ambitious builders.
+            </p>
           </div>
-          <span className="logo-script">What's Happening in Tech</span>
+
+          <div style={{ display: 'flex', gap: '3rem', flexWrap: 'wrap' }}>
+            <div>
+              <div style={{ fontSize: '0.75rem', fontWeight: 700, letterSpacing: '0.1em', color: 'var(--text-main)', marginBottom: '0.8rem', textTransform: 'uppercase' }}>
+                Navigation
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', fontSize: '0.88rem', color: 'var(--text-muted)' }}>
+                <Link to="/" style={{ color: 'var(--text-muted)' }}>Home</Link>
+                <Link to="/blogs" style={{ color: 'var(--text-muted)' }}>Blogs</Link>
+                <Link to="/newsletters" style={{ color: 'var(--text-muted)' }}>Newsletters</Link>
+                <Link to="/about" style={{ color: 'var(--text-muted)' }}>About</Link>
+              </div>
+            </div>
+
+            <div>
+              <div style={{ fontSize: '0.75rem', fontWeight: 700, letterSpacing: '0.1em', color: 'var(--text-main)', marginBottom: '0.8rem', textTransform: 'uppercase' }}>
+                Connect
+              </div>
+
+              <div style={{ display: 'flex', gap: '1rem', color: 'var(--text-muted)' }}>
+                <a href="https://www.linkedin.com" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--text-muted)' }}><Linkedin size={20} /></a>
+                <a href="https://www.instagram.com" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--text-muted)' }}><Instagram size={20} /></a>
+                <a href="https://www.youtube.com" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--text-muted)' }}><Youtube size={20} /></a>
+              </div>
+            </div>
+          </div>
         </div>
-        <p style={{ maxWidth: '500px', margin: '0 auto 2rem', fontWeight: 600 }}>
-          Decoding tech, built for next gen
-        </p>
-        <div style={{ display: 'flex', gap: '2rem', justifyContent: 'center', marginBottom: '2rem' }}>
-          <a href="#" className="footer-icon-link" aria-label="LinkedIn"><Linkedin size={28} /></a>
-          <a href="#" className="footer-icon-link" aria-label="Instagram"><Instagram size={28} /></a>
-          <a href="#" className="footer-icon-link" aria-label="YouTube"><Youtube size={28} /></a>
+
+        <div className="footer-copy">
+          <div>&copy; {new Date().getFullYear()} WHT (What's Happening in Tech). All rights reserved.</div>
+          <div>Built for next-gen builders & engineers.</div>
         </div>
-        <p style={{ fontSize: '0.9rem', fontWeight: 600 }}>
-          &copy; {new Date().getFullYear()} WHT. Built with React.
-        </p>
       </div>
     </footer>
   );
