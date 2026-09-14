@@ -1,41 +1,57 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, Link } from 'react-router-dom';
-import Newsletter from '../components/Newsletter';
-import { ArrowLeft } from 'lucide-react';
+import { useParams, Link, useNavigate } from 'react-router-dom';
+import { ArrowLeft, Calendar, Clock, Share2, Linkedin, Terminal, Layers, Code, Trash2 } from 'lucide-react';
 
-const ArticleDetailPage = () => {
+export default function ArticleDetailPage({ blogs = [], isAdmin = false, onDeleteBlog }) {
   const { slug } = useParams();
-  const [article, setArticle] = useState(null);
+  const navigate = useNavigate();
+  const [tutorial, setTutorial] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch(`/_/backend/api/articles/${slug}`)
+    // 1. Check in passed blogs props
+    const match = blogs.find(b => b.slug === slug || String(b.id) === slug);
+    if (match) {
+      setTutorial(match);
+      setLoading(false);
+      return;
+    }
+
+    // 2. Fetch from backend API
+    fetch(`/api/blogs/${slug}`)
       .then(res => res.json())
       .then(data => {
-        setArticle(data);
+        if (data && data.title) {
+          setTutorial(data);
+        } else {
+          setTutorial(null);
+        }
         setLoading(false);
       })
       .catch(err => {
-        console.error("Failed to fetch article", err);
+        console.warn("Failed to fetch tutorial:", err);
         setLoading(false);
       });
-  }, [slug]);
+  }, [slug, blogs]);
 
   if (loading) {
     return (
-      <div className="page-fade" style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-        <h1 className="title-huge">LOADING...</h1>
+      <div className="page-fade" style={{ minHeight: '80vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <h2 style={{ color: 'var(--color-yellow)' }}>LOADING TUTORIAL...</h2>
       </div>
     );
   }
 
-  if (!article) {
+  if (!tutorial) {
     return (
       <div className="page-fade">
-        <section className="section-padding text-center">
-          <div className="container">
-            <h1 className="title-huge" style={{ fontSize: 'clamp(3rem, 8vw, 6rem)' }}>ARTICLE NOT FOUND</h1>
-            <Link to="/" className="btn" style={{ marginTop: '2rem' }}>Return Home</Link>
+        <section className="section-padding text-center" style={{ minHeight: '60vh', display: 'flex', alignItems: 'center' }}>
+          <div className="container" style={{ textAlign: 'center', margin: '0 auto' }}>
+            <h1 style={{ fontSize: '3rem', marginBottom: '1.5rem' }}>TUTORIAL NOT FOUND</h1>
+            <p style={{ color: 'var(--text-muted)', fontSize: '1.1rem', marginBottom: '2rem' }}>
+              The requested practical tutorial could not be located.
+            </p>
+            <Link to="/" className="btn btn-primary">Return to Tutorials Feed</Link>
           </div>
         </section>
       </div>
@@ -44,49 +60,108 @@ const ArticleDetailPage = () => {
 
   return (
     <div className="page-fade">
-      <section className="hero" style={{ background: 'white', padding: '4rem 0' }}>
+      <section style={{ padding: '4rem 0 2rem 0', borderBottom: 'var(--border-subtle)' }}>
         <div className="container" style={{ maxWidth: '900px' }}>
-          <div style={{ marginBottom: '2rem' }}>
-            <Link to={article.category === 'AGENTIC_AI' ? '/agentic-ai' : '/trends'} style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', fontWeight: 800, textTransform: 'uppercase', color: 'var(--color-red)' }}>
-              <ArrowLeft size={18} style={{ strokeWidth: 3 }} /> BACK TO FEED
+          <div style={{ marginBottom: '2rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <Link to="/" style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.85rem', fontWeight: 700, color: 'var(--color-yellow)', letterSpacing: '0.05em' }}>
+              <ArrowLeft size={16} /> BACK TO TUTORIALS
             </Link>
-            {article.sub_category && <span className="card-tag" style={{ marginLeft: '1rem', display: 'inline-block' }}>{article.sub_category}</span>}
+            
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+              {isAdmin && (
+                <button
+                  type="button"
+                  onClick={async () => {
+                    if (window.confirm(`Are you sure you want to permanently delete "${tutorial.title}"?`)) {
+                      if (onDeleteBlog) {
+                        const ok = await onDeleteBlog(tutorial.id);
+                        if (ok) {
+                          navigate('/blogs');
+                        }
+                      }
+                    }
+                  }}
+                  title="Delete Blog (Admin Only)"
+                  style={{
+                    background: 'rgba(230, 57, 70, 0.15)',
+                    border: '1px solid var(--color-red)',
+                    color: 'var(--color-red)',
+                    borderRadius: '9999px',
+                    padding: '0.2rem 0.8rem',
+                    fontSize: '0.75rem',
+                    fontWeight: 700,
+                    cursor: 'pointer',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '0.35rem',
+                    transition: 'all 0.2s ease'
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.background = 'var(--color-red)';
+                    e.currentTarget.style.color = '#FFFFFF';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.background = 'rgba(230, 57, 70, 0.15)';
+                    e.currentTarget.style.color = 'var(--color-red)';
+                  }}
+                >
+                  <Trash2 size={13} /> DELETE BLOG
+                </button>
+              )}
+              <span style={{ fontSize: '0.75rem', fontWeight: 800, color: '#0D0D0D', background: 'var(--color-yellow)', padding: '0.2rem 0.7rem', borderRadius: '9999px' }}>
+                {tutorial.difficulty || 'PRACTICAL'}
+              </span>
+              <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--color-red)', background: 'rgba(230, 57, 70, 0.1)', border: '1px solid rgba(230, 57, 70, 0.25)', padding: '0.2rem 0.7rem', borderRadius: '9999px' }}>
+                {tutorial.category || 'AI TUTORIAL'}
+              </span>
+            </div>
           </div>
           
-          <h1 className="title-huge" style={{ fontSize: 'clamp(2.5rem, 6vw, 4.5rem)', lineHeight: 1.1, marginBottom: '2rem' }}>{article.title}</h1>
+          <h1 style={{ fontSize: 'clamp(2.2rem, 4.5vw, 3.6rem)', lineHeight: 1.15, marginBottom: '1.5rem', fontWeight: 800 }}>
+            {tutorial.title}
+          </h1>
+
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', color: 'var(--color-yellow)', fontSize: '0.9rem', fontWeight: 700, marginBottom: '1.5rem' }}>
+            <Terminal size={16} /> <span>Tech Stack: {tutorial.tech_stack || 'Python, AI, Ollama'}</span>
+          </div>
           
-          <div style={{ display: 'flex', alignItems: 'center', paddingBottom: '2rem', borderBottom: 'var(--border-thick)', fontWeight: 800, fontFamily: 'var(--font-display)', fontSize: '1.2rem' }}>
-            <span style={{ marginRight: '1.5rem', color: 'var(--color-pink)' }}>{article.source_name}</span>
-            <span>{new Date(article.published_at).toLocaleDateString()}</span>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '1rem', paddingBottom: '1.5rem', color: 'var(--text-muted)', fontSize: '0.9rem' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
+              <span style={{ color: '#FFFFFF', fontWeight: 600 }}>By {tutorial.author || 'WHT Tech Team'}</span>
+              <span style={{ display: 'flex', alignItems: 'center', gap: '0.3rem' }}><Clock size={14} /> {tutorial.read_time || tutorial.readTime || '5 MIN READ'}</span>
+            </div>
+            
+            <a href="https://www.linkedin.com" target="_blank" rel="noopener noreferrer" className="btn btn-outline" style={{ padding: '0.4rem 0.9rem', fontSize: '0.8rem' }}>
+              SHARE TUTORIAL <Linkedin size={14} />
+            </a>
           </div>
         </div>
       </section>
 
-      <section className="section-padding" style={{ paddingTop: '2rem' }}>
+      <section className="section-padding" style={{ background: '#0D0D0D' }}>
         <div className="container" style={{ maxWidth: '900px' }}>
-          {article.image_url && (
-            <div style={{ width: '100%', height: '400px', border: 'var(--border-thick)', boxShadow: 'var(--shadow-block)', marginBottom: '3rem', background: '#eee' }}>
-              <img src={article.image_url} alt={article.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+          {(tutorial.image_url || tutorial.image) && (
+            <div style={{ width: '100%', height: '420px', borderRadius: '12px', overflow: 'hidden', border: 'var(--border-subtle)', marginBottom: '3rem' }}>
+              <img src={tutorial.image_url || tutorial.image} alt={tutorial.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
             </div>
           )}
           
-          <div className="article-body" style={{ fontSize: '1.25rem', lineHeight: 1.8 }}>
-            <p style={{ fontWeight: 800, fontSize: '1.5rem', marginBottom: '2rem', paddingLeft: '1.5rem', borderLeft: '4px solid var(--color-red)' }}>{article.summary}</p>
-            <div dangerouslySetInnerHTML={{ __html: article.content }} />
+          <div style={{ background: 'var(--bg-card)', border: 'var(--border-subtle)', borderRadius: '14px', padding: '3.5rem' }}>
+            <div style={{ fontSize: '1.2rem', fontWeight: 600, color: '#FFFFFF', lineHeight: 1.6, marginBottom: '2.5rem', paddingLeft: '1.2rem', borderLeft: '3px solid var(--color-yellow)', background: 'rgba(255, 207, 42, 0.04)', padding: '1rem 1.2rem', borderRadius: '0 8px 8px 0' }}>
+              <strong>Prerequisites & Takeaway:</strong> {tutorial.summary}
+            </div>
+            
+            <div 
+              style={{ fontSize: '1.05rem', color: '#D4D4D8', lineHeight: 1.8 }}
+              dangerouslySetInnerHTML={{ 
+                __html: tutorial.content.includes('<') 
+                  ? tutorial.content 
+                  : `<p>${tutorial.content.replace(/\n\n/g, '</p><p>').replace(/\n/g, '<br/>')}</p>` 
+              }} 
+            />
           </div>
         </div>
       </section>
-      
-      <style>{`
-        .article-body p { margin-bottom: 1.5rem; }
-        .article-body h2 { font-size: 2.5rem; margin-top: 3rem; margin-bottom: 1rem; color: #111; }
-        .article-body ul { margin-bottom: 1.5rem; padding-left: 2rem; list-style-type: square; }
-        .article-body li { margin-bottom: 0.5rem; }
-      `}</style>
-      
-      <Newsletter />
     </div>
   );
-};
-
-export default ArticleDetailPage;
+}
