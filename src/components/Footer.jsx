@@ -39,10 +39,29 @@ export default function Footer() {
                 Connect
               </div>
 
-              <div style={{ display: 'flex', gap: '1rem', color: 'var(--text-muted)' }}>
-                <a href="https://www.linkedin.com" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--text-muted)' }}><Linkedin size={20} /></a>
-                <a href="https://www.instagram.com" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--text-muted)' }}><Instagram size={20} /></a>
-                <a href="https://www.youtube.com" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--text-muted)' }}><Youtube size={20} /></a>
+              <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', color: 'var(--text-muted)' }}>
+                <a 
+                  href="https://www.linkedin.com/company/113232583/" 
+                  target="_blank" 
+                  rel="noopener noreferrer" 
+                  style={{ color: 'var(--text-muted)', transition: 'color 0.2s ease' }}
+                  title="WHT LinkedIn Page"
+                  className="social-icon-link"
+                >
+                  <Linkedin size={20} />
+                </a>
+                <span 
+                  style={{ color: 'var(--text-muted)', opacity: 0.4, cursor: 'default', display: 'flex', alignItems: 'center' }} 
+                  title="Instagram (Coming Soon)"
+                >
+                  <Instagram size={20} />
+                </span>
+                <span 
+                  style={{ color: 'var(--text-muted)', opacity: 0.4, cursor: 'default', display: 'flex', alignItems: 'center' }} 
+                  title="YouTube (Coming Soon)"
+                >
+                  <Youtube size={20} />
+                </span>
               </div>
             </div>
           </div>

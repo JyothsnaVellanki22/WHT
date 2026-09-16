@@ -48,7 +48,7 @@ export default function BlogsPage({ blogs = [], onOpenNewTutorialModal, isAdmin 
   const [activeTech, setActiveTech] = useState('ALL');
   const [searchQuery, setSearchQuery] = useState('');
 
-  const displayBlogs = blogs.length > 0 ? blogs : FALLBACK_BLOGS;
+  const displayBlogs = blogs;
 
   const techFilters = ['ALL', 'AI Research', 'DeepSeek-R1', 'Cyber Security', 'Post-Quantum', 'React 19', 'RSC'];
 
@@ -85,55 +85,103 @@ export default function BlogsPage({ blogs = [], onOpenNewTutorialModal, isAdmin 
             Explore step-by-step guides, code implementations, and tool breakdowns for modern software and AI builders.
           </p>
 
-          <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', alignItems: 'center' }}>
-            <button onClick={onOpenNewTutorialModal} className="btn btn-primary">
-              <Plus size={18} /> POST NEW BLOG
-            </button>
-          </div>
+          {isAdmin && (
+            <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', alignItems: 'center' }}>
+              <button onClick={onOpenNewTutorialModal} className="btn btn-primary">
+                <Plus size={18} /> POST NEW BLOG
+              </button>
+            </div>
+          )}
         </div>
       </section>
 
       {/* Search & Filter Bar */}
       <section className="section-padding">
         <div className="container">
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2.5rem', flexWrap: 'wrap', gap: '1.5rem' }}>
-            {/* Filter Pills */}
-            <div style={{ display: 'flex', gap: '0.6rem', flexWrap: 'wrap' }}>
-              {techFilters.map(tech => (
-                <button
-                  key={tech}
-                  onClick={() => setActiveTech(tech)}
-                  className={`category-pill ${activeTech === tech ? 'active' : ''}`}
-                >
-                  {tech}
-                </button>
-              ))}
-            </div>
+          {blogs.length > 0 && (
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2.5rem', flexWrap: 'wrap', gap: '1.5rem' }}>
+              {/* Filter Pills */}
+              <div style={{ display: 'flex', gap: '0.6rem', flexWrap: 'wrap' }}>
+                {techFilters.map(tech => (
+                  <button
+                    key={tech}
+                    onClick={() => setActiveTech(tech)}
+                    className={`category-pill ${activeTech === tech ? 'active' : ''}`}
+                  >
+                    {tech}
+                  </button>
+                ))}
+              </div>
 
-            {/* Search Input */}
-            <div style={{ position: 'relative', width: '280px' }}>
-              <Search size={16} style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
-              <input
-                type="text"
-                placeholder="Search blogs & tech..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                style={{
-                  width: '100%',
-                  padding: '0.65rem 1rem 0.65rem 2.6rem',
-                  background: 'var(--bg-card)',
-                  border: 'var(--border-subtle)',
-                  borderRadius: '9999px',
-                  color: '#FFFFFF',
-                  fontSize: '0.88rem',
-                  outline: 'none'
-                }}
-              />
+              {/* Search Input */}
+              <div style={{ position: 'relative', width: '280px' }}>
+                <Search size={16} style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
+                <input
+                  type="text"
+                  placeholder="Search blogs & tech..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  style={{
+                    width: '100%',
+                    padding: '0.65rem 1rem 0.65rem 2.6rem',
+                    background: 'var(--bg-card)',
+                    border: 'var(--border-subtle)',
+                    borderRadius: '9999px',
+                    color: '#FFFFFF',
+                    fontSize: '0.88rem',
+                    outline: 'none'
+                  }}
+                />
+              </div>
             </div>
-          </div>
+          )}
 
-          {/* Blogs Grid */}
-          {filteredBlogs.length === 0 ? (
+          {/* Blogs Grid or Uploads Coming Soon */}
+          {blogs.length === 0 ? (
+            <div style={{ 
+              background: 'var(--bg-card)', 
+              border: '1px solid rgba(255, 207, 42, 0.2)', 
+              borderRadius: '16px', 
+              padding: '5rem 2rem',
+              textAlign: 'center',
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              maxWidth: '700px',
+              margin: '0 auto'
+            }}>
+              <div style={{
+                width: '64px',
+                height: '64px',
+                borderRadius: '50%',
+                background: 'rgba(255, 207, 42, 0.1)',
+                border: '1px solid rgba(255, 207, 42, 0.25)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                color: 'var(--color-yellow)',
+                marginBottom: '1.5rem'
+              }}>
+                <Sparkles size={28} />
+              </div>
+              <h3 style={{ fontSize: '2rem', marginBottom: '0.8rem', color: '#FFFFFF' }}>
+                Uploads Coming Soon
+              </h3>
+              <p style={{ color: 'var(--text-muted)', fontSize: '1.05rem', lineHeight: 1.6, marginBottom: '2rem', maxWidth: '540px' }}>
+                Our engineering team is actively writing practical AI tutorials, security deep-dives, and production architecture blueprints. Subscribe to our weekly dispatch to get notified the second new guides are published.
+              </p>
+              <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', justifyContent: 'center' }}>
+                <Link to="/newsletters" className="btn btn-primary">
+                  Subscribe to Dispatches
+                </Link>
+                {isAdmin && (
+                  <button onClick={onOpenNewTutorialModal} className="btn btn-outline" style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem' }}>
+                    <Plus size={16} color="var(--color-yellow)" /> Publish First Blog
+                  </button>
+                )}
+              </div>
+            </div>
+          ) : filteredBlogs.length === 0 ? (
             <div style={{ textAlign: 'center', padding: '4rem 0', color: 'var(--text-muted)' }}>
               <h3>No blogs match your filter "{searchQuery || activeTech}"</h3>
               <button onClick={() => { setActiveTech('ALL'); setSearchQuery(''); }} className="btn btn-outline" style={{ marginTop: '1rem' }}>

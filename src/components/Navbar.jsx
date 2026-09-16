@@ -54,33 +54,37 @@ export default function Navbar({
           ))}
           
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
-            <button 
-              onClick={onOpenNewNewsletterModal}
-              className="btn btn-outline"
-              style={{ 
-                padding: '0.45rem 1rem', 
-                fontSize: '0.82rem',
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '0.35rem'
-              }}
-            >
-              <Mail size={14} color="var(--color-yellow)" /> SEND NEWSLETTER
-            </button>
+            {isAdmin && (
+              <>
+                <button 
+                  onClick={onOpenNewNewsletterModal}
+                  className="btn btn-outline"
+                  style={{ 
+                    padding: '0.45rem 1rem', 
+                    fontSize: '0.82rem',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '0.35rem'
+                  }}
+                >
+                  <Mail size={14} color="var(--color-yellow)" /> SEND NEWSLETTER
+                </button>
 
-            <button 
-              onClick={onOpenNewTutorialModal}
-              className="btn btn-post"
-              style={{ 
-                padding: '0.45rem 1.1rem', 
-                fontSize: '0.85rem',
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '0.35rem'
-              }}
-            >
-              <Plus size={15} /> POST BLOG
-            </button>
+                <button 
+                  onClick={onOpenNewTutorialModal}
+                  className="btn btn-post"
+                  style={{ 
+                    padding: '0.45rem 1.1rem', 
+                    fontSize: '0.85rem',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '0.35rem'
+                  }}
+                >
+                  <Plus size={15} /> POST BLOG
+                </button>
+              </>
+            )}
 
             {/* RBAC User Session / Admin Badge */}
             {currentUser ? (
@@ -192,23 +196,25 @@ export default function Navbar({
               </Link>
             ))}
 
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.8rem', marginTop: '1rem', paddingTop: '1rem', borderTop: 'var(--border-subtle)' }}>
-              <button 
-                onClick={() => { setMobileMenuOpen(false); onOpenNewNewsletterModal(); }}
-                className="btn btn-outline"
-                style={{ width: '100%', padding: '0.75rem', fontSize: '0.9rem' }}
-              >
-                <Mail size={16} color="var(--color-yellow)" /> SEND NEWSLETTER
-              </button>
+            {isAdmin && (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.8rem', marginTop: '1rem', paddingTop: '1rem', borderTop: 'var(--border-subtle)' }}>
+                <button 
+                  onClick={() => { setMobileMenuOpen(false); onOpenNewNewsletterModal(); }}
+                  className="btn btn-outline"
+                  style={{ width: '100%', padding: '0.75rem', fontSize: '0.9rem' }}
+                >
+                  <Mail size={16} color="var(--color-yellow)" /> SEND NEWSLETTER
+                </button>
 
-              <button 
-                onClick={() => { setMobileMenuOpen(false); onOpenNewTutorialModal(); }}
-                className="btn btn-post"
-                style={{ width: '100%', padding: '0.75rem', fontSize: '0.9rem' }}
-              >
-                <Plus size={16} /> POST BLOG
-              </button>
-            </div>
+                <button 
+                  onClick={() => { setMobileMenuOpen(false); onOpenNewTutorialModal(); }}
+                  className="btn btn-post"
+                  style={{ width: '100%', padding: '0.75rem', fontSize: '0.9rem' }}
+                >
+                  <Plus size={16} /> POST BLOG
+                </button>
+              </div>
+            )}
           </div>
         </div>
       )}

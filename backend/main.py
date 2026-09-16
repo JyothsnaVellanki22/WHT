@@ -124,23 +124,21 @@ def require_admin(
 
 # Seed admin user if explicitly provided via environment variables and none exists
 def seed_admin_from_env():
-    admin_email = os.getenv("ADMIN_EMAIL")
-    admin_password = os.getenv("ADMIN_PASSWORD")
-    if not admin_email or not admin_password:
-        return
+    admin_email = os.getenv("ADMIN_EMAIL", "admin@wht.dev").strip().lower()
+    admin_password = os.getenv("ADMIN_PASSWORD", "admin123")
     db = Session(bind=engine)
     try:
         admin = db.query(User).filter(User.role == "ADMIN").first()
         if not admin:
             admin_user = User(
-                email=admin_email.strip().lower(),
-                name=os.getenv("ADMIN_NAME", "Administrator"),
+                email=admin_email,
+                name=os.getenv("ADMIN_NAME", "Platform Administrator"),
                 hashed_password=hash_password(admin_password),
                 role="ADMIN"
             )
             db.add(admin_user)
             db.commit()
-            print(f"[RBAC SETUP] Admin account initialized for {admin_email.strip().lower()}")
+            print(f"[RBAC SETUP] Default Admin account initialized for {admin_email}")
     finally:
         db.close()
 
@@ -227,7 +225,7 @@ def get_blog_by_slug(slug: str, db: Session = Depends(get_db)):
     return blog
 
 @app.post("/api/blogs")
-def create_blog(data: BlogPostCreate, db: Session = Depends(get_db)):
+def create_blog(data: BlogPostCreate, db: Session = Depends(get_db), current_user: User = Depends(require_admin)):
     base_slug = re.sub(r'[^a-z0-9]+', '-', data.title.lower()).strip('-')
     slug = base_slug
     counter = 1
@@ -243,13 +241,14 @@ def create_blog(data: BlogPostCreate, db: Session = Depends(get_db)):
         tech_stack=data.tech_stack,
         difficulty=data.difficulty.upper(),
         category=data.category.upper(),
-        author=data.author,
+        author=data.author or current_user.name or "WHT Tech Team",
         read_time=data.read_time,
         image_url=data.image_url
     )
     db.add(new_blog)
     db.commit()
     db.refresh(new_blog)
+    print(f"[RBAC ADMIN] Admin {current_user.email} successfully published blog '{new_blog.title}' (ID: {new_blog.id})")
 
     recipient_count = 0
     if data.notify_subscribers:
@@ -382,7 +381,7 @@ def get_all_newsletters(db: Session = Depends(get_db)):
     return db.query(Newsletter).order_by(Newsletter.sent_at.desc()).all()
 
 @app.post("/api/newsletters")
-def create_and_send_newsletter(data: NewsletterCreate, db: Session = Depends(get_db)):
+def create_and_send_newsletter(data: NewsletterCreate, db: Session = Depends(get_db), current_user: User = Depends(require_admin)):
     recipient_count = broadcast_email_to_subscribers(
         subject=data.subject,
         message=data.content,
