@@ -8,6 +8,7 @@ from datetime import datetime, timedelta, timezone
 import re
 import os
 import bcrypt
+import secrets
 import jwt
 
 from database import get_db, engine, Base
@@ -27,7 +28,38 @@ app.add_middleware(
 )
 
 # ----------------- JWT & Security Configuration ----------------- #
-JWT_SECRET = os.getenv("JWT_SECRET", "wht-jwt-secret-key-2026-production-secure")
+ENVIRONMENT = os.getenv("ENVIRONMENT", os.getenv("ENV", "development")).lower()
+JWT_SECRET = os.getenv("JWT_SECRET")
+
+KNOWN_INSECURE_SECRETS = {
+    "secret",
+    "changeme",
+    "admin",
+    "password",
+    "123456"
+}
+
+if not JWT_SECRET:
+    if ENVIRONMENT in ("production", "prod"):
+        raise RuntimeError(
+            "CRITICAL SECURITY CONFIGURATION ERROR: 'JWT_SECRET' environment variable must be set in production! "
+            "Server startup aborted to prevent token forgery."
+        )
+    else:
+        JWT_SECRET = secrets.token_hex(32)
+        print(
+            "[SECURITY WARNING] 'JWT_SECRET' is not set. Generated an ephemeral random key for development. "
+            "Set 'JWT_SECRET' in your environment to persist sessions across restarts."
+        )
+elif JWT_SECRET in KNOWN_INSECURE_SECRETS:
+    if ENVIRONMENT in ("production", "prod"):
+        raise RuntimeError(
+            "CRITICAL SECURITY CONFIGURATION ERROR: 'JWT_SECRET' is configured with a known insecure default value. "
+            "Please configure a strong, randomly generated secret in production."
+        )
+    else:
+        print("[SECURITY WARNING] 'JWT_SECRET' is set to a known insecure default value.")
+
 JWT_ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_DAYS = 7
 
@@ -90,25 +122,29 @@ def require_admin(
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Access denied: Admin role required.")
     return user
 
-# Seed default admin user if absent
-def seed_default_admin():
+# Seed admin user if explicitly provided via environment variables and none exists
+def seed_admin_from_env():
+    admin_email = os.getenv("ADMIN_EMAIL")
+    admin_password = os.getenv("ADMIN_PASSWORD")
+    if not admin_email or not admin_password:
+        return
     db = Session(bind=engine)
     try:
         admin = db.query(User).filter(User.role == "ADMIN").first()
         if not admin:
             admin_user = User(
-                email="admin@wht.dev",
-                name="WHT Superadmin",
-                hashed_password=hash_password("admin123"),
+                email=admin_email.strip().lower(),
+                name=os.getenv("ADMIN_NAME", "Administrator"),
+                hashed_password=hash_password(admin_password),
                 role="ADMIN"
             )
             db.add(admin_user)
             db.commit()
-            print("[RBAC SETUP] Default Admin account created: admin@wht.dev (password: admin123)")
+            print(f"[RBAC SETUP] Admin account initialized for {admin_email.strip().lower()}")
     finally:
         db.close()
 
-seed_default_admin()
+seed_admin_from_env()
 
 # ----------------- Pydantic Schemas ----------------- #
 class UserRegister(BaseModel):

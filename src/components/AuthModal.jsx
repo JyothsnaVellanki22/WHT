@@ -52,13 +52,6 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess }) {
     }
   };
 
-  const handleQuickFillAdmin = () => {
-    setIsRegister(false);
-    setEmail('admin@wht.dev');
-    setPassword('admin123');
-    setError('');
-  };
-
   return (
     <div 
       style={{
@@ -220,7 +213,7 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess }) {
           </button>
         </form>
 
-        <div style={{ borderTop: '1px solid rgba(255, 255, 255, 0.08)', paddingTop: '1.2rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.82rem' }}>
+        <div style={{ borderTop: '1px solid rgba(255, 255, 255, 0.08)', paddingTop: '1.2rem', textAlign: 'center', fontSize: '0.82rem' }}>
           <button
             type="button"
             onClick={() => { setIsRegister(!isRegister); setError(''); }}
@@ -228,17 +221,6 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess }) {
           >
             {isRegister ? 'Already have an account? Sign In' : "Don't have an account? Sign Up"}
           </button>
-
-          {!isRegister && (
-            <button
-              type="button"
-              onClick={handleQuickFillAdmin}
-              title="Fill default admin account"
-              style={{ background: 'rgba(255, 207, 42, 0.1)', border: '1px solid rgba(255, 207, 42, 0.3)', color: 'var(--color-yellow)', borderRadius: '6px', padding: '0.25rem 0.6rem', cursor: 'pointer', fontSize: '0.75rem', fontWeight: 700 }}
-            >
-              Fill Admin
-            </button>
-          )}
         </div>
       </div>
     </div>
