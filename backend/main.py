@@ -146,6 +146,20 @@ def seed_admin_from_env():
 
 seed_admin_from_env()
 
+# Seed curated blogs if database has none
+def seed_initial_blogs():
+    db = Session(bind=engine)
+    try:
+        if db.query(BlogPost).count() == 0:
+            from seed_tutorials import seed_database
+            seed_database()
+    except Exception as e:
+        print(f"[SEED NOTICE] Initial blogs check: {e}")
+    finally:
+        db.close()
+
+seed_initial_blogs()
+
 # ----------------- Pydantic Schemas ----------------- #
 class UserRegister(BaseModel):
     email: str

@@ -18,15 +18,15 @@ export default function Home({
 
   // Take the latest/first blog as the featured blog
   const featuredBlog = blogs.length > 0 ? blogs[0] : {
-    slug: 'building-local-autonomous-coding-agent-ollama-langchain',
-    title: 'Building a Local Autonomous Coding Agent with Ollama and LangChain',
-    category: 'AI TUTORIAL',
-    tech_stack: 'Python, Ollama, LangChain, Llama 3',
-    difficulty: 'INTERMEDIATE',
-    read_time: '6 MIN READ',
-    image_url: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=1200&q=80',
-    summary: 'Step-by-step practical guide for students: Setup local LLMs with Ollama, construct an AST tool execution pipeline in LangChain, and build an agent that autonomously reviews and refactors Python code.',
-    author: 'Jyothsna Vellanki'
+    slug: 'rise-of-reasoning-models-deepseek-r1-test-time-compute',
+    title: 'The Rise of Reasoning Models: How DeepSeek-R1 and Test-Time Compute are Reshaping AI',
+    category: 'AI RESEARCH',
+    tech_stack: 'DeepSeek-R1, OpenAI o1, Reinforcement Learning, Test-Time Compute, MCTS',
+    difficulty: 'ADVANCED',
+    read_time: '7 MIN READ',
+    image_url: 'https://images.unsplash.com/photo-1620712943543-bcc4688e7485?auto=format&fit=crop&w=1200&q=80',
+    summary: 'A comprehensive breakdown of the newest frontier in AI research: how inference-time compute scaling, reinforcement learning without human feedback (RLVR), and tree-search thinking models like DeepSeek-R1 are outperforming pure pre-training scaling laws.',
+    author: 'WHT AI Research Team'
   };
 
   const handleSubscribe = async (e) => {
