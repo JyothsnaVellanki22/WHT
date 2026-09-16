@@ -1,169 +1,165 @@
 from database import SessionLocal, engine, Base
 from models import BlogPost, Subscriber, Newsletter, EmailLog
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 
 Base.metadata.create_all(bind=engine)
 
-def seed_database():
+def seed_database(force_reseed=False):
     db = SessionLocal()
 
-    # Clear existing if needed or check if empty
-    if db.query(BlogPost).count() == 0:
-        print("Seeding practical AI tutorials...")
-        tutorials = [
-            BlogPost(
-                title="Building a Local Autonomous Coding Agent with Ollama and LangChain",
-                slug="building-local-autonomous-coding-agent-ollama-langchain",
-                category="AI TUTORIAL",
-                tech_stack="Python, Ollama, LangChain, Llama 3",
-                difficulty="INTERMEDIATE",
-                author="Jyothsna Vellanki",
-                read_time="6 MIN READ",
-                image_url="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=1200&q=80",
-                summary="Step-by-step practical guide for students: Setup local LLMs with Ollama, construct an AST tool execution pipeline in LangChain, and build an agent that autonomously reviews and refactors Python code.",
-                content="""
-<h3>1. What You Will Learn & Build</h3>
-<p>In this hands-on tutorial, we build a local autonomous coding assistant that runs completely offline on your computer using <strong>Ollama</strong> and <strong>LangChain</strong>. No OpenAI API keys or cloud costs required.</p>
+    if force_reseed or db.query(BlogPost).count() == 0:
+        if force_reseed:
+            db.query(BlogPost).delete()
+        print("Seeding 3 curated blogs (AI/LLM Research, Cyber Security, React)...")
 
-<h3>2. Prerequisites & Environment Setup</h3>
-<p>Install Ollama from <code>ollama.ai</code> and run the following terminal command to pull the 8B coding model:</p>
-<pre><code># Pull the local open-weights model
-ollama run llama3:8b
+    new_blogs = [
+        BlogPost(
+            title="The Rise of Reasoning Models: How DeepSeek-R1 and Test-Time Compute are Reshaping AI",
+            slug="rise-of-reasoning-models-deepseek-r1-test-time-compute",
+            category="AI RESEARCH",
+            tech_stack="DeepSeek-R1, OpenAI o1, Reinforcement Learning, Test-Time Compute, MCTS",
+            difficulty="ADVANCED",
+            author="WHT AI Research Team",
+            read_time="7 MIN READ",
+            image_url="https://images.unsplash.com/photo-1620712943543-bcc4688e7485?auto=format&fit=crop&w=1200&q=80",
+            summary="A comprehensive breakdown of the newest frontier in AI research: how inference-time compute scaling, reinforcement learning without human feedback (RLVR), and tree-search thinking models like DeepSeek-R1 are outperforming pure pre-training scaling laws.",
+            content="""
+<h3>1. The Paradigm Shift: From Pre-Training to Test-Time Scaling</h3>
+<p>For years, frontier AI progress followed empirical scaling laws: train bigger dense models on more trillions of web tokens using massive GPU superclusters. However, modern research has reached a pivotal transition toward <strong>Inference-Time (Test-Time) Compute Scaling</strong>.</p>
+<p>Rather than spitting out tokens instantly through next-token prediction, modern reasoning models—most notably demonstrated by OpenAI's o1 and DeepSeek-R1—expend computational power <em>thinking</em> before delivering their final conclusion. By exploring candidate reasoning paths, validating logical deductions, and backtracking when errors are caught, these models demonstrate emergent problem-solving in complex mathematics, competitive programming, and automated theorem proving.</p>
 
-# Install python dependencies in your virtualenv
-pip install langchain langchain-community langchain-core pydantic</code></pre>
+<h3>2. Pure Reinforcement Learning: The DeepSeek-R1-Zero Discovery</h3>
+<p>One of the most remarkable breakthroughs detailed in recent research papers is the viability of training reasoning models purely via <strong>Large-Scale Reinforcement Learning (RL)</strong> without requiring supervised fine-tuning (SFT) reasoning traces first. As demonstrated by DeepSeek-R1-Zero, when an LLM is guided solely by verifiable outcome rewards (such as compiler execution passes or math equation checkers) using rule-based reward models, the model spontaneously discovers chain-of-thought, self-reflection, and verification strategies.</p>
+<pre><code># Conceptual reward verification loop for reasoning models
+def evaluate_candidate_solution(model_output: str, test_cases: list) -> float:
+    # 1. Extract thought process between &lt;think&gt; ... &lt;/think&gt; tags
+    # 2. Extract proposed executable code or final mathematical answer
+    extracted_code = parse_code_block(model_output)
+    
+    # 3. Deterministic reward function: passes all unit tests
+    passed, total = execute_in_sandbox(extracted_code, test_cases)
+    if passed == total:
+        return 1.0  # Full reward for verified correctness
+    return 0.0      # Zero reward for invalid reasoning
+</code></pre>
 
-<h3>3. Defining the AST Code Reviewer Tool</h3>
-<p>We write a Python tool that inspects files, runs Python's built-in <code>ast</code> parser to detect syntax issues, and suggests refactors:</p>
-<pre><code>import ast
-from langchain.tools import tool
+<h3>3. Distillation: Bringing Frontier Reasoning to 7B &amp; 14B Edge Models</h3>
+<p>While training frontier reasoning systems requires immense compute, open research has revealed that high-quality reasoning traces generated by models like DeepSeek-R1 can be distilled into standard dense architectures like Qwen and Llama. Benchmarks on AIME (American Invitational Mathematics Examination) and Codeforces show distilled 14B and 32B models rivaling older closed-source models that had hundreds of billions of parameters.</p>
 
-@tool
-def analyze_python_code(source_code: str) -> str:
-    \"\"\"Parses Python code and checks for AST syntax errors or anti-patterns.\"\"\"
-    try:
-        tree = ast.parse(source_code)
-        num_functions = len([node for node in ast.walk(tree) if isinstance(node, ast.FunctionDef)])
-        return f"Code syntax is valid! Found {num_functions} functions."
-    except SyntaxError as e:
-        return f"Syntax Error on line {e.lineno}: {e.msg}"</code></pre>
-
-<h3>4. Binding the Agent to Ollama</h3>
-<pre><code>from langchain_community.llms import Ollama
-from langchain.agents import create_react_agent, AgentExecutor
-from langchain_core.prompts import PromptTemplate
-
-llm = Ollama(model="llama3:8b", temperature=0.2)
-tools = [analyze_python_code]
-
-# Initialize agent loop
-print("Agent ready! Provide your code snippet to analyze.")</code></pre>
-
-<h3>5. Practical Takeaways for Students</h3>
+<h3>4. Key Takeaways for AI Engineers &amp; Builders</h3>
 <ul>
-  <li>Local LLM orchestration is free, fast, and confidential for student projects.</li>
-  <li>Binding deterministic AST tools eliminates model hallucination when inspecting code.</li>
+  <li><strong>Prompt Engineering is Evolving:</strong> Traditional few-shot prompting and manual "Let's think step by step" instructions are often counterproductive with reasoning models; developers should allow models to format their own internal reasoning trace.</li>
+  <li><strong>Cost vs. Latency Tradeoffs:</strong> Reasoning models consume more output tokens because of the <code>&lt;think&gt;</code> phase, making them optimal for deep code audits, architectural planning, and mathematical proofs rather than real-time auto-complete.</li>
+  <li><strong>Verifiable Environments Win:</strong> The most significant performance gains occur in domains with deterministic feedback loops (compilers, formal verification engines, and mathematical checkers).</li>
 </ul>
 """
-            ),
-            BlogPost(
-                title="Fine-Tuning Llama 3 with LoRA and PyTorch: Step-by-Step Practical Guide",
-                slug="fine-tuning-llama-3-lora-pytorch-guide",
-                category="HANDS-ON GUIDE",
-                tech_stack="PyTorch, Hugging Face, PEFT, LoRA",
-                difficulty="PRO",
-                author="WHT Tech Team",
-                read_time="8 MIN READ",
-                image_url="https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=1200&q=80",
-                summary="Learn parameter-efficient fine-tuning (PEFT) on consumer GPUs. We cover dataset formatting, QLoRA 4-bit quantization, Hugging Face SFTTrainer, and evaluating loss curves.",
-                content="""
-<h3>1. Introduction to QLoRA & Parameter-Efficient Fine-Tuning</h3>
-<p>Fine-tuning modern foundation models no longer requires an 8x A100 GPU cluster. With <strong>QLoRA (Quantized Low-Rank Adaptation)</strong>, we can fine-tune an 8-billion parameter model on a single 16GB VRAM GPU.</p>
+        ),
+        BlogPost(
+            title="NIST Finalizes Post-Quantum Encryption Standards as AI Zero-Day Attacks Surge",
+            slug="nist-post-quantum-cryptography-ai-zero-day-threats",
+            category="CYBER SECURITY",
+            tech_stack="Post-Quantum Cryptography, ML-KEM, ML-DSA, Zero Trust, eBPF",
+            difficulty="INTERMEDIATE",
+            author="WHT Security Desk",
+            read_time="6 MIN READ",
+            image_url="https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&w=1200&q=80",
+            summary="NIST has officially published FIPS 203, 204, and 205, cementing the world's quantum-resistant cryptographic algorithms. We analyze why organizations are replacing RSA/ECC today and how automated AI threat hunting is mitigating weaponized zero-days.",
+            content="""
+<h3>1. The Quantum Horizon and "Harvest Now, Decrypt Later"</h3>
+<p>Quantum computing has long been viewed as a theoretical future challenge, but cyber threat actors are operating in the present under a strategy known as <strong>"Harvest Now, Decrypt Later" (HNDL)</strong>. Sophisticated adversaries and nation-state groups are exfiltrating vast quantities of encrypted government, healthcare, and enterprise network traffic today, intending to decrypt it once fault-tolerant quantum computers running Shor's Algorithm become operational.</p>
+<p>Because classical public-key cryptography—specifically RSA, Diffie-Hellman, and Elliptic Curve Cryptography (ECC)—relies on mathematical problems that quantum computers can solve in polynomial time, entire global security infrastructures face obsolescence.</p>
 
-<h3>2. Setting Up the Training Pipeline</h3>
-<pre><code>pip install torch transformers datasets peft bitsandbytes trl accelerate</code></pre>
+<h3>2. NIST's Standardized Post-Quantum Cryptographic Suite (FIPS 203, 204, 205)</h3>
+<p>To establish a resilient foundation, the National Institute of Standards and Technology (NIST) officially published the finalized federal standards for Post-Quantum Cryptography (PQC):</p>
+<ul>
+  <li><strong>FIPS 203 (ML-KEM):</strong> Module-Lattice-Based Key-Encapsulation Mechanism (derived from CRYSTALS-Kyber) for general encryption, securing TLS sessions, and VPN connections.</li>
+  <li><strong>FIPS 204 (ML-DSA):</strong> Module-Lattice-Based Digital Signature Algorithm (derived from CRYSTALS-Dilithium) for digital signatures, document signing, and identity verification.</li>
+  <li><strong>FIPS 205 (SLH-DSA):</strong> Stateless Hash-Based Digital Signature Algorithm (derived from SPHINCS+) as a mathematical fallback not dependent on lattice math.</li>
+</ul>
 
-<h3>3. Loading the 4-Bit Quantized Base Model</h3>
-<pre><code>import torch
-from transformers import AutoModelForCausalLM, AutoTokenizer, BitsAndBytesConfig
-from peft import LoraConfig, get_peft_model
+<h3>3. The Rise of AI-Augmented Zero-Day Exploits</h3>
+<p>Simultaneously, the threat landscape has shifted with generative AI models being weaponized to discover and chain together zero-day vulnerabilities. Automated fuzzers enhanced by LLMs can analyze open-source repositories, decompile binaries, and identify memory safety flaws (such as buffer overruns in legacy C/C++ libraries) in hours rather than months.</p>
+<pre><code># DevSecOps Action: Enabling Hybrid Post-Quantum TLS in OpenSSL 3.2+
+# Test your server support for X25519MLKEM768 hybrid key exchange
+openssl s_client -connect your-api-domain.com:443 -curves X25519MLKEM768
+</code></pre>
 
-bnb_config = BitsAndBytesConfig(
-    load_in_4bit=True,
-    bnb_4bit_quant_type="nf4",
-    bnb_4bit_compute_dtype=torch.float16,
-)
+<h3>4. Modern Defense: Kernel-Level eBPF &amp; Automated SOC Response</h3>
+<p>To counter automated AI exploitation, security teams are abandoning perimeter firewalls in favor of <strong>Zero-Trust Architecture coupled with eBPF (Extended Berkeley Packet Filter)</strong>. By observing system calls directly at the Linux kernel level in real time, security platforms detect anomalous process execution, unauthorized memory reads, and lateral container escapes before an attacker can deploy payloads.</p>
 
-model_id = "meta-llama/Meta-Llama-3-8B"
-tokenizer = AutoTokenizer.from_pretrained(model_id)
-model = AutoModelForCausalLM.from_pretrained(
-    model_id,
-    quantization_config=bnb_config,
-    device_map="auto"
-)</code></pre>
-
-<h3>4. Configuring the LoRA Adapters</h3>
-<pre><code>peft_config = LoraConfig(
-    r=16,
-    lora_alpha=32,
-    target_modules=["q_proj", "v_proj"],
-    lora_dropout=0.05,
-    bias="none",
-    task_type="CAUSAL_LM"
-)
-model = get_peft_model(model, peft_config)
-print("Trainable parameters:", model.print_trainable_parameters())</code></pre>
-
-<h3>5. Summary & Evaluation</h3>
-<p>By training only 0.1% of total parameters, training converges in under 45 minutes on custom technical instruction datasets.</p>
+<h3>5. Practical Migration Checklist for Engineering Teams</h3>
+<ul>
+  <li><strong>Crypto-Agility:</strong> Audit cryptographic dependencies across your microservices and transition to modular libraries (such as OpenSSL 3.x or BoringSSL) that support algorithm switching.</li>
+  <li><strong>Upgrade Cloud Load Balancers:</strong> Major cloud providers (Cloudflare, AWS, GCP) now support hybrid post-quantum key exchange (X25519 + ML-KEM). Enable it across public edge ingress points.</li>
+  <li><strong>Implement Strict Supply-Chain Attestation:</strong> Use SLSA frameworks and cryptographic signing (Sigstore / Cosign) to ensure code deployed to production cannot be intercepted or tampered with.</li>
+</ul>
 """
-            ),
-            BlogPost(
-                title="Production RAG with ChromaDB, FastEmbed & Hybrid Search",
-                slug="production-rag-chromadb-fastembed-hybrid-search",
-                category="TOOLS & FRAMEWORKS",
-                tech_stack="ChromaDB, FastEmbed, Python, Vector DB",
-                difficulty="BEGINNER",
-                author="WHT Editorial",
-                read_time="5 MIN READ",
-                image_url="https://images.unsplash.com/photo-1522071820081-009f0129c71c?auto=format&fit=crop&w=1200&q=80",
-                summary="Build a blazing-fast Retrieval-Augmented Generation system. Learn vector embedding creation, cosine similarity querying, reranking, and context injection into LLM prompts.",
-                content="""
-<h3>1. Why Standard Prompting Fails for Custom Data</h3>
-<p>LLMs possess broad public knowledge but have zero context on your private code, documentation, or textbooks. <strong>RAG (Retrieval-Augmented Generation)</strong> connects your private knowledge base directly to LLM queries.</p>
+        ),
+        BlogPost(
+            title="React 19 Deep Dive: The React Compiler, Server Actions, and the Death of useMemo",
+            slug="react-19-deep-dive-compiler-actions-use-memo",
+            category="REACT & WEB",
+            tech_stack="React 19, React Compiler, useActionState, useOptimistic, RSC",
+            difficulty="INTERMEDIATE",
+            author="WHT Web Engineering",
+            read_time="5 MIN READ",
+            image_url="https://images.unsplash.com/photo-1633356122544-f134324a6cee?auto=format&fit=crop&w=1200&q=80",
+            summary="React 19 revolutionizes the React paradigm. Discover how the automated React Compiler eliminates manual dependency arrays and useMemo/useCallback, and how Actions and the useActionState hook drastically simplify forms and async state.",
+            content="""
+<h3>1. React 19 is Here: A Milestone Release</h3>
+<p>React 19 represents one of the most consequential updates to the React ecosystem since hooks were introduced in 2019. Rather than adding more cognitive complexity and hook boilerplate, React 19's primary philosophy is <strong>streamlining developer experience and automating optimizations</strong> that previously required meticulous manual engineering.</p>
 
-<h3>2. Installing Vector Database & Embeddings</h3>
-<pre><code>pip install chromadb fastembed langchain</code></pre>
+<h3>2. The React Compiler: Farewell to useMemo and useCallback</h3>
+<p>In React 16 through 18, preventing unnecessary component re-renders required developers to manually wrap expensive computations in <code>useMemo</code> and callback functions in <code>useCallback</code>, while diligently tracking dependency arrays. Misconfigured dependency arrays led to subtle bugs, stale closures, and memory leaks.</p>
+<p>The <strong>React Compiler</strong> (formerly React Forget) changes this fundamentally. It is an optimizing compiler that operates at build time, parsing your pure JavaScript and JSX to automatically memoize component sub-trees, props, and values. You write standard idiomatic JavaScript, and the compiler handles optimal re-rendering under the hood.</p>
+<pre><code>// React 18: Manual, fragile memoization
+const expensiveResult = useMemo(() =&gt; computeStats(data, filter), [data, filter]);
+const handleClick = useCallback(() =&gt; submit(expensiveResult), [expensiveResult]);
 
-<h3>3. Ingesting Documents & Querying</h3>
-<pre><code>import chromadb
-from chromadb.utils import embedding_functions
+// React 19: Pure, clean JavaScript. The compiler optimizes automatically!
+const expensiveResult = computeStats(data, filter);
+const handleClick = () =&gt; submit(expensiveResult);
+</code></pre>
 
-client = chromadb.Client()
-collection = client.create_collection("tech_docs")
+<h3>3. Modern Asynchronous Mutations with Actions &amp; `useActionState`</h3>
+<p>Handling form submissions in React previously meant managing multiple pieces of state: <code>isSubmitting</code>, <code>error</code>, <code>response</code>, and coordinating pending transitions. React 19 introduces native support for <strong>Actions</strong> through the <code>useActionState</code> hook:</p>
+<pre><code>import { useActionState } from 'react';
 
-# Add student textbook snippets
-collection.add(
-    documents=[
-        "Transformers rely on multi-head self-attention mechanisms to weigh token dependencies.",
-        "Backpropagation computes gradient vectors through reverse-mode automatic differentiation."
-    ],
-    ids=["doc1", "doc2"]
-)
+async function updateProfileName(previousState, formData) {
+  const newName = formData.get("name");
+  const res = await api.updateName(newName);
+  if (!res.ok) return { error: "Failed to update profile." };
+  return { error: null, name: newName };
+}
 
-# Semantic search query
-results = collection.query(
-    query_texts=["How does self-attention work in neural nets?"],
-    n_results=1
-)
-print("Retrieved context:", results['documents'])</code></pre>
+function ProfileForm() {
+  const [state, formAction, isPending] = useActionState(updateProfileName, { name: "Builder" });
+
+  return (
+    &lt;form action={formAction}&gt;
+      &lt;input name="name" defaultValue={state.name} /&gt;
+      &lt;button type="submit" disabled={isPending}&gt;
+        {isPending ? "Saving..." : "Save Profile"}
+      &lt;/button&gt;
+      {state.error &amp;&amp; &lt;p className="error"&gt;{state.error}&lt;/p&gt;}
+    &lt;/form&gt;
+  );
+}
+</code></pre>
+
+<h3>4. Optimistic UI Updates with `useOptimistic`</h3>
+<p>Modern web apps demand instant feedback. With <code>useOptimistic</code>, you can display expected state changes immediately while an asynchronous server mutation is running, automatically reverting to the server state if the request fails.</p>
+
+<h3>5. Native Metadata &amp; Resource Preloading</h3>
+<p>React 19 removes the need for external packages like <code>react-helmet</code>. You can now place <code>&lt;title&gt;</code>, <code>&lt;meta&gt;</code>, and <code>&lt;link rel="stylesheet"&gt;</code> directly within your component tree, and React will automatically hoist them to the document <code>&lt;head&gt;</code>.</p>
 """
-            )
-        ]
-        for t in tutorials:
-            db.add(t)
-        db.commit()
-        print("Added 3 practical learning tutorials.")
+        )
+    ]
+
+    for b in new_blogs:
+        db.add(b)
+    db.commit()
+    print("Successfully seeded 3 new curated blogs.")
 
     # Seed initial subscribers if empty
     if db.query(Subscriber).count() == 0:
@@ -178,31 +174,33 @@ print("Retrieved context:", results['documents'])</code></pre>
         for email in sample_emails:
             db.add(Subscriber(email=email))
         db.commit()
-        print("Added 5 sample student subscribers.")
 
-    # Seed initial newsletters if empty
+    # Seed initial newsletter issues if empty
     if db.query(Newsletter).count() == 0:
-        print("Seeding sample weekly newsletter...")
-        nl = Newsletter(
-            edition="Edition #12",
-            title="Mastering Local LLM Tool Calling & DeepSeek-R1 Distillations",
-            subject="WHT Weekly #12: Local Tool Calling, LoRA Fine-Tuning, & Python Agents",
-            tech_spotlight="Ollama 0.5 + DeepSeek-R1 Distill",
-            content="""
-Welcome to this week's WHT Learning Dispatch! Here is what we're building this week:
-
-1. **Local Tool-Calling Deep Dive**: How to bind deterministic Python functions to Ollama models.
-2. **PyTorch Quantization Breakdown**: What is NF4 quantization and why does it save 70% VRAM?
-3. **Student Project Idea**: Build a local terminal CLI agent that monitors git diffs before you push!
-            """,
-            recipient_count=5
+        print("Seeding sample newsletter editions...")
+        n1 = Newsletter(
+            edition="Edition #14",
+            title="Reasoning LLMs & The Frontier of Autonomous Agents",
+            subject="WHT Weekly #14: How DeepSeek-R1 & Test-Time Compute are Changing Software",
+            tech_spotlight="DeepSeek-R1, OpenAI o1, Test-Time Compute",
+            content="""<h2>Welcome to WHT Issue #14</h2><p>In this week's edition, we explore the newest reasoning paradigms in AI, NIST's finalized post-quantum encryption standards, and the game-changing React 19 compiler.</p>""",
+            sent_at=datetime.now(timezone.utc) - timedelta(days=2),
+            recipient_count=1240
         )
-        db.add(nl)
+        n2 = Newsletter(
+            edition="Edition #13",
+            title="Full-Stack Local AI & Quantized Inference",
+            subject="WHT Weekly #13: Running Models Locally with Ollama",
+            tech_spotlight="Ollama, GGUF Quantization, PEFT",
+            content="""<h2>Welcome to WHT Issue #13</h2><p>Learn how students and indie developers are running local LLMs without expensive cloud bills.</p>""",
+            sent_at=datetime.now(timezone.utc) - timedelta(days=9),
+            recipient_count=1180
+        )
+        db.add(n1)
+        db.add(n2)
         db.commit()
-        print("Added sample newsletter edition.")
 
     db.close()
-    print("Database seeding complete!")
 
 if __name__ == "__main__":
     seed_database()

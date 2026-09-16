@@ -2,9 +2,11 @@ import React, { useState } from 'react';
 import { Mail, Send, Check, Sparkles, Plus, Inbox } from 'lucide-react';
 
 export default function NewslettersPage({ 
+  newsletters = [],
   subscriberCount = 5, 
   onSubscriberAdded, 
-  onOpenNewNewsletterModal 
+  onOpenNewNewsletterModal,
+  isAdmin = false
 }) {
   const [email, setEmail] = useState('');
   const [subscribed, setSubscribed] = useState(false);
@@ -45,7 +47,6 @@ export default function NewslettersPage({
             <span>WEEKLY TECH DISPATCH</span>
           </div>
 
-
           <h1 className="hero-headline" style={{ margin: '0 auto 1.5rem auto' }}>
             Weekly Newsletters
           </h1>
@@ -54,11 +55,13 @@ export default function NewslettersPage({
             Curated practical AI tools, architecture breakdowns, and developer blueprints dispatched directly to student builder inboxes every Sunday.
           </p>
 
-          <div style={{ display: 'flex', justifyContent: 'center', gap: '1rem', flexWrap: 'wrap' }}>
-            <button onClick={onOpenNewNewsletterModal} className="btn btn-primary">
-              <Mail size={16} /> SEND NEW NEWSLETTER
-            </button>
-          </div>
+          {isAdmin && (
+            <div style={{ display: 'flex', justifyContent: 'center', gap: '1rem', flexWrap: 'wrap' }}>
+              <button onClick={onOpenNewNewsletterModal} className="btn btn-primary">
+                <Mail size={16} /> SEND NEW NEWSLETTER
+              </button>
+            </div>
+          )}
         </div>
       </section>
 
@@ -96,45 +99,107 @@ export default function NewslettersPage({
         </div>
       </section>
 
-      {/* Empty Newsletters Archive Placeholder */}
+      {/* Newsletters Archive or Empty Uploads Coming Soon State */}
       <section className="section-padding" style={{ background: '#0D0D0F' }}>
-        <div className="container" style={{ maxWidth: '800px', textAlign: 'center' }}>
-          <div style={{ 
-            background: 'var(--bg-card)', 
-            border: 'var(--border-subtle)', 
-            borderRadius: '16px', 
-            padding: '4rem 2rem',
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center'
-          }}>
+        <div className="container" style={{ maxWidth: '800px' }}>
+          {newsletters.length === 0 ? (
             <div style={{ 
-              width: '64px', 
-              height: '64px', 
-              borderRadius: '50%', 
-              background: 'rgba(255, 207, 42, 0.08)', 
-              border: '1px solid rgba(255, 207, 42, 0.2)', 
-              display: 'flex', 
-              alignItems: 'center', 
-              justifyContent: 'center',
-              color: 'var(--color-yellow)',
-              marginBottom: '1.5rem'
+              background: 'var(--bg-card)', 
+              border: 'var(--border-subtle)', 
+              borderRadius: '16px', 
+              padding: '4rem 2rem',
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              textAlign: 'center'
             }}>
-              <Inbox size={28} />
+              <div style={{ 
+                width: '64px', 
+                height: '64px', 
+                borderRadius: '50%', 
+                background: 'rgba(255, 207, 42, 0.08)', 
+                border: '1px solid rgba(255, 207, 42, 0.2)', 
+                display: 'flex', 
+                alignItems: 'center', 
+                justifyContent: 'center',
+                color: 'var(--color-yellow)',
+                marginBottom: '1.5rem'
+              }}>
+                <Inbox size={28} />
+              </div>
+
+              <h3 style={{ fontSize: '1.8rem', marginBottom: '0.6rem', color: '#FFFFFF' }}>
+                Uploads Coming Soon
+              </h3>
+              
+              <p style={{ color: 'var(--text-muted)', fontSize: '1rem', maxWidth: '480px', marginBottom: '2rem', lineHeight: 1.6 }}>
+                Our weekly tech dispatches are in production. Join over {subscriberCount}+ student builders by subscribing above to receive the first edition directly in your inbox.
+              </p>
+
+              {isAdmin && (
+                <button onClick={onOpenNewNewsletterModal} className="btn btn-outline" style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem' }}>
+                  <Plus size={16} color="var(--color-yellow)" /> Draft & Send First Newsletter
+                </button>
+              )}
             </div>
+          ) : (
+            <div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem', flexWrap: 'wrap', gap: '1rem' }}>
+                <div>
+                  <span className="section-label">PAST DISPATCHES</span>
+                  <h2 style={{ fontSize: '1.8rem', color: '#FFFFFF', margin: 0 }}>Newsletter Archive</h2>
+                </div>
+                <span style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>
+                  {newsletters.length} {newsletters.length === 1 ? 'Edition' : 'Editions'} Published
+                </span>
+              </div>
 
-            <h3 style={{ fontSize: '1.6rem', marginBottom: '0.6rem', color: '#FFFFFF' }}>
-              No Public Newsletters Published Yet
-            </h3>
-            
-            <p style={{ color: 'var(--text-muted)', fontSize: '0.98rem', maxWidth: '460px', marginBottom: '2rem', lineHeight: 1.6 }}>
-              New weekly dispatches will appear here once broadcasted to subscribers. Click below to draft and send the first edition.
-            </p>
-
-            <button onClick={onOpenNewNewsletterModal} className="btn btn-outline" style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem' }}>
-              <Plus size={16} color="var(--color-yellow)" /> Draft & Send First Newsletter
-            </button>
-          </div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+                {newsletters.map((item, idx) => (
+                  <div 
+                    key={item.id || idx}
+                    style={{
+                      background: 'var(--bg-card)',
+                      border: 'var(--border-subtle)',
+                      borderRadius: '12px',
+                      padding: '2rem'
+                    }}
+                  >
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '1rem', marginBottom: '1rem' }}>
+                      <div>
+                        <span style={{ color: 'var(--color-yellow)', fontSize: '0.78rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                          {item.edition || `Edition #${newsletters.length - idx}`}
+                        </span>
+                        <h3 style={{ fontSize: '1.3rem', color: '#FFFFFF', marginTop: '0.3rem' }}>
+                          {item.title}
+                        </h3>
+                      </div>
+                      {item.tech_spotlight && (
+                        <span style={{ 
+                          background: 'rgba(255, 207, 42, 0.1)', 
+                          color: 'var(--color-yellow)', 
+                          border: '1px solid rgba(255, 207, 42, 0.25)', 
+                          borderRadius: '9999px', 
+                          padding: '0.25rem 0.75rem', 
+                          fontSize: '0.75rem', 
+                          fontWeight: 700 
+                        }}>
+                          {item.tech_spotlight}
+                        </span>
+                      )}
+                    </div>
+                    <p style={{ color: 'var(--text-muted)', fontSize: '0.95rem', lineHeight: 1.6, whiteSpace: 'pre-line', marginBottom: '1.2rem' }}>
+                      {item.content}
+                    </p>
+                    <div style={{ fontSize: '0.78rem', color: 'var(--text-subtle)', display: 'flex', gap: '1.2rem' }}>
+                      <span>Dispatched to {item.recipient_count || subscriberCount} subscribers</span>
+                      {item.sent_at && <span>{new Date(item.sent_at).toLocaleDateString()}</span>}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
       </section>
     </div>

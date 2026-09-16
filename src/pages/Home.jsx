@@ -17,17 +17,7 @@ export default function Home({
   const [subscribing, setSubscribing] = useState(false);
 
   // Take the latest/first blog as the featured blog
-  const featuredBlog = blogs.length > 0 ? blogs[0] : {
-    slug: 'building-local-autonomous-coding-agent-ollama-langchain',
-    title: 'Building a Local Autonomous Coding Agent with Ollama and LangChain',
-    category: 'AI TUTORIAL',
-    tech_stack: 'Python, Ollama, LangChain, Llama 3',
-    difficulty: 'INTERMEDIATE',
-    read_time: '6 MIN READ',
-    image_url: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=1200&q=80',
-    summary: 'Step-by-step practical guide for students: Setup local LLMs with Ollama, construct an AST tool execution pipeline in LangChain, and build an agent that autonomously reviews and refactors Python code.',
-    author: 'Jyothsna Vellanki'
-  };
+  const featuredBlog = blogs.length > 0 ? blogs[0] : null;
 
   const handleSubscribe = async (e) => {
     e.preventDefault();
@@ -82,9 +72,11 @@ export default function Home({
               <Mail size={16} color="var(--color-yellow)" /> VIEW NEWSLETTERS
             </Link>
 
-            <button onClick={onOpenNewTutorialModal} className="btn btn-post">
-              <Plus size={18} /> POST BLOG
-            </button>
+            {isAdmin && (
+              <button onClick={onOpenNewTutorialModal} className="btn btn-post">
+                <Plus size={18} /> POST BLOG
+              </button>
+            )}
           </div>
         </div>
       </section>
@@ -183,91 +175,130 @@ export default function Home({
               </h2>
             </div>
             <Link to="/blogs" className="btn btn-outline">
-              VIEW ALL BLOGS ({blogs.length || 3}) <ArrowRight size={16} />
+              VIEW ALL BLOGS ({blogs.length}) <ArrowRight size={16} />
             </Link>
           </div>
 
-          <div style={{ 
-            background: 'var(--bg-card)', 
-            border: '1px solid rgba(255, 207, 42, 0.25)', 
-            borderRadius: '16px', 
-            overflow: 'hidden',
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(360px, 1fr))'
-          }}>
-            <div style={{ height: '380px', overflow: 'hidden', position: 'relative' }}>
-              <img 
-                src={featuredBlog.image_url || featuredBlog.image} 
-                alt={featuredBlog.title} 
-                style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-              />
-              <span className="blog-tag" style={{ top: '1.5rem', left: '1.5rem' }}>
-                FEATURED SPOTLIGHT
-              </span>
+          {!featuredBlog ? (
+            <div style={{ 
+              background: 'var(--bg-card)', 
+              border: '1px solid rgba(255, 207, 42, 0.2)', 
+              borderRadius: '16px', 
+              padding: '4rem 2rem',
+              textAlign: 'center',
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center'
+            }}>
+              <div style={{
+                width: '64px',
+                height: '64px',
+                borderRadius: '50%',
+                background: 'rgba(255, 207, 42, 0.1)',
+                border: '1px solid rgba(255, 207, 42, 0.25)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                color: 'var(--color-yellow)',
+                marginBottom: '1.5rem'
+              }}>
+                <Sparkles size={28} />
+              </div>
+              <h3 style={{ fontSize: '1.8rem', marginBottom: '0.8rem', color: '#FFFFFF' }}>
+                Uploads Coming Soon
+              </h3>
+              <p style={{ color: 'var(--text-muted)', fontSize: '1.02rem', maxWidth: '520px', lineHeight: 1.6, marginBottom: '2rem' }}>
+                Practical technical breakdowns, local AI recipes, and architecture blueprints are currently in development. Subscribe below to be the first to read new releases.
+              </p>
+              {isAdmin && (
+                <button onClick={onOpenNewTutorialModal} className="btn btn-primary" style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem' }}>
+                  <Plus size={16} /> Publish First Blog Post
+                </button>
+              )}
             </div>
-
-            <div style={{ padding: '3rem', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
-              <div>
-                <div style={{ display: 'flex', gap: '0.8rem', alignItems: 'center', marginBottom: '1rem' }}>
-                  <span style={{ fontSize: '0.8rem', fontWeight: 800, color: 'var(--color-red)' }}>{featuredBlog.difficulty || 'INTERMEDIATE'}</span>
-                  <span style={{ color: 'var(--text-subtle)', fontSize: '0.8rem' }}>• {featuredBlog.read_time || '6 MIN READ'}</span>
-                </div>
-
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: 'var(--color-yellow)', fontSize: '0.82rem', fontWeight: 700, marginBottom: '0.8rem' }}>
-                  <Terminal size={14} /> {featuredBlog.tech_stack || 'Python, Ollama, LangChain'}
-                </div>
-
-                <h3 style={{ fontSize: '1.8rem', lineHeight: 1.25, marginBottom: '1rem', color: '#FFFFFF' }}>
-                  {featuredBlog.title}
-                </h3>
-
-                <p style={{ color: 'var(--text-muted)', fontSize: '1rem', lineHeight: 1.6, marginBottom: '2rem' }}>
-                  {featuredBlog.summary}
-                </p>
+          ) : (
+            <div style={{ 
+              background: 'var(--bg-card)', 
+              border: '1px solid rgba(255, 207, 42, 0.25)', 
+              borderRadius: '16px', 
+              overflow: 'hidden',
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(360px, 1fr))'
+            }}>
+              <div style={{ height: '380px', overflow: 'hidden', position: 'relative' }}>
+                <img 
+                  src={featuredBlog.image_url || featuredBlog.image} 
+                  alt={featuredBlog.title} 
+                  style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                />
+                <span className="blog-tag" style={{ top: '1.5rem', left: '1.5rem' }}>
+                  FEATURED SPOTLIGHT
+                </span>
               </div>
 
-              <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', flexWrap: 'wrap' }}>
-                <Link to={`/article/${featuredBlog.slug}`} className="btn btn-primary" style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem' }}>
-                  READ FULL BLOG <ArrowRight size={18} />
-                </Link>
-                {isAdmin && featuredBlog.id && (
-                  <button
-                    type="button"
-                    onClick={() => {
-                      if (window.confirm(`Are you sure you want to permanently delete "${featuredBlog.title}"?`)) {
-                        if (onDeleteBlog) onDeleteBlog(featuredBlog.id);
-                      }
-                    }}
-                    title="Delete Blog (Admin Only)"
-                    style={{
-                      background: 'rgba(230, 57, 70, 0.15)',
-                      border: '1px solid var(--color-red)',
-                      color: 'var(--color-red)',
-                      borderRadius: '8px',
-                      padding: '0.65rem 1.1rem',
-                      fontSize: '0.85rem',
-                      fontWeight: 700,
-                      cursor: 'pointer',
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      gap: '0.4rem',
-                      transition: 'all 0.2s ease'
-                    }}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.background = 'var(--color-red)';
-                      e.currentTarget.style.color = '#FFFFFF';
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.background = 'rgba(230, 57, 70, 0.15)';
-                      e.currentTarget.style.color = 'var(--color-red)';
-                    }}
-                  >
-                    <Trash2 size={15} /> DELETE BLOG
-                  </button>
-                )}
+              <div style={{ padding: '3rem', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+                <div>
+                  <div style={{ display: 'flex', gap: '0.8rem', alignItems: 'center', marginBottom: '1rem' }}>
+                    <span style={{ fontSize: '0.8rem', fontWeight: 800, color: 'var(--color-red)' }}>{featuredBlog.difficulty || 'INTERMEDIATE'}</span>
+                    <span style={{ color: 'var(--text-subtle)', fontSize: '0.8rem' }}>• {featuredBlog.read_time || '6 MIN READ'}</span>
+                  </div>
+
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: 'var(--color-yellow)', fontSize: '0.82rem', fontWeight: 700, marginBottom: '0.8rem' }}>
+                    <Terminal size={14} /> {featuredBlog.tech_stack || 'Python, Ollama, LangChain'}
+                  </div>
+
+                  <h3 style={{ fontSize: '1.8rem', lineHeight: 1.25, marginBottom: '1rem', color: '#FFFFFF' }}>
+                    {featuredBlog.title}
+                  </h3>
+
+                  <p style={{ color: 'var(--text-muted)', fontSize: '1rem', lineHeight: 1.6, marginBottom: '2rem' }}>
+                    {featuredBlog.summary}
+                  </p>
+                </div>
+
+                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', flexWrap: 'wrap' }}>
+                  <Link to={`/article/${featuredBlog.slug}`} className="btn btn-primary" style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem' }}>
+                    READ FULL BLOG <ArrowRight size={18} />
+                  </Link>
+                  {isAdmin && featuredBlog.id && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (window.confirm(`Are you sure you want to permanently delete "${featuredBlog.title}"?`)) {
+                          if (onDeleteBlog) onDeleteBlog(featuredBlog.id);
+                        }
+                      }}
+                      title="Delete Blog (Admin Only)"
+                      style={{
+                        background: 'rgba(230, 57, 70, 0.15)',
+                        border: '1px solid var(--color-red)',
+                        color: 'var(--color-red)',
+                        borderRadius: '8px',
+                        padding: '0.65rem 1.1rem',
+                        fontSize: '0.85rem',
+                        fontWeight: 700,
+                        cursor: 'pointer',
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '0.4rem',
+                        transition: 'all 0.2s ease'
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.background = 'var(--color-red)';
+                        e.currentTarget.style.color = '#FFFFFF';
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.background = 'rgba(230, 57, 70, 0.15)';
+                        e.currentTarget.style.color = 'var(--color-red)';
+                      }}
+                    >
+                      <Trash2 size={15} /> DELETE BLOG
+                    </button>
+                  )}
+                </div>
               </div>
             </div>
-          </div>
+          )}
         </div>
       </section>
 

@@ -653,6 +653,11 @@ a {
   color: var(--text-subtle);
 }
 
+.social-icon-link:hover {
+  color: var(--color-yellow) !important;
+  transform: translateY(-2px);
+}
+
 /* --- Category Pills --- */
 .category-pill {
   padding: 0.45rem 1.1rem;

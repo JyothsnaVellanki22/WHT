@@ -25,41 +25,48 @@ export default function NewTutorialModal({ isOpen, onClose, onAddBlog }) {
       return;
     }
 
+    const token = localStorage.getItem('wht_auth_token');
+    if (!token) {
+      alert('Authentication required: You must be signed in as an administrator to publish a tutorial.');
+      return;
+    }
+
     setIsSubmitting(true);
 
     try {
       const res = await fetch('/api/blogs', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
         body: JSON.stringify(formData)
       });
+      
+      if (res.status === 401 || res.status === 403) {
+        const errorData = await res.json().catch(() => ({}));
+        alert(errorData.detail || 'Access denied: Administrator permissions required to publish tutorials.');
+        return;
+      }
+
+      if (!res.ok) {
+        const errorData = await res.json().catch(() => ({}));
+        throw new Error(errorData.detail || 'Failed to publish tutorial');
+      }
+
       const data = await res.json();
       if (data && data.blog) {
         onAddBlog(data.blog);
         if (data.notified_subscribers > 0) {
-          alert(`Tutorial published and email notification sent to ${data.notified_subscribers} student subscribers!`);
+          alert(`Tutorial published and email notification logged for ${data.notified_subscribers} student subscribers!`);
         }
+        onClose();
       }
     } catch (err) {
-      console.warn('API error, falling back to local storage:', err);
-      const fallbackBlog = {
-        id: `blog-${Date.now()}`,
-        slug: formData.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, ''),
-        title: formData.title,
-        tech_stack: formData.tech_stack,
-        difficulty: formData.difficulty,
-        category: formData.category,
-        date: new Date().toLocaleDateString('en-US', { month: 'SHORT', day: 'numeric', year: 'numeric' }).toUpperCase(),
-        read_time: formData.read_time,
-        author: formData.author,
-        image_url: formData.image_url,
-        summary: formData.summary,
-        content: formData.content || formData.summary
-      };
-      onAddBlog(fallbackBlog);
+      console.error('API error while creating blog:', err);
+      alert(err.message || 'Failed to publish tutorial. Please check server connection.');
     } finally {
       setIsSubmitting(false);
-      onClose();
       // Reset form
       setFormData({
         title: '',

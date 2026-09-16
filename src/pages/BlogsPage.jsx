@@ -3,45 +3,44 @@ import { Link } from 'react-router-dom';
 import { ArrowUpRight, Plus, Terminal, Search, Sparkles, Trash2 } from 'lucide-react';
 
 const FALLBACK_BLOGS = [
-
   {
     id: 1,
     num: '01',
-    slug: 'building-local-autonomous-coding-agent-ollama-langchain',
-    title: 'Building a Local Autonomous Coding Agent with Ollama and LangChain',
-    category: 'AI TUTORIAL',
-    tech_stack: 'Python, Ollama, LangChain, Llama 3',
-    difficulty: 'INTERMEDIATE',
-    read_time: '6 MIN READ',
-    image_url: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=800&q=80',
-    summary: 'Step-by-step practical guide for students: Setup local LLMs with Ollama, construct an AST tool execution pipeline in LangChain, and build an agent that autonomously reviews and refactors Python code.',
-    author: 'Jyothsna Vellanki'
+    slug: 'rise-of-reasoning-models-deepseek-r1-test-time-compute',
+    title: 'The Rise of Reasoning Models: How DeepSeek-R1 and Test-Time Compute are Reshaping AI',
+    category: 'AI RESEARCH',
+    tech_stack: 'DeepSeek-R1, OpenAI o1, Reinforcement Learning, Test-Time Compute, MCTS',
+    difficulty: 'ADVANCED',
+    read_time: '7 MIN READ',
+    image_url: 'https://images.unsplash.com/photo-1620712943543-bcc4688e7485?auto=format&fit=crop&w=1200&q=80',
+    summary: 'A comprehensive breakdown of the newest frontier in AI research: how inference-time compute scaling, reinforcement learning without human feedback (RLVR), and tree-search thinking models like DeepSeek-R1 are outperforming pure pre-training scaling laws.',
+    author: 'WHT AI Research Team'
   },
   {
     id: 2,
     num: '02',
-    slug: 'fine-tuning-llama-3-lora-pytorch-guide',
-    title: 'Fine-Tuning Llama 3 with LoRA and PyTorch: Step-by-Step Practical Guide',
-    category: 'HANDS-ON GUIDE',
-    tech_stack: 'PyTorch, Hugging Face, PEFT, LoRA',
-    difficulty: 'PRO',
-    read_time: '8 MIN READ',
-    image_url: 'https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=800&q=80',
-    summary: 'Learn parameter-efficient fine-tuning (PEFT) on consumer GPUs. We cover dataset formatting, QLoRA 4-bit quantization, Hugging Face SFTTrainer, and evaluating loss curves.',
-    author: 'WHT Tech Team'
+    slug: 'nist-post-quantum-cryptography-ai-zero-day-threats',
+    title: 'NIST Finalizes Post-Quantum Encryption Standards as AI Zero-Day Attacks Surge',
+    category: 'CYBER SECURITY',
+    tech_stack: 'Post-Quantum Cryptography, ML-KEM, ML-DSA, Zero Trust, eBPF',
+    difficulty: 'INTERMEDIATE',
+    read_time: '6 MIN READ',
+    image_url: 'https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&w=1200&q=80',
+    summary: 'NIST has officially published FIPS 203, 204, and 205, cementing the world\'s quantum-resistant cryptographic algorithms. We analyze why organizations are replacing RSA/ECC today and how automated AI threat hunting is mitigating weaponized zero-days.',
+    author: 'WHT Security Desk'
   },
   {
     id: 3,
     num: '03',
-    slug: 'production-rag-chromadb-fastembed-hybrid-search',
-    title: 'Production RAG with ChromaDB, FastEmbed & Hybrid Search',
-    category: 'TOOLS & FRAMEWORKS',
-    tech_stack: 'ChromaDB, FastEmbed, Python, Vector DB',
-    difficulty: 'BEGINNER',
+    slug: 'react-19-deep-dive-compiler-actions-use-memo',
+    title: 'React 19 Deep Dive: The React Compiler, Server Actions, and the Death of useMemo',
+    category: 'REACT & WEB',
+    tech_stack: 'React 19, React Compiler, useActionState, useOptimistic, RSC',
+    difficulty: 'INTERMEDIATE',
     read_time: '5 MIN READ',
-    image_url: 'https://images.unsplash.com/photo-1522071820081-009f0129c71c?auto=format&fit=crop&w=800&q=80',
-    summary: 'Build a blazing-fast Retrieval-Augmented Generation system. Learn vector embedding creation, cosine similarity querying, reranking, and context injection into LLM prompts.',
-    author: 'WHT Editorial'
+    image_url: 'https://images.unsplash.com/photo-1633356122544-f134324a6cee?auto=format&fit=crop&w=1200&q=80',
+    summary: 'React 19 revolutionizes the React paradigm. Discover how the automated React Compiler eliminates manual dependency arrays and useMemo/useCallback, and how Actions and the useActionState hook drastically simplify forms and async state.',
+    author: 'WHT Web Engineering'
   }
 ];
 
@@ -49,9 +48,9 @@ export default function BlogsPage({ blogs = [], onOpenNewTutorialModal, isAdmin 
   const [activeTech, setActiveTech] = useState('ALL');
   const [searchQuery, setSearchQuery] = useState('');
 
-  const displayBlogs = blogs.length > 0 ? blogs : FALLBACK_BLOGS;
+  const displayBlogs = blogs;
 
-  const techFilters = ['ALL', 'Python', 'LangChain', 'Ollama', 'PyTorch', 'Vector DB', 'LoRA'];
+  const techFilters = ['ALL', 'AI Research', 'DeepSeek-R1', 'Cyber Security', 'Post-Quantum', 'React 19', 'RSC'];
 
   const filteredBlogs = displayBlogs.filter(blog => {
     const stack = blog.tech_stack || blog.category || '';
@@ -86,55 +85,103 @@ export default function BlogsPage({ blogs = [], onOpenNewTutorialModal, isAdmin 
             Explore step-by-step guides, code implementations, and tool breakdowns for modern software and AI builders.
           </p>
 
-          <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', alignItems: 'center' }}>
-            <button onClick={onOpenNewTutorialModal} className="btn btn-primary">
-              <Plus size={18} /> POST NEW BLOG
-            </button>
-          </div>
+          {isAdmin && (
+            <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', alignItems: 'center' }}>
+              <button onClick={onOpenNewTutorialModal} className="btn btn-primary">
+                <Plus size={18} /> POST NEW BLOG
+              </button>
+            </div>
+          )}
         </div>
       </section>
 
       {/* Search & Filter Bar */}
       <section className="section-padding">
         <div className="container">
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2.5rem', flexWrap: 'wrap', gap: '1.5rem' }}>
-            {/* Filter Pills */}
-            <div style={{ display: 'flex', gap: '0.6rem', flexWrap: 'wrap' }}>
-              {techFilters.map(tech => (
-                <button
-                  key={tech}
-                  onClick={() => setActiveTech(tech)}
-                  className={`category-pill ${activeTech === tech ? 'active' : ''}`}
-                >
-                  {tech}
-                </button>
-              ))}
-            </div>
+          {blogs.length > 0 && (
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2.5rem', flexWrap: 'wrap', gap: '1.5rem' }}>
+              {/* Filter Pills */}
+              <div style={{ display: 'flex', gap: '0.6rem', flexWrap: 'wrap' }}>
+                {techFilters.map(tech => (
+                  <button
+                    key={tech}
+                    onClick={() => setActiveTech(tech)}
+                    className={`category-pill ${activeTech === tech ? 'active' : ''}`}
+                  >
+                    {tech}
+                  </button>
+                ))}
+              </div>
 
-            {/* Search Input */}
-            <div style={{ position: 'relative', width: '280px' }}>
-              <Search size={16} style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
-              <input
-                type="text"
-                placeholder="Search blogs & tech..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                style={{
-                  width: '100%',
-                  padding: '0.65rem 1rem 0.65rem 2.6rem',
-                  background: 'var(--bg-card)',
-                  border: 'var(--border-subtle)',
-                  borderRadius: '9999px',
-                  color: '#FFFFFF',
-                  fontSize: '0.88rem',
-                  outline: 'none'
-                }}
-              />
+              {/* Search Input */}
+              <div style={{ position: 'relative', width: '280px' }}>
+                <Search size={16} style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
+                <input
+                  type="text"
+                  placeholder="Search blogs & tech..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  style={{
+                    width: '100%',
+                    padding: '0.65rem 1rem 0.65rem 2.6rem',
+                    background: 'var(--bg-card)',
+                    border: 'var(--border-subtle)',
+                    borderRadius: '9999px',
+                    color: '#FFFFFF',
+                    fontSize: '0.88rem',
+                    outline: 'none'
+                  }}
+                />
+              </div>
             </div>
-          </div>
+          )}
 
-          {/* Blogs Grid */}
-          {filteredBlogs.length === 0 ? (
+          {/* Blogs Grid or Uploads Coming Soon */}
+          {blogs.length === 0 ? (
+            <div style={{ 
+              background: 'var(--bg-card)', 
+              border: '1px solid rgba(255, 207, 42, 0.2)', 
+              borderRadius: '16px', 
+              padding: '5rem 2rem',
+              textAlign: 'center',
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              maxWidth: '700px',
+              margin: '0 auto'
+            }}>
+              <div style={{
+                width: '64px',
+                height: '64px',
+                borderRadius: '50%',
+                background: 'rgba(255, 207, 42, 0.1)',
+                border: '1px solid rgba(255, 207, 42, 0.25)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                color: 'var(--color-yellow)',
+                marginBottom: '1.5rem'
+              }}>
+                <Sparkles size={28} />
+              </div>
+              <h3 style={{ fontSize: '2rem', marginBottom: '0.8rem', color: '#FFFFFF' }}>
+                Uploads Coming Soon
+              </h3>
+              <p style={{ color: 'var(--text-muted)', fontSize: '1.05rem', lineHeight: 1.6, marginBottom: '2rem', maxWidth: '540px' }}>
+                Our engineering team is actively writing practical AI tutorials, security deep-dives, and production architecture blueprints. Subscribe to our weekly dispatch to get notified the second new guides are published.
+              </p>
+              <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', justifyContent: 'center' }}>
+                <Link to="/newsletters" className="btn btn-primary">
+                  Subscribe to Dispatches
+                </Link>
+                {isAdmin && (
+                  <button onClick={onOpenNewTutorialModal} className="btn btn-outline" style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem' }}>
+                    <Plus size={16} color="var(--color-yellow)" /> Publish First Blog
+                  </button>
+                )}
+              </div>
+            </div>
+          ) : filteredBlogs.length === 0 ? (
             <div style={{ textAlign: 'center', padding: '4rem 0', color: 'var(--text-muted)' }}>
               <h3>No blogs match your filter "{searchQuery || activeTech}"</h3>
               <button onClick={() => { setActiveTech('ALL'); setSearchQuery(''); }} className="btn btn-outline" style={{ marginTop: '1rem' }}>

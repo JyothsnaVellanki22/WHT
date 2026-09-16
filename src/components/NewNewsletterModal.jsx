@@ -21,14 +21,35 @@ export default function NewNewsletterModal({ isOpen, onClose, onNewsletterSent, 
       return;
     }
 
+    const token = localStorage.getItem('wht_auth_token');
+    if (!token) {
+      alert('Authentication required: You must be signed in as an administrator to broadcast a newsletter.');
+      return;
+    }
+
     setIsSending(true);
 
     try {
       const res = await fetch('/api/newsletters', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
         body: JSON.stringify(formData)
       });
+
+      if (res.status === 401 || res.status === 403) {
+        const errorData = await res.json().catch(() => ({}));
+        alert(errorData.detail || 'Access denied: Administrator permissions required to dispatch newsletters.');
+        return;
+      }
+
+      if (!res.ok) {
+        const errorData = await res.json().catch(() => ({}));
+        throw new Error(errorData.detail || 'Failed to dispatch newsletter.');
+      }
+
       const data = await res.json();
       if (data && data.newsletter) {
         setSuccessResult(data);
@@ -37,26 +58,8 @@ export default function NewNewsletterModal({ isOpen, onClose, onNewsletterSent, 
         }
       }
     } catch (err) {
-      console.warn('API error, simulating broadcast:', err);
-      const fallbackNewsletter = {
-        id: Date.now(),
-        edition: formData.edition,
-        title: formData.title,
-        subject: formData.subject,
-        tech_spotlight: formData.tech_spotlight,
-        content: formData.content,
-        recipient_count: subscriberCount || 5,
-        sent_at: new Date().toISOString()
-      };
-      setSuccessResult({
-        success: true,
-        newsletter: fallbackNewsletter,
-        recipient_count: subscriberCount || 5,
-        message: `Weekly Newsletter broadcast simulated to ${subscriberCount || 5} student subscribers!`
-      });
-      if (onNewsletterSent) {
-        onNewsletterSent(fallbackNewsletter);
-      }
+      console.error('API error while sending newsletter:', err);
+      alert(err.message || 'Failed to dispatch newsletter. Please check server connection.');
     } finally {
       setIsSending(false);
     }

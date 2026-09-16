@@ -157,13 +157,29 @@ function App() {
     setNewsletters((prev) => [newNewsletter, ...prev]);
   };
 
+  const handleOpenTutorialModal = () => {
+    if (!isAdmin) {
+      setIsAuthModalOpen(true);
+    } else {
+      setIsTutorialModalOpen(true);
+    }
+  };
+
+  const handleOpenNewsletterModal = () => {
+    if (!isAdmin) {
+      setIsAuthModalOpen(true);
+    } else {
+      setIsNewsletterModalOpen(true);
+    }
+  };
+
   return (
     <Router>
       <Navbar 
         theme={theme}
         onToggleTheme={toggleTheme}
-        onOpenNewTutorialModal={() => setIsTutorialModalOpen(true)}
-        onOpenNewNewsletterModal={() => setIsNewsletterModalOpen(true)}
+        onOpenNewTutorialModal={handleOpenTutorialModal}
+        onOpenNewNewsletterModal={handleOpenNewsletterModal}
         currentUser={currentUser}
         isAdmin={isAdmin}
         onOpenAuthModal={() => setIsAuthModalOpen(true)}
@@ -178,8 +194,8 @@ function App() {
                 blogs={blogs}
                 subscriberCount={subscriberCount}
                 onSubscriberAdded={() => fetchSubscriberCount()}
-                onOpenNewTutorialModal={() => setIsTutorialModalOpen(true)}
-                onOpenNewNewsletterModal={() => setIsNewsletterModalOpen(true)}
+                onOpenNewTutorialModal={handleOpenTutorialModal}
+                onOpenNewNewsletterModal={handleOpenNewsletterModal}
                 isAdmin={isAdmin}
                 onDeleteBlog={handleDeleteBlog}
               />
@@ -190,7 +206,7 @@ function App() {
             element={
               <BlogsPage 
                 blogs={blogs}
-                onOpenNewTutorialModal={() => setIsTutorialModalOpen(true)}
+                onOpenNewTutorialModal={handleOpenTutorialModal}
                 isAdmin={isAdmin}
                 onDeleteBlog={handleDeleteBlog}
               />
@@ -210,9 +226,11 @@ function App() {
             path="/newsletters" 
             element={
               <NewslettersPage 
+                newsletters={newsletters}
                 subscriberCount={subscriberCount}
                 onSubscriberAdded={() => fetchSubscriberCount()}
-                onOpenNewNewsletterModal={() => setIsNewsletterModalOpen(true)}
+                onOpenNewNewsletterModal={handleOpenNewsletterModal}
+                isAdmin={isAdmin}
               />
             } 
           />
@@ -220,15 +238,15 @@ function App() {
         </Routes>
       </main>
 
-      {/* Builder Modals */}
+      {/* Builder Modals (Restricted to Admin) */}
       <NewTutorialModal 
-        isOpen={isTutorialModalOpen} 
+        isOpen={isTutorialModalOpen && isAdmin} 
         onClose={() => setIsTutorialModalOpen(false)} 
         onAddBlog={handleAddBlog} 
       />
 
       <NewNewsletterModal
-        isOpen={isNewsletterModalOpen}
+        isOpen={isNewsletterModalOpen && isAdmin}
         onClose={() => setIsNewsletterModalOpen(false)}
         onNewsletterSent={handleNewsletterSent}
         subscriberCount={subscriberCount}
