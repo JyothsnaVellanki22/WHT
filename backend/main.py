@@ -2,7 +2,7 @@ from fastapi import FastAPI, Depends, HTTPException, status
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from sqlalchemy.orm import Session
-from pydantic import BaseModel
+from pydantic import BaseModel, Field, field_validator
 from typing import List, Optional
 from datetime import datetime, timedelta, timezone
 import re
@@ -19,16 +19,30 @@ Base.metadata.create_all(bind=engine)
 
 app = FastAPI(title="WHT Practical AI Learning Platform API")
 
+# ----------------- Environment & CORS Hardening ----------------- #
+ENVIRONMENT = os.getenv("ENVIRONMENT", os.getenv("ENV", "development")).lower()
+
+ALLOWED_ORIGINS_ENV = os.getenv("ALLOWED_ORIGINS")
+allowed_origins_list = [
+    origin.strip() for origin in ALLOWED_ORIGINS_ENV.split(",") if origin.strip()
+] if ALLOWED_ORIGINS_ENV else [
+    "http://localhost:5173",
+    "http://127.0.0.1:5173",
+    "http://localhost:3000",
+    "http://127.0.0.1:3000",
+    "https://wht.dev",
+]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=allowed_origins_list,
+    allow_origin_regex=os.getenv("CORS_ORIGIN_REGEX", r"https?://(localhost|127\.0\.0\.1)(:\d+)?|https://.*\.vercel\.app"),
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
 # ----------------- JWT & Security Configuration ----------------- #
-ENVIRONMENT = os.getenv("ENVIRONMENT", os.getenv("ENV", "development")).lower()
 JWT_SECRET = os.getenv("JWT_SECRET")
 
 KNOWN_INSECURE_SECRETS = {
@@ -125,7 +139,12 @@ def require_admin(
 # Seed admin user if explicitly provided via environment variables and none exists
 def seed_admin_from_env():
     admin_email = os.getenv("ADMIN_EMAIL", "admin@wht.dev").strip().lower()
-    admin_password = os.getenv("ADMIN_PASSWORD", "admin123")
+    admin_password = os.getenv("ADMIN_PASSWORD")
+    if not admin_password:
+        if ENVIRONMENT in ("production", "prod"):
+            # Never seed default admin credentials in production
+            return
+        admin_password = "admin"  # Development placeholder; override with ADMIN_PASSWORD in .env
     db = Session(bind=engine)
     try:
         admin = db.query(User).filter(User.role == "ADMIN").first()
@@ -158,30 +177,56 @@ def seed_initial_blogs():
 
 seed_initial_blogs()
 
-# ----------------- Pydantic Schemas ----------------- #
+# ----------------- Pydantic Schemas & Input Validation ----------------- #
+EMAIL_REGEX = re.compile(r"^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$")
+
 class UserRegister(BaseModel):
-    email: str
-    password: str
-    name: Optional[str] = "Student Builder"
+    email: str = Field(..., max_length=254)
+    password: str = Field(..., min_length=6, max_length=128)
+    name: Optional[str] = Field("Student Builder", max_length=100)
+
+    @field_validator("email")
+    @classmethod
+    def validate_email_format(cls, v: str) -> str:
+        clean = v.strip().lower()
+        if not clean or not EMAIL_REGEX.match(clean):
+            raise ValueError("Invalid email address format.")
+        return clean
 
 class UserLogin(BaseModel):
-    email: str
-    password: str
+    email: str = Field(..., max_length=254)
+    password: str = Field(..., max_length=128)
+
+    @field_validator("email")
+    @classmethod
+    def validate_email_format(cls, v: str) -> str:
+        clean = v.strip().lower()
+        if not clean or not EMAIL_REGEX.match(clean):
+            raise ValueError("Invalid email address format.")
+        return clean
 
 class BlogPostCreate(BaseModel):
-    title: str
-    summary: str
-    content: str
-    tech_stack: Optional[str] = "Python, AI"
-    difficulty: Optional[str] = "BEGINNER"
-    category: Optional[str] = "AI TUTORIAL"
-    author: Optional[str] = "WHT Tech Team"
-    read_time: Optional[str] = "5 MIN READ"
-    image_url: Optional[str] = "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=800&q=80"
+    title: str = Field(..., min_length=3, max_length=250)
+    summary: str = Field(..., min_length=10, max_length=1000)
+    content: str = Field(..., min_length=20)
+    tech_stack: Optional[str] = Field("Python, AI", max_length=200)
+    difficulty: Optional[str] = Field("BEGINNER", max_length=50)
+    category: Optional[str] = Field("AI TUTORIAL", max_length=100)
+    author: Optional[str] = Field("WHT Tech Team", max_length=100)
+    read_time: Optional[str] = Field("5 MIN READ", max_length=50)
+    image_url: Optional[str] = Field("https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=800&q=80", max_length=500)
     notify_subscribers: Optional[bool] = True
 
 class SubscriberCreate(BaseModel):
-    email: str
+    email: str = Field(..., max_length=254)
+
+    @field_validator("email")
+    @classmethod
+    def validate_email_format(cls, v: str) -> str:
+        clean = v.strip().lower()
+        if not clean or not EMAIL_REGEX.match(clean):
+            raise ValueError("Invalid email address format. Please provide a valid email.")
+        return clean
 
 class NewsletterCreate(BaseModel):
     title: str

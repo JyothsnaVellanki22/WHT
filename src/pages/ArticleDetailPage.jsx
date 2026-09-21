@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { ArrowLeft, Calendar, Clock, Share2, Linkedin, Terminal, Layers, Code, Trash2 } from 'lucide-react';
+import DOMPurify from 'dompurify';
 
 export default function ArticleDetailPage({ blogs = [], isAdmin = false, onDeleteBlog }) {
   const { slug } = useParams();
@@ -127,7 +128,7 @@ export default function ArticleDetailPage({ blogs = [], isAdmin = false, onDelet
           
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '1rem', paddingBottom: '1.5rem', color: 'var(--text-muted)', fontSize: '0.9rem' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
-              <span style={{ color: '#FFFFFF', fontWeight: 600 }}>By {tutorial.author || 'WHT Tech Team'}</span>
+              <span style={{ color: 'var(--text-main)', fontWeight: 600 }}>By {tutorial.author || 'WHT Tech Team'}</span>
               <span style={{ display: 'flex', alignItems: 'center', gap: '0.3rem' }}><Clock size={14} /> {tutorial.read_time || tutorial.readTime || '5 MIN READ'}</span>
             </div>
             
@@ -138,7 +139,7 @@ export default function ArticleDetailPage({ blogs = [], isAdmin = false, onDelet
         </div>
       </section>
 
-      <section className="section-padding" style={{ background: '#0D0D0D' }}>
+      <section className="section-padding">
         <div className="container" style={{ maxWidth: '900px' }}>
           {(tutorial.image_url || tutorial.image) && (
             <div style={{ width: '100%', height: '420px', borderRadius: '12px', overflow: 'hidden', border: 'var(--border-subtle)', marginBottom: '3rem' }}>
@@ -147,16 +148,18 @@ export default function ArticleDetailPage({ blogs = [], isAdmin = false, onDelet
           )}
           
           <div style={{ background: 'var(--bg-card)', border: 'var(--border-subtle)', borderRadius: '14px', padding: '3.5rem' }}>
-            <div style={{ fontSize: '1.2rem', fontWeight: 600, color: '#FFFFFF', lineHeight: 1.6, marginBottom: '2.5rem', paddingLeft: '1.2rem', borderLeft: '3px solid var(--color-yellow)', background: 'rgba(255, 207, 42, 0.04)', padding: '1rem 1.2rem', borderRadius: '0 8px 8px 0' }}>
+            <div style={{ fontSize: '1.2rem', fontWeight: 600, color: 'var(--text-main)', lineHeight: 1.6, marginBottom: '2.5rem', paddingLeft: '1.2rem', borderLeft: '3px solid var(--color-yellow)', background: 'rgba(255, 207, 42, 0.04)', padding: '1rem 1.2rem', borderRadius: '0 8px 8px 0' }}>
               <strong>Prerequisites & Takeaway:</strong> {tutorial.summary}
             </div>
             
             <div 
-              style={{ fontSize: '1.05rem', color: '#D4D4D8', lineHeight: 1.8 }}
+              style={{ fontSize: '1.05rem', color: 'var(--text-muted)', lineHeight: 1.8 }}
               dangerouslySetInnerHTML={{ 
-                __html: tutorial.content.includes('<') 
-                  ? tutorial.content 
-                  : `<p>${tutorial.content.replace(/\n\n/g, '</p><p>').replace(/\n/g, '<br/>')}</p>` 
+                __html: DOMPurify.sanitize(
+                  tutorial.content.includes('<') 
+                    ? tutorial.content 
+                    : `<p>${tutorial.content.replace(/\n\n/g, '</p><p>').replace(/\n/g, '<br/>')}</p>`
+                )
               }} 
             />
           </div>

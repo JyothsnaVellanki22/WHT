@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { X, ShieldAlert, Mail, Lock, User, CheckCircle2, ArrowRight } from 'lucide-react';
+import { X, ShieldAlert, Mail, Lock, User, CheckCircle2, ArrowRight, Eye, EyeOff } from 'lucide-react';
 
 export default function AuthModal({ isOpen, onClose, onAuthSuccess }) {
   const [isRegister, setIsRegister] = useState(false);
@@ -8,6 +8,7 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess }) {
   const [name, setName] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   if (!isOpen) return null;
 
@@ -72,9 +73,9 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess }) {
     >
       <div 
         style={{
-          background: '#151518',
+          background: 'var(--bg-card)',
           border: '1px solid rgba(255, 207, 42, 0.3)',
-          boxShadow: '0 25px 60px rgba(0, 0, 0, 0.95)',
+          boxShadow: 'var(--shadow-hover)',
           borderRadius: '16px',
           width: '100%',
           maxWidth: '460px',
@@ -82,7 +83,7 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess }) {
           overflowY: 'auto',
           position: 'relative',
           padding: '2.5rem',
-          color: '#FFFFFF'
+          color: 'var(--text-main)'
         }}
         onClick={(e) => e.stopPropagation()} 
       >
@@ -91,15 +92,15 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess }) {
             <span className="section-label" style={{ marginBottom: '0.3rem' }}>
               DATABASE RBAC AUTH
             </span>
-            <h2 style={{ fontSize: '1.5rem', margin: 0, color: '#FFFFFF' }}>
+            <h2 style={{ fontSize: '1.5rem', margin: 0, color: 'var(--text-main)' }}>
               {isRegister ? 'Create Builder Account' : 'Sign In to WHT'}
             </h2>
           </div>
           <button 
             onClick={onClose} 
             style={{ 
-              background: 'rgba(255, 255, 255, 0.08)',
-              color: '#FFFFFF',
+              background: 'var(--bg-card-hover)',
+              color: 'var(--text-main)',
               border: 'none',
               borderRadius: '50%',
               width: '36px',
@@ -138,10 +139,10 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess }) {
                   style={{
                     width: '100%',
                     padding: '0.75rem 1rem 0.75rem 2.6rem',
-                    background: 'rgba(255, 255, 255, 0.04)',
-                    border: '1px solid rgba(255, 255, 255, 0.12)',
+                    background: 'var(--bg-card-hover)',
+                    border: 'var(--border-subtle)',
                     borderRadius: '8px',
-                    color: '#FFFFFF',
+                    color: 'var(--text-main)',
                     fontSize: '0.95rem',
                     outline: 'none'
                   }}
@@ -165,10 +166,10 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess }) {
                 style={{
                   width: '100%',
                   padding: '0.75rem 1rem 0.75rem 2.6rem',
-                  background: 'rgba(255, 255, 255, 0.04)',
-                  border: '1px solid rgba(255, 255, 255, 0.12)',
+                  background: 'var(--bg-card-hover)',
+                  border: 'var(--border-subtle)',
                   borderRadius: '8px',
-                  color: '#FFFFFF',
+                  color: 'var(--text-main)',
                   fontSize: '0.95rem',
                   outline: 'none'
                 }}
@@ -183,22 +184,42 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess }) {
             <div style={{ position: 'relative' }}>
               <Lock size={16} style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
               <input
-                type="password"
+                type={showPassword ? 'text' : 'password'}
                 required
                 placeholder="••••••••"
                 value={password}
                 onChange={(e) => { setPassword(e.target.value); setError(''); }}
                 style={{
                   width: '100%',
-                  padding: '0.75rem 1rem 0.75rem 2.6rem',
-                  background: 'rgba(255, 255, 255, 0.04)',
-                  border: '1px solid rgba(255, 255, 255, 0.12)',
+                  padding: '0.75rem 2.6rem 0.75rem 2.6rem',
+                  background: 'var(--bg-card-hover)',
+                  border: 'var(--border-subtle)',
                   borderRadius: '8px',
-                  color: '#FFFFFF',
+                  color: 'var(--text-main)',
                   fontSize: '0.95rem',
                   outline: 'none'
                 }}
               />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                title={showPassword ? "Hide password" : "Show password"}
+                style={{
+                  position: 'absolute',
+                  right: '0.8rem',
+                  top: '50%',
+                  transform: 'translateY(-50%)',
+                  background: 'none',
+                  border: 'none',
+                  color: 'var(--text-muted)',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  padding: 0
+                }}
+              >
+                {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+              </button>
             </div>
           </div>
 
@@ -213,7 +234,7 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess }) {
           </button>
         </form>
 
-        <div style={{ borderTop: '1px solid rgba(255, 255, 255, 0.08)', paddingTop: '1.2rem', textAlign: 'center', fontSize: '0.82rem' }}>
+        <div style={{ borderTop: 'var(--border-subtle)', paddingTop: '1.2rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.82rem' }}>
           <button
             type="button"
             onClick={() => { setIsRegister(!isRegister); setError(''); }}
@@ -221,6 +242,31 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess }) {
           >
             {isRegister ? 'Already have an account? Sign In' : "Don't have an account? Sign Up"}
           </button>
+
+          {import.meta.env.DEV && !isRegister && (
+            <button
+              type="button"
+              onClick={() => {
+                setIsRegister(false);
+                setEmail(import.meta.env.VITE_DEV_ADMIN_EMAIL || 'admin@wht.dev');
+                setPassword(import.meta.env.VITE_DEV_ADMIN_PASSWORD || '');
+                setError('');
+              }}
+              title="Pre-fill development admin credentials (Dev only)"
+              style={{
+                background: 'rgba(255, 207, 42, 0.1)',
+                border: '1px solid rgba(255, 207, 42, 0.3)',
+                color: 'var(--color-yellow)',
+                borderRadius: '6px',
+                padding: '0.25rem 0.6rem',
+                cursor: 'pointer',
+                fontSize: '0.75rem',
+                fontWeight: 700
+              }}
+            >
+              Fill Admin (Dev)
+            </button>
+          )}
         </div>
       </div>
     </div>
