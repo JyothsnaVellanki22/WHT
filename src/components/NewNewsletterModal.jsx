@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { X, Send, Sparkles, Mail, Zap, CheckCircle2 } from 'lucide-react';
+import RichContentEditor from './RichContentEditor';
 
 export default function NewNewsletterModal({ isOpen, onClose, onNewsletterSent, subscriberCount = 0 }) {
   const [formData, setFormData] = useState({
@@ -249,29 +250,13 @@ export default function NewNewsletterModal({ isOpen, onClose, onNewsletterSent, 
                 />
               </div>
 
-              <div>
-                <label style={{ display: 'block', fontWeight: 700, fontSize: '0.85rem', marginBottom: '0.4rem', color: 'var(--text-main)', textTransform: 'uppercase' }}>
-                  Newsletter Content & Takeaways (Markdown Supported) *
-                </label>
-                <textarea
-                  required
-                  rows={6}
-                  value={formData.content}
-                  onChange={(e) => setFormData({ ...formData, content: e.target.value })}
-                  style={{
-                    width: '100%',
-                    padding: '0.85rem 1.1rem',
-                    border: 'var(--border-subtle)',
-                    borderRadius: '8px',
-                    fontSize: '0.95rem',
-                    fontFamily: 'monospace',
-                    background: 'var(--bg-card-hover)',
-                    color: 'var(--text-main)',
-                    outline: 'none',
-                    resize: 'vertical'
-                  }}
-                />
-              </div>
+              <RichContentEditor
+                value={formData.content}
+                onChange={(content) => setFormData({ ...formData, content })}
+                label="Newsletter Content & In-Between Images"
+                placeholder="Write your weekly dispatch and upload/insert images in-between paragraphs..."
+                rows={8}
+              />
 
               <div style={{ background: 'rgba(255, 207, 42, 0.08)', border: '1px dashed var(--color-yellow)', borderRadius: '8px', padding: '1rem', display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
                 <Zap size={20} color="var(--color-yellow)" />

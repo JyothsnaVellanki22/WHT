@@ -644,6 +644,40 @@ a {
   color: #FFFFFF;
 }
 
+/* --- Newsletter In-Between Images & Rich Content --- */
+.newsletter-content {
+  color: var(--text-muted);
+  line-height: 1.75;
+}
+
+.newsletter-content img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 10px;
+  margin: 1.8rem auto;
+  display: block;
+  border: var(--border-subtle);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+}
+
+.newsletter-content h1,
+.newsletter-content h2,
+.newsletter-content h3 {
+  color: var(--text-main);
+  margin-top: 1.8rem;
+  margin-bottom: 0.8rem;
+}
+
+.newsletter-content blockquote {
+  border-left: 3px solid var(--color-yellow);
+  padding: 0.8rem 1.2rem;
+  margin: 1.5rem 0;
+  background: rgba(255, 207, 42, 0.05);
+  border-radius: 0 8px 8px 0;
+  color: var(--text-muted);
+  font-style: italic;
+}
+
 /* --- Footer (Simple, grounded, standard full-width) --- */
 .footer-editorial {
   padding: 4rem 0 2.5rem 0;

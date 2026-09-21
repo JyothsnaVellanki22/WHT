@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Mail, Send, Check, Sparkles, Plus, Inbox, Edit2 } from 'lucide-react';
+import { formatNewsletterContent } from '../components/RichContentEditor';
 
 export default function NewslettersPage({ 
   newsletters = [],
@@ -208,9 +209,11 @@ export default function NewslettersPage({
                         )}
                       </div>
                     </div>
-                    <p style={{ color: 'var(--text-muted)', fontSize: '0.95rem', lineHeight: 1.6, whiteSpace: 'pre-line', marginBottom: '1.2rem' }}>
-                      {item.content}
-                    </p>
+                    <div 
+                      className="newsletter-content"
+                      style={{ marginBottom: '1.4rem' }}
+                      dangerouslySetInnerHTML={{ __html: formatNewsletterContent(item.content) }}
+                    />
                     <div style={{ fontSize: '0.78rem', color: 'var(--text-subtle)', display: 'flex', gap: '1.2rem' }}>
                       <span>Dispatched to {item.recipient_count || subscriberCount} subscribers</span>
                       {item.sent_at && <span>{new Date(item.sent_at).toLocaleDateString()}</span>}

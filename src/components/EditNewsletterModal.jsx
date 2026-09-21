@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { X, Save, Trash2, CheckCircle2, AlertCircle } from 'lucide-react';
+import RichContentEditor from './RichContentEditor';
 
 export default function EditNewsletterModal({ isOpen, onClose, newsletter, onNewsletterUpdated, onNewsletterDeleted }) {
   const [formData, setFormData] = useState({
@@ -291,31 +292,13 @@ export default function EditNewsletterModal({ isOpen, onClose, newsletter, onNew
             />
           </div>
 
-          <div>
-            <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 700, color: 'var(--text-subtle)', marginBottom: '0.4rem', textTransform: 'uppercase' }}>
-              Edition Content & Code Notes
-            </label>
-            <textarea
-              rows={8}
-              value={formData.content}
-              onChange={(e) => setFormData({ ...formData, content: e.target.value })}
-              required
-              placeholder="Write the newsletter essay or markdown/html notes..."
-              style={{
-                width: '100%',
-                padding: '1rem',
-                background: 'var(--bg-card-hover)',
-                border: 'var(--border-subtle)',
-                borderRadius: '8px',
-                color: 'var(--text-main)',
-                fontSize: '0.95rem',
-                lineHeight: 1.6,
-                outline: 'none',
-                fontFamily: 'var(--font-body)',
-                resize: 'vertical'
-              }}
-            />
-          </div>
+          <RichContentEditor
+            value={formData.content}
+            onChange={(content) => setFormData({ ...formData, content })}
+            label="Edition Content & In-Between Media"
+            placeholder="Write your newsletter analysis, tutorial, and insert images or diagrams in-between paragraphs..."
+            rows={9}
+          />
 
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '1rem', flexWrap: 'wrap', gap: '1rem' }}>
             <button
