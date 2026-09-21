@@ -243,12 +243,12 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess }) {
             {isRegister ? 'Already have an account? Sign In' : "Don't have an account? Sign Up"}
           </button>
 
-          {import.meta.env.DEV && !isRegister && (
+          {import.meta.env.DEV && import.meta.env.VITE_DEV_ADMIN_EMAIL && !isRegister && (
             <button
               type="button"
               onClick={() => {
                 setIsRegister(false);
-                setEmail(import.meta.env.VITE_DEV_ADMIN_EMAIL || 'admin@wht.dev');
+                setEmail(import.meta.env.VITE_DEV_ADMIN_EMAIL || '');
                 setPassword(import.meta.env.VITE_DEV_ADMIN_PASSWORD || '');
                 setError('');
               }}

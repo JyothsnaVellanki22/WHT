@@ -138,13 +138,13 @@ def require_admin(
 
 # Seed admin user if explicitly provided via environment variables and none exists
 def seed_admin_from_env():
-    admin_email = os.getenv("ADMIN_EMAIL", "admin@wht.dev").strip().lower()
+    admin_email = os.getenv("ADMIN_EMAIL")
     admin_password = os.getenv("ADMIN_PASSWORD")
-    if not admin_password:
-        if ENVIRONMENT in ("production", "prod"):
-            # Never seed default admin credentials in production
-            return
-        admin_password = "admin"  # Development placeholder; override with ADMIN_PASSWORD in .env
+    if not admin_email or not admin_password:
+        # Do not seed unless explicitly configured in deployment environment
+        return
+    
+    admin_email = admin_email.strip().lower()
     db = Session(bind=engine)
     try:
         admin = db.query(User).filter(User.role == "ADMIN").first()
@@ -157,7 +157,7 @@ def seed_admin_from_env():
             )
             db.add(admin_user)
             db.commit()
-            print(f"[RBAC SETUP] Default Admin account initialized for {admin_email}")
+            print(f"[RBAC SETUP] Admin account initialized for {admin_email}")
     finally:
         db.close()
 
