@@ -4,6 +4,7 @@ import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import NewTutorialModal from './components/NewTutorialModal';
 import NewNewsletterModal from './components/NewNewsletterModal';
+import EditNewsletterModal from './components/EditNewsletterModal';
 import AuthModal from './components/AuthModal';
 
 // Pages
@@ -28,6 +29,8 @@ function App() {
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [isTutorialModalOpen, setIsTutorialModalOpen] = useState(false);
   const [isNewsletterModalOpen, setIsNewsletterModalOpen] = useState(false);
+  const [editingNewsletter, setEditingNewsletter] = useState(null);
+  const [isEditNewsletterModalOpen, setIsEditNewsletterModalOpen] = useState(false);
   const [subscriberCount, setSubscriberCount] = useState(5);
   const [blogs, setBlogs] = useState([]);
   const [newsletters, setNewsletters] = useState([]);
@@ -157,6 +160,22 @@ function App() {
     setNewsletters((prev) => [newNewsletter, ...prev]);
   };
 
+  const handleOpenEditNewsletter = (newsletter) => {
+    if (!isAdmin) return;
+    setEditingNewsletter(newsletter);
+    setIsEditNewsletterModalOpen(true);
+  };
+
+  const handleNewsletterUpdated = (updatedNewsletter) => {
+    setNewsletters((prev) =>
+      prev.map((item) => (item.id === updatedNewsletter.id ? updatedNewsletter : item))
+    );
+  };
+
+  const handleNewsletterDeleted = (deletedId) => {
+    setNewsletters((prev) => prev.filter((item) => item.id !== deletedId));
+  };
+
   const handleOpenTutorialModal = () => {
     if (!isAdmin) {
       setIsAuthModalOpen(true);
@@ -230,6 +249,7 @@ function App() {
                 subscriberCount={subscriberCount}
                 onSubscriberAdded={() => fetchSubscriberCount()}
                 onOpenNewNewsletterModal={handleOpenNewsletterModal}
+                onEditNewsletter={handleOpenEditNewsletter}
                 isAdmin={isAdmin}
               />
             } 
@@ -250,6 +270,17 @@ function App() {
         onClose={() => setIsNewsletterModalOpen(false)}
         onNewsletterSent={handleNewsletterSent}
         subscriberCount={subscriberCount}
+      />
+
+      <EditNewsletterModal
+        isOpen={isEditNewsletterModalOpen && isAdmin}
+        onClose={() => {
+          setIsEditNewsletterModalOpen(false);
+          setEditingNewsletter(null);
+        }}
+        newsletter={editingNewsletter}
+        onNewsletterUpdated={handleNewsletterUpdated}
+        onNewsletterDeleted={handleNewsletterDeleted}
       />
 
       <AuthModal

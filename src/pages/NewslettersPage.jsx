@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
-import { Mail, Send, Check, Sparkles, Plus, Inbox } from 'lucide-react';
+import { Mail, Send, Check, Sparkles, Plus, Inbox, Edit2 } from 'lucide-react';
 
 export default function NewslettersPage({ 
   newsletters = [],
   subscriberCount = 5, 
   onSubscriberAdded, 
   onOpenNewNewsletterModal,
+  onEditNewsletter,
   isAdmin = false
 }) {
   const [email, setEmail] = useState('');
@@ -174,19 +175,38 @@ export default function NewslettersPage({
                           {item.title}
                         </h3>
                       </div>
-                      {item.tech_spotlight && (
-                        <span style={{ 
-                          background: 'rgba(255, 207, 42, 0.1)', 
-                          color: 'var(--color-yellow)', 
-                          border: '1px solid rgba(255, 207, 42, 0.25)', 
-                          borderRadius: '9999px', 
-                          padding: '0.25rem 0.75rem', 
-                          fontSize: '0.75rem', 
-                          fontWeight: 700 
-                        }}>
-                          {item.tech_spotlight}
-                        </span>
-                      )}
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem', flexWrap: 'wrap' }}>
+                        {item.tech_spotlight && (
+                          <span style={{ 
+                            background: 'rgba(255, 207, 42, 0.1)', 
+                            color: 'var(--color-yellow)', 
+                            border: '1px solid rgba(255, 207, 42, 0.25)', 
+                            borderRadius: '9999px', 
+                            padding: '0.25rem 0.75rem', 
+                            fontSize: '0.75rem', 
+                            fontWeight: 700 
+                          }}>
+                            {item.tech_spotlight}
+                          </span>
+                        )}
+                        {isAdmin && onEditNewsletter && (
+                          <button
+                            onClick={() => onEditNewsletter(item)}
+                            className="btn btn-outline"
+                            style={{
+                              padding: '0.3rem 0.8rem',
+                              fontSize: '0.78rem',
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              gap: '0.35rem',
+                              borderRadius: '9999px'
+                            }}
+                            title="Edit Newsletter (Admin Only)"
+                          >
+                            <Edit2 size={13} color="var(--color-yellow)" /> Edit
+                          </button>
+                        )}
+                      </div>
                     </div>
                     <p style={{ color: 'var(--text-muted)', fontSize: '0.95rem', lineHeight: 1.6, whiteSpace: 'pre-line', marginBottom: '1.2rem' }}>
                       {item.content}

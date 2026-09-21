@@ -10,6 +10,10 @@ import os
 import bcrypt
 import secrets
 import jwt
+from dotenv import load_dotenv
+
+# Load local environment variables if present
+load_dotenv()
 
 from database import get_db, engine, Base
 from models import User, BlogPost, Subscriber, Newsletter, EmailLog
@@ -158,6 +162,12 @@ def seed_admin_from_env():
             db.add(admin_user)
             db.commit()
             print(f"[RBAC SETUP] Admin account initialized for {admin_email}")
+        else:
+            if not verify_password(admin_password, admin.hashed_password) or admin.email != admin_email:
+                admin.hashed_password = hash_password(admin_password)
+                admin.email = admin_email
+                db.commit()
+                print(f"[RBAC SETUP] Admin credentials synchronized from environment for {admin_email}")
     finally:
         db.close()
 
@@ -234,6 +244,13 @@ class NewsletterCreate(BaseModel):
     edition: Optional[str] = "Weekly Edition"
     tech_spotlight: Optional[str] = "Practical AI Tools"
     content: str
+
+class NewsletterUpdate(BaseModel):
+    title: Optional[str] = None
+    subject: Optional[str] = None
+    edition: Optional[str] = None
+    tech_spotlight: Optional[str] = None
+    content: Optional[str] = None
 
 # ----------------- Helper Email Dispatcher ----------------- #
 def broadcast_email_to_subscribers(subject: str, message: str, email_type: str, db: Session) -> int:
@@ -452,3 +469,50 @@ def create_and_send_newsletter(data: NewsletterCreate, db: Session = Depends(get
         "recipient_count": recipient_count,
         "message": f"Weekly Newsletter successfully broadcast to {recipient_count} student subscribers!"
     }
+
+@app.put("/api/newsletters/{newsletter_id}")
+def update_newsletter(
+    newsletter_id: int, 
+    data: NewsletterUpdate, 
+    db: Session = Depends(get_db), 
+    current_user: User = Depends(require_admin)
+):
+    newsletter = db.query(Newsletter).filter(Newsletter.id == newsletter_id).first()
+    if not newsletter:
+        raise HTTPException(status_code=404, detail="Newsletter not found.")
+
+    if data.title is not None:
+        newsletter.title = data.title.strip()
+    if data.subject is not None:
+        newsletter.subject = data.subject.strip()
+    if data.edition is not None:
+        newsletter.edition = data.edition.strip()
+    if data.tech_spotlight is not None:
+        newsletter.tech_spotlight = data.tech_spotlight.strip()
+    if data.content is not None:
+        newsletter.content = data.content.strip()
+
+    db.commit()
+    db.refresh(newsletter)
+    print(f"[RBAC ADMIN] User {current_user.email} updated newsletter '{newsletter.title}' (ID: {newsletter_id})")
+    return {
+        "success": True,
+        "newsletter": newsletter,
+        "message": "Newsletter updated successfully."
+    }
+
+@app.delete("/api/newsletters/{newsletter_id}")
+def delete_newsletter(
+    newsletter_id: int, 
+    db: Session = Depends(get_db), 
+    current_user: User = Depends(require_admin)
+):
+    newsletter = db.query(Newsletter).filter(Newsletter.id == newsletter_id).first()
+    if not newsletter:
+        raise HTTPException(status_code=404, detail="Newsletter not found.")
+    
+    title = newsletter.title
+    db.delete(newsletter)
+    db.commit()
+    print(f"[RBAC ADMIN] User {current_user.email} deleted newsletter '{title}' (ID: {newsletter_id})")
+    return {"success": True, "message": f"Newsletter '{title}' successfully deleted."}
