@@ -93,13 +93,13 @@ export default function Navbar({
                   display: 'inline-flex', 
                   alignItems: 'center', 
                   gap: '0.45rem', 
-                  background: isAdmin ? 'rgba(255, 207, 42, 0.12)' : 'rgba(255, 255, 255, 0.05)', 
-                  border: `1px solid ${isAdmin ? 'var(--color-yellow)' : 'rgba(255, 255, 255, 0.2)'}`, 
+                  background: isAdmin ? 'rgba(255, 207, 42, 0.12)' : 'var(--bg-card-hover)', 
+                  border: isAdmin ? '1px solid var(--color-yellow)' : 'var(--border-subtle)', 
                   borderRadius: '9999px', 
                   padding: '0.4rem 0.85rem', 
                   fontSize: '0.75rem', 
                   fontWeight: 800, 
-                  color: isAdmin ? 'var(--color-yellow)' : '#FFFFFF' 
+                  color: isAdmin ? 'var(--color-yellow)' : 'var(--text-main)' 
                 }}
               >
                 {isAdmin ? <ShieldCheck size={14} /> : <User size={14} />}
@@ -133,8 +133,7 @@ export default function Navbar({
                   fontSize: '0.8rem', 
                   display: 'inline-flex', 
                   alignItems: 'center', 
-                  gap: '0.35rem',
-                  borderColor: 'rgba(255, 255, 255, 0.18)'
+                  gap: '0.35rem'
                 }}
               >
                 <User size={13} /> SIGN IN

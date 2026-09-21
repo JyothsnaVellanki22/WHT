@@ -86,9 +86,9 @@ export default function NewNewsletterModal({ isOpen, onClose, onNewsletterSent, 
       backdropFilter: 'blur(12px)'
     }}>
       <div style={{
-        background: '#151518',
+        background: 'var(--bg-card)',
         border: '1px solid rgba(255, 207, 42, 0.35)',
-        boxShadow: '0 25px 60px rgba(0, 0, 0, 0.95)',
+        boxShadow: 'var(--shadow-hover)',
         borderRadius: '16px',
         width: '100%',
         maxWidth: '680px',
@@ -98,7 +98,7 @@ export default function NewNewsletterModal({ isOpen, onClose, onNewsletterSent, 
         msOverflowStyle: 'none',
         position: 'relative',
         padding: '2.5rem',
-        color: '#FFFFFF'
+        color: 'var(--text-main)'
       }}>
 
         {/* Close Button */}
@@ -108,8 +108,8 @@ export default function NewNewsletterModal({ isOpen, onClose, onNewsletterSent, 
             position: 'absolute',
             top: '1.5rem',
             right: '1.5rem',
-            background: 'rgba(255, 255, 255, 0.08)',
-            color: '#FFFFFF',
+            background: 'var(--bg-card-hover)',
+            color: 'var(--text-main)',
             border: 'none',
             borderRadius: '50%',
             width: '36px',
@@ -128,15 +128,15 @@ export default function NewNewsletterModal({ isOpen, onClose, onNewsletterSent, 
             <div style={{ width: '64px', height: '64px', borderRadius: '50%', background: 'rgba(255, 207, 42, 0.15)', color: 'var(--color-yellow)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1.5rem auto' }}>
               <CheckCircle2 size={36} />
             </div>
-            <h2 style={{ fontSize: '2rem', marginBottom: '1rem', color: '#FFFFFF' }}>
+            <h2 style={{ fontSize: '2rem', marginBottom: '1rem', color: 'var(--text-main)' }}>
               Newsletter Broadcasted!
             </h2>
             <p style={{ color: 'var(--text-muted)', fontSize: '1.05rem', marginBottom: '2rem', lineHeight: 1.6 }}>
               {successResult.message}
             </p>
-            <div style={{ background: '#0D0D0F', border: '1px solid rgba(255, 255, 255, 0.1)', borderRadius: '8px', padding: '1.2rem', textAlign: 'left', marginBottom: '2rem' }}>
+            <div style={{ background: 'var(--bg-card-hover)', border: 'var(--border-subtle)', borderRadius: '8px', padding: '1.2rem', textAlign: 'left', marginBottom: '2rem' }}>
               <div style={{ fontSize: '0.85rem', color: 'var(--color-yellow)', fontWeight: 700 }}>SUBJECT: {formData.subject}</div>
-              <div style={{ fontSize: '0.85rem', color: '#AAA', marginTop: '0.4rem' }}>RECIPIENTS: {successResult.recipient_count} enrolled student emails</div>
+              <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginTop: '0.4rem' }}>RECIPIENTS: {successResult.recipient_count} enrolled student emails</div>
             </div>
             <button onClick={handleClose} className="btn btn-primary" style={{ padding: '0.75rem 2rem' }}>
               Done
@@ -145,7 +145,7 @@ export default function NewNewsletterModal({ isOpen, onClose, onNewsletterSent, 
         ) : (
           <>
             {/* Modal Header */}
-            <div style={{ marginBottom: '2rem', borderBottom: '1px solid rgba(255, 255, 255, 0.1)', paddingBottom: '1.2rem' }}>
+            <div style={{ marginBottom: '2rem', borderBottom: 'var(--border-subtle)', paddingBottom: '1.2rem' }}>
               <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', color: 'var(--color-yellow)', fontSize: '0.8rem', fontWeight: 800, letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: '0.5rem' }}>
                 <Mail size={14} /> WEEKLY DISPATCH ENGINE
               </div>
@@ -171,11 +171,11 @@ export default function NewNewsletterModal({ isOpen, onClose, onNewsletterSent, 
                     style={{
                       width: '100%',
                       padding: '0.85rem',
-                      border: '1px solid rgba(255, 255, 255, 0.15)',
+                      border: 'var(--border-subtle)',
                       borderRadius: '8px',
                       fontSize: '0.9rem',
-                      background: '#0D0D0F',
-                      color: '#FFFFFF',
+                      background: 'var(--bg-card-hover)',
+                      color: 'var(--text-main)',
                       outline: 'none'
                     }}
                   />
@@ -193,11 +193,11 @@ export default function NewNewsletterModal({ isOpen, onClose, onNewsletterSent, 
                     style={{
                       width: '100%',
                       padding: '0.85rem',
-                      border: '1px solid rgba(255, 255, 255, 0.15)',
+                      border: 'var(--border-subtle)',
                       borderRadius: '8px',
                       fontSize: '0.9rem',
-                      background: '#0D0D0F',
-                      color: '#FFFFFF',
+                      background: 'var(--bg-card-hover)',
+                      color: 'var(--text-main)',
                       outline: 'none'
                     }}
                   />
@@ -206,7 +206,7 @@ export default function NewNewsletterModal({ isOpen, onClose, onNewsletterSent, 
 
 
               <div>
-                <label style={{ display: 'block', fontWeight: 700, fontSize: '0.85rem', marginBottom: '0.4rem', color: '#CCC', textTransform: 'uppercase' }}>
+                <label style={{ display: 'block', fontWeight: 700, fontSize: '0.85rem', marginBottom: '0.4rem', color: 'var(--text-main)', textTransform: 'uppercase' }}>
                   Newsletter Title *
                 </label>
                 <input
@@ -217,18 +217,18 @@ export default function NewNewsletterModal({ isOpen, onClose, onNewsletterSent, 
                   style={{
                     width: '100%',
                     padding: '0.85rem 1.1rem',
-                    border: '1px solid rgba(255, 255, 255, 0.15)',
+                    border: 'var(--border-subtle)',
                     borderRadius: '8px',
                     fontSize: '0.95rem',
-                    background: '#0D0D0F',
-                    color: '#FFFFFF',
+                    background: 'var(--bg-card-hover)',
+                    color: 'var(--text-main)',
                     outline: 'none'
                   }}
                 />
               </div>
 
               <div>
-                <label style={{ display: 'block', fontWeight: 700, fontSize: '0.85rem', marginBottom: '0.4rem', color: '#CCC', textTransform: 'uppercase' }}>
+                <label style={{ display: 'block', fontWeight: 700, fontSize: '0.85rem', marginBottom: '0.4rem', color: 'var(--text-main)', textTransform: 'uppercase' }}>
                   Email Subject Line *
                 </label>
                 <input
@@ -239,18 +239,18 @@ export default function NewNewsletterModal({ isOpen, onClose, onNewsletterSent, 
                   style={{
                     width: '100%',
                     padding: '0.85rem 1.1rem',
-                    border: '1px solid rgba(255, 255, 255, 0.15)',
+                    border: 'var(--border-subtle)',
                     borderRadius: '8px',
                     fontSize: '0.95rem',
-                    background: '#0D0D0F',
-                    color: '#FFFFFF',
+                    background: 'var(--bg-card-hover)',
+                    color: 'var(--text-main)',
                     outline: 'none'
                   }}
                 />
               </div>
 
               <div>
-                <label style={{ display: 'block', fontWeight: 700, fontSize: '0.85rem', marginBottom: '0.4rem', color: '#CCC', textTransform: 'uppercase' }}>
+                <label style={{ display: 'block', fontWeight: 700, fontSize: '0.85rem', marginBottom: '0.4rem', color: 'var(--text-main)', textTransform: 'uppercase' }}>
                   Newsletter Content & Takeaways (Markdown Supported) *
                 </label>
                 <textarea
@@ -261,12 +261,12 @@ export default function NewNewsletterModal({ isOpen, onClose, onNewsletterSent, 
                   style={{
                     width: '100%',
                     padding: '0.85rem 1.1rem',
-                    border: '1px solid rgba(255, 255, 255, 0.15)',
+                    border: 'var(--border-subtle)',
                     borderRadius: '8px',
                     fontSize: '0.95rem',
                     fontFamily: 'monospace',
-                    background: '#0D0D0F',
-                    color: '#FFFFFF',
+                    background: 'var(--bg-card-hover)',
+                    color: 'var(--text-main)',
                     outline: 'none',
                     resize: 'vertical'
                   }}
@@ -275,7 +275,7 @@ export default function NewNewsletterModal({ isOpen, onClose, onNewsletterSent, 
 
               <div style={{ background: 'rgba(255, 207, 42, 0.08)', border: '1px dashed var(--color-yellow)', borderRadius: '8px', padding: '1rem', display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
                 <Zap size={20} color="var(--color-yellow)" />
-                <div style={{ fontSize: '0.85rem', color: '#EEE' }}>
+                <div style={{ fontSize: '0.85rem', color: 'var(--text-main)' }}>
                   <strong>Broadcast Ready:</strong> This will dispatch to all active student subscriber emails stored in the SQLite database.
                 </div>
               </div>

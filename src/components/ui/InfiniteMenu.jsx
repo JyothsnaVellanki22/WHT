@@ -46,9 +46,9 @@ export default function InfiniteMenu({ items }) {
         width: '100%',
         overflow: 'hidden',
         padding: '1.2rem 0',
-        background: '#09090B',
-        borderTop: '1px solid rgba(255, 255, 255, 0.08)',
-        borderBottom: '1px solid rgba(255, 255, 255, 0.08)'
+        background: 'var(--bg-card)',
+        borderTop: 'var(--border-subtle)',
+        borderBottom: 'var(--border-subtle)'
       }}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
@@ -70,14 +70,14 @@ export default function InfiniteMenu({ items }) {
             href={item.path}
             style={{
               flex: '0 0 auto',
-              background: 'rgba(255, 255, 255, 0.03)',
-              border: '1px solid rgba(255, 255, 255, 0.08)',
+              background: 'var(--bg-card-hover)',
+              border: 'var(--border-subtle)',
               borderRadius: '9999px',
               padding: '0.5rem 1.2rem',
               display: 'flex',
               alignItems: 'center',
               gap: '0.75rem',
-              color: '#FFFFFF',
+              color: 'var(--text-main)',
               fontSize: '0.85rem',
               fontWeight: 600,
               letterSpacing: '0.04em',
@@ -89,8 +89,8 @@ export default function InfiniteMenu({ items }) {
               e.currentTarget.style.borderColor = 'var(--color-yellow)';
             }}
             onMouseLeave={(e) => {
-              e.currentTarget.style.background = 'rgba(255, 255, 255, 0.03)';
-              e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.08)';
+              e.currentTarget.style.background = 'var(--bg-card-hover)';
+              e.currentTarget.style.borderColor = '';
             }}
           >
             <span style={{ color: 'var(--color-yellow)', display: 'flex', alignItems: 'center' }}>

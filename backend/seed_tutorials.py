@@ -175,31 +175,6 @@ function ProfileForm() {
             db.add(Subscriber(email=email))
         db.commit()
 
-    # Seed initial newsletter issues if empty
-    if db.query(Newsletter).count() == 0:
-        print("Seeding sample newsletter editions...")
-        n1 = Newsletter(
-            edition="Edition #14",
-            title="Reasoning LLMs & The Frontier of Autonomous Agents",
-            subject="WHT Weekly #14: How DeepSeek-R1 & Test-Time Compute are Changing Software",
-            tech_spotlight="DeepSeek-R1, OpenAI o1, Test-Time Compute",
-            content="""<h2>Welcome to WHT Issue #14</h2><p>In this week's edition, we explore the newest reasoning paradigms in AI, NIST's finalized post-quantum encryption standards, and the game-changing React 19 compiler.</p>""",
-            sent_at=datetime.now(timezone.utc) - timedelta(days=2),
-            recipient_count=1240
-        )
-        n2 = Newsletter(
-            edition="Edition #13",
-            title="Full-Stack Local AI & Quantized Inference",
-            subject="WHT Weekly #13: Running Models Locally with Ollama",
-            tech_spotlight="Ollama, GGUF Quantization, PEFT",
-            content="""<h2>Welcome to WHT Issue #13</h2><p>Learn how students and indie developers are running local LLMs without expensive cloud bills.</p>""",
-            sent_at=datetime.now(timezone.utc) - timedelta(days=9),
-            recipient_count=1180
-        )
-        db.add(n1)
-        db.add(n2)
-        db.commit()
-
     db.close()
 
 if __name__ == "__main__":

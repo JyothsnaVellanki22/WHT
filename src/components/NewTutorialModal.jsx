@@ -99,9 +99,9 @@ export default function NewTutorialModal({ isOpen, onClose, onAddBlog }) {
       backdropFilter: 'blur(12px)'
     }}>
       <div style={{
-        background: '#151518',
+        background: 'var(--bg-card)',
         border: '1px solid rgba(255, 207, 42, 0.3)',
-        boxShadow: '0 25px 60px rgba(0, 0, 0, 0.95)',
+        boxShadow: 'var(--shadow-hover)',
         borderRadius: '16px',
         width: '100%',
         maxWidth: '720px',
@@ -111,7 +111,7 @@ export default function NewTutorialModal({ isOpen, onClose, onAddBlog }) {
         msOverflowStyle: 'none',
         position: 'relative',
         padding: '2.5rem',
-        color: '#FFFFFF'
+        color: 'var(--text-main)'
       }}>
 
         {/* Close Button */}
@@ -121,8 +121,8 @@ export default function NewTutorialModal({ isOpen, onClose, onAddBlog }) {
             position: 'absolute',
             top: '1.5rem',
             right: '1.5rem',
-            background: 'rgba(255, 255, 255, 0.08)',
-            color: '#FFFFFF',
+            background: 'var(--bg-card-hover)',
+            color: 'var(--text-main)',
             border: 'none',
             borderRadius: '50%',
             width: '36px',
@@ -138,7 +138,7 @@ export default function NewTutorialModal({ isOpen, onClose, onAddBlog }) {
         </button>
 
         {/* Modal Header */}
-        <div style={{ marginBottom: '2rem', borderBottom: '1px solid rgba(255, 255, 255, 0.1)', paddingBottom: '1.2rem' }}>
+        <div style={{ marginBottom: '2rem', borderBottom: 'var(--border-subtle)', paddingBottom: '1.2rem' }}>
           <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', color: 'var(--color-yellow)', fontSize: '0.8rem', fontWeight: 800, letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: '0.5rem' }}>
             <Sparkles size={14} /> PRACTICAL BLOG CREATOR
           </div>
@@ -166,11 +166,11 @@ export default function NewTutorialModal({ isOpen, onClose, onAddBlog }) {
               style={{
                 width: '100%',
                 padding: '0.85rem 1.1rem',
-                border: '1px solid rgba(255, 255, 255, 0.15)',
+                border: 'var(--border-subtle)',
                 borderRadius: '8px',
                 fontSize: '0.95rem',
-                background: '#0D0D0F',
-                color: '#FFFFFF',
+                background: 'var(--bg-card-hover)',
+                color: 'var(--text-main)',
                 outline: 'none'
               }}
             />
@@ -178,7 +178,7 @@ export default function NewTutorialModal({ isOpen, onClose, onAddBlog }) {
 
           <div className="modal-grid-2">
             <div>
-              <label style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', fontWeight: 700, fontSize: '0.85rem', marginBottom: '0.4rem', color: '#CCC', textTransform: 'uppercase' }}>
+              <label style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', fontWeight: 700, fontSize: '0.85rem', marginBottom: '0.4rem', color: 'var(--text-main)', textTransform: 'uppercase' }}>
                 <Code size={13} color="var(--color-yellow)" /> Tech Stack
               </label>
               <input
@@ -189,18 +189,18 @@ export default function NewTutorialModal({ isOpen, onClose, onAddBlog }) {
                 style={{
                   width: '100%',
                   padding: '0.85rem',
-                  border: '1px solid rgba(255, 255, 255, 0.15)',
+                  border: 'var(--border-subtle)',
                   borderRadius: '8px',
                   fontSize: '0.9rem',
-                  background: '#0D0D0F',
-                  color: '#FFFFFF',
+                  background: 'var(--bg-card-hover)',
+                  color: 'var(--text-main)',
                   outline: 'none'
                 }}
               />
             </div>
 
             <div>
-              <label style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', fontWeight: 700, fontSize: '0.85rem', marginBottom: '0.4rem', color: '#CCC', textTransform: 'uppercase' }}>
+              <label style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', fontWeight: 700, fontSize: '0.85rem', marginBottom: '0.4rem', color: 'var(--text-main)', textTransform: 'uppercase' }}>
                 <Layers size={13} color="var(--color-yellow)" /> Difficulty Level
               </label>
               <select
@@ -209,11 +209,11 @@ export default function NewTutorialModal({ isOpen, onClose, onAddBlog }) {
                 style={{
                   width: '100%',
                   padding: '0.85rem',
-                  border: '1px solid rgba(255, 255, 255, 0.15)',
+                  border: 'var(--border-subtle)',
                   borderRadius: '8px',
                   fontSize: '0.9rem',
-                  background: '#0D0D0F',
-                  color: '#FFFFFF',
+                  background: 'var(--bg-card-hover)',
+                  color: 'var(--text-main)',
                   outline: 'none'
                 }}
               >
@@ -226,7 +226,7 @@ export default function NewTutorialModal({ isOpen, onClose, onAddBlog }) {
 
           <div className="modal-grid-2">
             <div>
-              <label style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', fontWeight: 700, fontSize: '0.85rem', marginBottom: '0.4rem', color: '#CCC', textTransform: 'uppercase' }}>
+              <label style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', fontWeight: 700, fontSize: '0.85rem', marginBottom: '0.4rem', color: 'var(--text-main)', textTransform: 'uppercase' }}>
                 <Tag size={13} color="var(--color-yellow)" /> Category
               </label>
               <select
@@ -235,11 +235,11 @@ export default function NewTutorialModal({ isOpen, onClose, onAddBlog }) {
                 style={{
                   width: '100%',
                   padding: '0.85rem',
-                  border: '1px solid rgba(255, 255, 255, 0.15)',
+                  border: 'var(--border-subtle)',
                   borderRadius: '8px',
                   fontSize: '0.9rem',
-                  background: '#0D0D0F',
-                  color: '#FFFFFF',
+                  background: 'var(--bg-card-hover)',
+                  color: 'var(--text-main)',
                   outline: 'none'
                 }}
               >
@@ -251,7 +251,7 @@ export default function NewTutorialModal({ isOpen, onClose, onAddBlog }) {
             </div>
 
             <div>
-              <label style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', fontWeight: 700, fontSize: '0.85rem', marginBottom: '0.4rem', color: '#CCC', textTransform: 'uppercase' }}>
+              <label style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', fontWeight: 700, fontSize: '0.85rem', marginBottom: '0.4rem', color: 'var(--text-main)', textTransform: 'uppercase' }}>
                 <BookOpen size={13} color="var(--color-yellow)" /> Read Time
               </label>
               <input
@@ -262,11 +262,11 @@ export default function NewTutorialModal({ isOpen, onClose, onAddBlog }) {
                 style={{
                   width: '100%',
                   padding: '0.85rem',
-                  border: '1px solid rgba(255, 255, 255, 0.15)',
+                  border: 'var(--border-subtle)',
                   borderRadius: '8px',
                   fontSize: '0.9rem',
-                  background: '#0D0D0F',
-                  color: '#FFFFFF',
+                  background: 'var(--bg-card-hover)',
+                  color: 'var(--text-main)',
                   outline: 'none'
                 }}
               />
@@ -275,7 +275,7 @@ export default function NewTutorialModal({ isOpen, onClose, onAddBlog }) {
 
           <div className="modal-grid-2">
             <div>
-              <label style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', fontWeight: 700, fontSize: '0.85rem', marginBottom: '0.4rem', color: '#CCC', textTransform: 'uppercase' }}>
+              <label style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', fontWeight: 700, fontSize: '0.85rem', marginBottom: '0.4rem', color: 'var(--text-main)', textTransform: 'uppercase' }}>
                 <User size={13} color="var(--color-yellow)" /> Author Name
               </label>
               <input
@@ -286,18 +286,18 @@ export default function NewTutorialModal({ isOpen, onClose, onAddBlog }) {
                 style={{
                   width: '100%',
                   padding: '0.85rem',
-                  border: '1px solid rgba(255, 255, 255, 0.15)',
+                  border: 'var(--border-subtle)',
                   borderRadius: '8px',
                   fontSize: '0.9rem',
-                  background: '#0D0D0F',
-                  color: '#FFFFFF',
+                  background: 'var(--bg-card-hover)',
+                  color: 'var(--text-main)',
                   outline: 'none'
                 }}
               />
             </div>
 
             <div>
-              <label style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', fontWeight: 700, fontSize: '0.85rem', marginBottom: '0.4rem', color: '#CCC', textTransform: 'uppercase' }}>
+              <label style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', fontWeight: 700, fontSize: '0.85rem', marginBottom: '0.4rem', color: 'var(--text-main)', textTransform: 'uppercase' }}>
                 <Image size={13} color="var(--color-yellow)" /> Cover Image URL
               </label>
               <input
@@ -308,11 +308,11 @@ export default function NewTutorialModal({ isOpen, onClose, onAddBlog }) {
                 style={{
                   width: '100%',
                   padding: '0.85rem',
-                  border: '1px solid rgba(255, 255, 255, 0.15)',
+                  border: 'var(--border-subtle)',
                   borderRadius: '8px',
                   fontSize: '0.9rem',
-                  background: '#0D0D0F',
-                  color: '#FFFFFF',
+                  background: 'var(--bg-card-hover)',
+                  color: 'var(--text-main)',
                   outline: 'none'
                 }}
               />
@@ -321,7 +321,7 @@ export default function NewTutorialModal({ isOpen, onClose, onAddBlog }) {
 
 
           <div>
-            <label style={{ display: 'block', fontWeight: 700, fontSize: '0.85rem', marginBottom: '0.4rem', color: '#CCC', textTransform: 'uppercase' }}>
+            <label style={{ display: 'block', fontWeight: 700, fontSize: '0.85rem', marginBottom: '0.4rem', color: 'var(--text-main)', textTransform: 'uppercase' }}>
               Practical Summary & Takeaways *
             </label>
             <textarea
@@ -333,11 +333,11 @@ export default function NewTutorialModal({ isOpen, onClose, onAddBlog }) {
               style={{
                 width: '100%',
                 padding: '0.85rem 1.1rem',
-                border: '1px solid rgba(255, 255, 255, 0.15)',
+                border: 'var(--border-subtle)',
                 borderRadius: '8px',
                 fontSize: '0.95rem',
-                background: '#0D0D0F',
-                color: '#FFFFFF',
+                background: 'var(--bg-card-hover)',
+                color: 'var(--text-main)',
                 outline: 'none',
                 resize: 'vertical'
               }}
@@ -345,7 +345,7 @@ export default function NewTutorialModal({ isOpen, onClose, onAddBlog }) {
           </div>
 
           <div>
-            <label style={{ display: 'block', fontWeight: 700, fontSize: '0.85rem', marginBottom: '0.4rem', color: '#CCC', textTransform: 'uppercase' }}>
+            <label style={{ display: 'block', fontWeight: 700, fontSize: '0.85rem', marginBottom: '0.4rem', color: 'var(--text-main)', textTransform: 'uppercase' }}>
               Step-by-Step Code & Tutorial Content (HTML/Markdown Supported)
             </label>
             <textarea
@@ -356,12 +356,12 @@ export default function NewTutorialModal({ isOpen, onClose, onAddBlog }) {
               style={{
                 width: '100%',
                 padding: '0.85rem 1.1rem',
-                border: '1px solid rgba(255, 255, 255, 0.15)',
+                border: 'var(--border-subtle)',
                 borderRadius: '8px',
                 fontSize: '0.95rem',
                 fontFamily: 'monospace',
-                background: '#0D0D0F',
-                color: '#FFFFFF',
+                background: 'var(--bg-card-hover)',
+                color: 'var(--text-main)',
                 outline: 'none',
                 resize: 'vertical'
               }}
@@ -376,7 +376,7 @@ export default function NewTutorialModal({ isOpen, onClose, onAddBlog }) {
               onChange={(e) => setFormData({ ...formData, notify_subscribers: e.target.checked })}
               style={{ width: '18px', height: '18px', accentColor: 'var(--color-yellow)', cursor: 'pointer' }}
             />
-            <label htmlFor="notify_subscribers" style={{ fontSize: '0.9rem', color: '#DDD', cursor: 'pointer' }}>
+            <label htmlFor="notify_subscribers" style={{ fontSize: '0.9rem', color: 'var(--text-muted)', cursor: 'pointer' }}>
               Automatically send email notification to all enrolled student subscribers upon publishing
             </label>
           </div>

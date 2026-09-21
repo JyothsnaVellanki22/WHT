@@ -127,7 +127,7 @@ export default function BlogsPage({ blogs = [], onOpenNewTutorialModal, isAdmin 
                     background: 'var(--bg-card)',
                     border: 'var(--border-subtle)',
                     borderRadius: '9999px',
-                    color: '#FFFFFF',
+                    color: 'var(--text-main)',
                     fontSize: '0.88rem',
                     outline: 'none'
                   }}
@@ -164,7 +164,7 @@ export default function BlogsPage({ blogs = [], onOpenNewTutorialModal, isAdmin 
               }}>
                 <Sparkles size={28} />
               </div>
-              <h3 style={{ fontSize: '2rem', marginBottom: '0.8rem', color: '#FFFFFF' }}>
+              <h3 style={{ fontSize: '2rem', marginBottom: '0.8rem', color: 'var(--text-main)' }}>
                 Uploads Coming Soon
               </h3>
               <p style={{ color: 'var(--text-muted)', fontSize: '1.05rem', lineHeight: 1.6, marginBottom: '2rem', maxWidth: '540px' }}>

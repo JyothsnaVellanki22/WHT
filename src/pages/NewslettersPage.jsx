@@ -66,7 +66,7 @@ export default function NewslettersPage({
       </section>
 
       {/* Subscription Card */}
-      <section className="section-padding" style={{ borderBottom: 'var(--border-subtle)' }}>
+      <section className="section-padding">
         <div className="container" style={{ maxWidth: '800px' }}>
           <div className="newsletter-card">
             <span className="section-label">JOIN {subscriberCount}+ STUDENT BUILDERS</span>
@@ -100,7 +100,7 @@ export default function NewslettersPage({
       </section>
 
       {/* Newsletters Archive or Empty Uploads Coming Soon State */}
-      <section className="section-padding" style={{ background: '#0D0D0F' }}>
+      <section className="section-padding">
         <div className="container" style={{ maxWidth: '800px' }}>
           {newsletters.length === 0 ? (
             <div style={{ 
@@ -128,7 +128,7 @@ export default function NewslettersPage({
                 <Inbox size={28} />
               </div>
 
-              <h3 style={{ fontSize: '1.8rem', marginBottom: '0.6rem', color: '#FFFFFF' }}>
+              <h3 style={{ fontSize: '1.8rem', marginBottom: '0.6rem', color: 'var(--text-main)' }}>
                 Uploads Coming Soon
               </h3>
               
@@ -147,7 +147,7 @@ export default function NewslettersPage({
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem', flexWrap: 'wrap', gap: '1rem' }}>
                 <div>
                   <span className="section-label">PAST DISPATCHES</span>
-                  <h2 style={{ fontSize: '1.8rem', color: '#FFFFFF', margin: 0 }}>Newsletter Archive</h2>
+                  <h2 style={{ fontSize: '1.8rem', color: 'var(--text-main)', margin: 0 }}>Newsletter Archive</h2>
                 </div>
                 <span style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>
                   {newsletters.length} {newsletters.length === 1 ? 'Edition' : 'Editions'} Published
@@ -170,7 +170,7 @@ export default function NewslettersPage({
                         <span style={{ color: 'var(--color-yellow)', fontSize: '0.78rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
                           {item.edition || `Edition #${newsletters.length - idx}`}
                         </span>
-                        <h3 style={{ fontSize: '1.3rem', color: '#FFFFFF', marginTop: '0.3rem' }}>
+                        <h3 style={{ fontSize: '1.3rem', color: 'var(--text-main)', marginTop: '0.3rem' }}>
                           {item.title}
                         </h3>
                       </div>

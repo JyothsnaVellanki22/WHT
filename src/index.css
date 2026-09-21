@@ -4,8 +4,11 @@
 :root {
   /* Dark Mode (Default) Palette */
   --bg-color: #0D0D0D;
-  --bg-card: #151517;
-  --bg-card-hover: #1C1C20;
+  --bg-gradient: 
+    radial-gradient(ellipse 85% 55% at 85% 12%, rgba(230, 57, 70, 0.14) 0%, rgba(255, 154, 118, 0.07) 32%, transparent 65%),
+    radial-gradient(ellipse 70% 50% at 15% 35%, rgba(255, 207, 42, 0.08) 0%, transparent 60%);
+  --bg-card: rgba(21, 21, 24, 0.75);
+  --bg-card-hover: rgba(28, 28, 32, 0.9);
   --bg-glass: rgba(13, 13, 13, 0.85);
   
   --text-main: #FFFFFF;
@@ -32,8 +35,11 @@
 /* Bright / Light Mode Palette */
 [data-theme="light"] {
   --bg-color: #F8F9FA;
-  --bg-card: #FFFFFF;
-  --bg-card-hover: #F1F3F5;
+  --bg-gradient: 
+    radial-gradient(ellipse 85% 55% at 85% 12%, rgba(230, 57, 70, 0.05) 0%, rgba(255, 154, 118, 0.03) 32%, transparent 65%),
+    radial-gradient(ellipse 70% 50% at 15% 35%, rgba(255, 207, 42, 0.05) 0%, transparent 60%);
+  --bg-card: rgba(255, 255, 255, 0.85);
+  --bg-card-hover: rgba(241, 243, 245, 0.95);
   --bg-glass: rgba(248, 249, 250, 0.9);
   
   --text-main: #111827;
@@ -67,6 +73,11 @@ html, body {
   scrollbar-width: none;
   -ms-overflow-style: none;
   background-color: var(--bg-color);
+  background-image: var(--bg-gradient);
+  background-attachment: fixed;
+  background-repeat: no-repeat;
+  background-size: cover;
+  min-height: 100vh;
   color: var(--text-main);
   transition: background-color 0.3s ease, color 0.3s ease;
 }
@@ -289,8 +300,7 @@ a {
   padding: 6.5rem 0 4.5rem 0;
   position: relative;
   overflow: hidden;
-  border-bottom: var(--border-subtle);
-  background: radial-gradient(circle at 80% 20%, rgba(230, 57, 70, 0.12) 0%, rgba(255, 207, 42, 0.08) 35%, transparent 70%);
+  background: transparent;
 }
 
 .hero-pill {
@@ -329,8 +339,7 @@ a {
 
 /* --- Metrics Ticker Strip --- */
 .metrics-strip {
-  border-bottom: var(--border-subtle);
-  background: rgba(255, 255, 255, 0.015);
+  background: transparent;
   padding: 2.5rem 0;
 }
 
@@ -364,8 +373,7 @@ a {
 
 /* --- Section Utilities --- */
 .section-padding {
-  padding: 6rem 0;
-  border-bottom: var(--border-subtle);
+  padding: 5rem 0;
 }
 
 .section-label {
@@ -415,7 +423,7 @@ a {
   height: 220px;
   overflow: hidden;
   position: relative;
-  background: #111;
+  background: var(--bg-card-hover);
 }
 
 .blog-img-wrap img {
@@ -515,6 +523,8 @@ a {
 /* --- Quote Spotlight Card --- */
 .quote-card {
   background: radial-gradient(circle at 10% 20%, rgba(230, 57, 70, 0.12) 0%, rgba(255, 207, 42, 0.05) 50%, var(--bg-card) 100%);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
   border: var(--border-subtle);
   border-radius: 16px;
   padding: 3.5rem;
@@ -565,6 +575,8 @@ a {
 /* --- Newsletter Section --- */
 .newsletter-card {
   background: var(--bg-card);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
   border: var(--border-subtle);
   border-radius: 16px;
   padding: 4rem 2rem;
@@ -590,11 +602,15 @@ a {
   display: flex;
   max-width: 520px;
   margin: 2rem auto 0 auto;
-  background: var(--bg-color);
+  background: rgba(0, 0, 0, 0.45);
   border: var(--border-subtle);
   border-radius: 9999px;
   padding: 0.35rem 0.35rem 0.35rem 1.2rem;
   transition: border-color 0.2s ease;
+}
+
+[data-theme="light"] .newsletter-form-dark {
+  background: #FFFFFF;
 }
 
 .newsletter-form-dark:focus-within {
@@ -628,11 +644,15 @@ a {
   color: #FFFFFF;
 }
 
-/* --- Footer --- */
+/* --- Footer (Simple, grounded, standard full-width) --- */
 .footer-editorial {
   padding: 4rem 0 2.5rem 0;
   border-top: var(--border-subtle);
-  background: var(--bg-card);
+  background: #09090B;
+}
+
+[data-theme="light"] .footer-editorial {
+  background: #F1F3F5;
 }
 
 .footer-inner {

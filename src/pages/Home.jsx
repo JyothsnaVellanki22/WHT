@@ -118,7 +118,7 @@ export default function Home({
               <div style={{ width: '48px', height: '48px', borderRadius: '10px', background: 'rgba(255, 207, 42, 0.1)', color: 'var(--color-yellow)', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '1.5rem' }}>
                 <Cpu size={24} />
               </div>
-              <h3 style={{ fontSize: '1.4rem', marginBottom: '0.8rem', color: '#FFFFFF' }}>
+              <h3 style={{ fontSize: '1.4rem', marginBottom: '0.8rem', color: 'var(--text-main)' }}>
                 Autonomous AI Agents
               </h3>
               <p style={{ color: 'var(--text-muted)', fontSize: '0.95rem', lineHeight: 1.6, marginBottom: '1.5rem' }}>
@@ -134,7 +134,7 @@ export default function Home({
               <div style={{ width: '48px', height: '48px', borderRadius: '10px', background: 'rgba(230, 57, 70, 0.1)', color: 'var(--color-red)', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '1.5rem' }}>
                 <Zap size={24} />
               </div>
-              <h3 style={{ fontSize: '1.4rem', marginBottom: '0.8rem', color: '#FFFFFF' }}>
+              <h3 style={{ fontSize: '1.4rem', marginBottom: '0.8rem', color: 'var(--text-main)' }}>
                 Silicon & Fine-Tuning
               </h3>
               <p style={{ color: 'var(--text-muted)', fontSize: '0.95rem', lineHeight: 1.6, marginBottom: '1.5rem' }}>
@@ -150,7 +150,7 @@ export default function Home({
               <div style={{ width: '48px', height: '48px', borderRadius: '10px', background: 'rgba(255, 207, 42, 0.1)', color: 'var(--color-yellow)', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '1.5rem' }}>
                 <Code2 size={24} />
               </div>
-              <h3 style={{ fontSize: '1.4rem', marginBottom: '0.8rem', color: '#FFFFFF' }}>
+              <h3 style={{ fontSize: '1.4rem', marginBottom: '0.8rem', color: 'var(--text-main)' }}>
                 Production RAG & Vector DBs
               </h3>
               <p style={{ color: 'var(--text-muted)', fontSize: '0.95rem', lineHeight: 1.6, marginBottom: '1.5rem' }}>
@@ -165,7 +165,7 @@ export default function Home({
       </section>
 
       {/* 5. Featured Spotlight Blog of the Week */}
-      <section className="section-padding" style={{ background: 'rgba(255, 255, 255, 0.015)' }}>
+      <section className="section-padding">
         <div className="container">
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '2.5rem', flexWrap: 'wrap', gap: '1rem' }}>
             <div>
@@ -204,7 +204,7 @@ export default function Home({
               }}>
                 <Sparkles size={28} />
               </div>
-              <h3 style={{ fontSize: '1.8rem', marginBottom: '0.8rem', color: '#FFFFFF' }}>
+              <h3 style={{ fontSize: '1.8rem', marginBottom: '0.8rem', color: 'var(--text-main)' }}>
                 Uploads Coming Soon
               </h3>
               <p style={{ color: 'var(--text-muted)', fontSize: '1.02rem', maxWidth: '520px', lineHeight: 1.6, marginBottom: '2rem' }}>
@@ -247,7 +247,7 @@ export default function Home({
                     <Terminal size={14} /> {featuredBlog.tech_stack || 'Python, Ollama, LangChain'}
                   </div>
 
-                  <h3 style={{ fontSize: '1.8rem', lineHeight: 1.25, marginBottom: '1rem', color: '#FFFFFF' }}>
+                  <h3 style={{ fontSize: '1.8rem', lineHeight: 1.25, marginBottom: '1rem', color: 'var(--text-main)' }}>
                     {featuredBlog.title}
                   </h3>
 
@@ -337,7 +337,7 @@ export default function Home({
       </section>
 
       {/* 7. Builder Philosophy Quote Card */}
-      <section className="section-padding" style={{ background: 'rgba(255, 255, 255, 0.015)' }}>
+      <section className="section-padding">
         <div className="container">
           <div className="quote-card">
             <span className="section-label">BUILDER PHILOSOPHY</span>
