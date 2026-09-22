@@ -16,54 +16,242 @@ import {
 } from 'lucide-react';
 import DOMPurify from 'dompurify';
 
+// Helper to escape HTML characters in preformatted blocks
+function escapeHtml(str = '') {
+  return str
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
+
+// Inline formatting for markdown: **bold**, *italic*, `code`, [link](url)
+function formatInline(text = '') {
+  let t = text;
+  // bold: **text**
+  t = t.replace(/\*\*(.*?)\*\*/g, '<strong style="color:var(--text-main);font-weight:700;">$1</strong>');
+  // italic: *text*
+  t = t.replace(/\*(.*?)\*/g, '<em>$1</em>');
+  // inline code: `code`
+  t = t.replace(/`([^`]+)`/g, '<code class="newsletter-inline-code">$1</code>');
+  // links: [text](url)
+  t = t.replace(/\[(.*?)\]\((https?:\/\/[^\s)]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer" style="color:var(--color-yellow);text-decoration:underline;">$1</a>');
+  return t;
+}
+
 export function formatNewsletterContent(content = '') {
   if (!content) return '';
-  
-  // If content already contains HTML block tags, process markdown images and return sanitized
-  let html = content;
 
-  // Convert markdown images: ![alt](url) -> <img>
-  html = html.replace(/!\[(.*?)\]\((.*?)\)/g, '<img src="$2" alt="$1" style="max-width:100%;border-radius:10px;margin:1.5rem auto;display:block;box-shadow:0 4px 20px rgba(0,0,0,0.3);" />');
-
-  // If already full of HTML tags
-  if (html.includes('<p') || html.includes('<h1') || html.includes('<h2') || html.includes('<h3') || html.includes('<div') || html.includes('<pre') || html.includes('<img')) {
-    return DOMPurify.sanitize(html, {
-      ADD_TAGS: ['iframe', 'img'],
-      ADD_ATTR: ['src', 'alt', 'style', 'width', 'height', 'target', 'rel']
+  // If content was already fully compiled into our structured classes, sanitize and return
+  if (content.includes('class="logic-diagram-card"') || content.includes('class="key-takeaway-card"')) {
+    return DOMPurify.sanitize(content, {
+      ADD_TAGS: ['figure', 'figcaption', 'pre', 'code', 'blockquote', 'hr', 'h1', 'h2', 'h3', 'span', 'strong', 'em', 'img'],
+      ADD_ATTR: ['src', 'alt', 'style', 'class', 'width', 'height', 'target', 'rel', 'loading']
     });
   }
 
-  // Convert markdown headings
-  html = html.replace(/^### (.*$)/gim, '<h3 style="font-size:1.3rem;margin:1.8rem 0 0.8rem 0;color:var(--text-main);font-weight:700;">$1</h3>');
-  html = html.replace(/^## (.*$)/gim, '<h2 style="font-size:1.6rem;margin:2rem 0 1rem 0;color:var(--text-main);font-weight:800;">$1</h2>');
-  html = html.replace(/^# (.*$)/gim, '<h1 style="font-size:1.9rem;margin:2.2rem 0 1.2rem 0;color:var(--text-main);font-weight:900;">$1</h1>');
+  // Pre-process: ensure HTML <img> tags and markdown images have surrounding double newlines
+  let raw = content;
+  raw = raw.replace(/(!\[.*?\]\(.*?\))/g, '\n\n$1\n\n');
+  raw = raw.replace(/(<img\b[^>]*\/?>)/gi, '\n\n$1\n\n');
 
-  // Convert bold: **text**
-  html = html.replace(/\*\*(.*?)\*\*/g, '<strong style="color:var(--text-main);font-weight:700;">$1</strong>');
+  // Split into raw blocks by 2 or more newlines
+  const blocks = raw.split(/\n\s*\n/).map(b => b.trim()).filter(Boolean);
+  const htmlBlocks = [];
+  let i = 0;
 
-  // Convert italic: *text*
-  html = html.replace(/\*(.*?)\*/g, '<em>$1</em>');
+  while (i < blocks.length) {
+    const block = blocks[i];
 
-  // Convert blockquote: > text
-  html = html.replace(/^> (.*$)/gim, '<blockquote style="border-left:3px solid var(--color-yellow);padding-left:1rem;margin:1.5rem 0;color:var(--text-muted);font-style:italic;background:rgba(255,207,42,0.05);padding:0.8rem 1rem;border-radius:0 8px 8px 0;">$1</blockquote>');
-
-  // Convert horizontal rules
-  html = html.replace(/^---$/gim, '<hr style="border:none;border-top:var(--border-subtle);margin:2rem 0;" />');
-
-  // Convert paragraphs
-  const blocks = html.split(/\n\n+/);
-  html = blocks.map(block => {
-    block = block.trim();
-    if (!block) return '';
-    if (block.startsWith('<h') || block.startsWith('<img') || block.startsWith('<blockquote') || block.startsWith('<hr') || block.startsWith('<pre') || block.startsWith('<ul') || block.startsWith('<ol')) {
-      return block;
+    // 1. Markdown image: ![Caption](url)
+    const mdImgMatch = block.match(/^!\[(.*?)\]\((.*?)\)$/);
+    if (mdImgMatch) {
+      const alt = mdImgMatch[1] || '';
+      const src = mdImgMatch[2] || '';
+      htmlBlocks.push(
+        `<figure class="newsletter-img-figure">
+          <img src="${src}" alt="${escapeHtml(alt)}" loading="lazy" />
+          ${alt && alt !== 'image' && alt !== 'illustration' ? `<figcaption class="newsletter-img-caption">${escapeHtml(alt)}</figcaption>` : ''}
+        </figure>`
+      );
+      i++;
+      continue;
     }
-    return `<p style="margin-bottom:1.2rem;line-height:1.75;font-size:1.02rem;">${block.replace(/\n/g, '<br/>')}</p>`;
-  }).join('');
 
-  return DOMPurify.sanitize(html, {
-    ADD_TAGS: ['iframe', 'img'],
-    ADD_ATTR: ['src', 'alt', 'style', 'width', 'height', 'target', 'rel']
+    // 2. HTML <img> tag
+    if (block.startsWith('<img')) {
+      const srcMatch = block.match(/src=["'](.*?)["']/);
+      const altMatch = block.match(/alt=["'](.*?)["']/);
+      const src = srcMatch ? srcMatch[1] : '';
+      const alt = altMatch ? altMatch[1] : '';
+      if (src) {
+        htmlBlocks.push(
+          `<figure class="newsletter-img-figure">
+            <img src="${src}" alt="${escapeHtml(alt)}" loading="lazy" />
+            ${alt && alt !== 'image' ? `<figcaption class="newsletter-img-caption">${escapeHtml(alt)}</figcaption>` : ''}
+          </figure>`
+        );
+      } else {
+        htmlBlocks.push(block);
+      }
+      i++;
+      continue;
+    }
+
+    // 3. Logic Diagrams
+    // Case A: Explicit title like "Logic Diagram 1 — The Problem" or "Architecture Diagram"
+    const isDiagramTitle = /^Logic Diagram \d+|^Architecture Diagram|^Flow Diagram/i.test(block);
+    const hasBoxChars = /[│─┌┐└┘┴┬┼►◄▼▲├┤]/.test(block);
+
+    if (isDiagramTitle) {
+      const title = block.replace(/^Logic Diagram \d+\s*[-—:]?\s*/i, '').trim() || block;
+      let diagramCode = '';
+
+      if (i + 1 < blocks.length) {
+        const nextBlock = blocks[i + 1];
+        // If next block contains box characters or multiple lines
+        if (/[│─┌┐└┘┴┬┼►◄▼▲├┤|]/.test(nextBlock) || nextBlock.split('\n').length >= 2) {
+          diagramCode = nextBlock;
+          i += 2;
+        } else {
+          diagramCode = '';
+          i++;
+        }
+      } else {
+        i++;
+      }
+
+      htmlBlocks.push(
+        `<div class="logic-diagram-card">
+          <div class="logic-diagram-header">
+            <span class="logic-diagram-pill">LOGIC DIAGRAM</span>
+            <span class="logic-diagram-title">${escapeHtml(title)}</span>
+          </div>
+          ${diagramCode ? `<pre class="logic-diagram-pre"><code>${escapeHtml(diagramCode)}</code></pre>` : ''}
+        </div>`
+      );
+      continue;
+    }
+
+    // Case B: Block containing box-drawing characters without a preceding title
+    if (hasBoxChars && block.split('\n').length >= 2) {
+      htmlBlocks.push(
+        `<div class="logic-diagram-card">
+          <div class="logic-diagram-header">
+            <span class="logic-diagram-pill">LOGIC DIAGRAM</span>
+            <span class="logic-diagram-title">System Architecture Flow</span>
+          </div>
+          <pre class="logic-diagram-pre"><code>${escapeHtml(block)}</code></pre>
+        </div>`
+      );
+      i++;
+      continue;
+    }
+
+    // 4. Key Takeaway Block
+    const isTakeawayHeader = /^Key Takeaway\b/i.test(block);
+    if (isTakeawayHeader) {
+      let takeawayText = '';
+      if (/^Key Takeaway[:\s]*$/i.test(block)) {
+        if (i + 1 < blocks.length) {
+          takeawayText = blocks[i + 1];
+          i += 2;
+        } else {
+          i++;
+        }
+      } else {
+        takeawayText = block.replace(/^Key Takeaway[:\s-]*/i, '').trim();
+        i++;
+      }
+
+      htmlBlocks.push(
+        `<div class="key-takeaway-card">
+          <div class="key-takeaway-badge">
+            <span class="key-takeaway-dot"></span>
+            KEY TAKEAWAY
+          </div>
+          <p class="key-takeaway-body">${formatInline(escapeHtml(takeawayText))}</p>
+        </div>`
+      );
+      continue;
+    }
+
+    // 5. Code blocks: ```lang ... ```
+    const codeFenceMatch = block.match(/^```([a-z0-9_-]*)\n([\s\S]*?)```$/i);
+    if (codeFenceMatch) {
+      const lang = codeFenceMatch[1] || 'code';
+      const code = codeFenceMatch[2];
+      htmlBlocks.push(
+        `<div class="logic-diagram-card">
+          <div class="logic-diagram-header">
+            <span class="logic-diagram-pill">${escapeHtml(lang.toUpperCase())}</span>
+          </div>
+          <pre class="logic-diagram-pre"><code>${escapeHtml(code)}</code></pre>
+        </div>`
+      );
+      i++;
+      continue;
+    }
+
+    // 6. Markdown Headings #, ##, ###
+    if (/^###\s+(.*$)/.test(block)) {
+      htmlBlocks.push(`<h3 class="newsletter-h3">${formatInline(escapeHtml(block.replace(/^###\s+/, '')))}</h3>`);
+      i++;
+      continue;
+    }
+    if (/^##\s+(.*$)/.test(block)) {
+      htmlBlocks.push(`<h2 class="newsletter-h2">${formatInline(escapeHtml(block.replace(/^##\s+/, '')))}</h2>`);
+      i++;
+      continue;
+    }
+    if (/^#\s+(.*$)/.test(block)) {
+      htmlBlocks.push(`<h1 class="newsletter-h1">${formatInline(escapeHtml(block.replace(/^#\s+/, '')))}</h1>`);
+      i++;
+      continue;
+    }
+
+    // 7. Blockquotes > ...
+    if (block.startsWith('>')) {
+      const quoteText = block.replace(/^>\s*/gm, '');
+      htmlBlocks.push(`<blockquote class="newsletter-blockquote">${formatInline(escapeHtml(quoteText))}</blockquote>`);
+      i++;
+      continue;
+    }
+
+    // 8. Horizontal rules
+    if (block === '---' || block === '***') {
+      htmlBlocks.push('<hr class="newsletter-hr" />');
+      i++;
+      continue;
+    }
+
+    // 9. Standalone section titles in plain text articles
+    const isStandaloneTitle = 
+      block.length < 80 && 
+      !block.includes('\n') && 
+      !block.endsWith('.') && 
+      !block.endsWith(',') && 
+      !block.endsWith(';') && 
+      !block.endsWith(':') &&
+      /^(The|Where|Why|How|What|Concept|Security|When|Part|Step|Phase|Architecture)\b/i.test(block);
+
+    if (isStandaloneTitle) {
+      htmlBlocks.push(`<h2 class="newsletter-h2">${formatInline(escapeHtml(block))}</h2>`);
+      i++;
+      continue;
+    }
+
+    // 10. Standard Paragraph
+    const lines = block.split('\n').map(l => formatInline(escapeHtml(l))).join('<br/>');
+    htmlBlocks.push(`<p class="newsletter-p">${lines}</p>`);
+    i++;
+  }
+
+  const finalHtml = htmlBlocks.join('\n');
+  return DOMPurify.sanitize(finalHtml, {
+    ADD_TAGS: ['figure', 'figcaption', 'pre', 'code', 'blockquote', 'hr', 'h1', 'h2', 'h3', 'span', 'strong', 'em', 'img', 'p', 'div', 'a'],
+    ADD_ATTR: ['src', 'alt', 'style', 'class', 'width', 'height', 'target', 'rel', 'loading', 'href']
   });
 }
 
@@ -78,6 +266,7 @@ export default function RichContentEditor({
   const [showImageUrlModal, setShowImageUrlModal] = useState(false);
   const [imageUrl, setImageUrl] = useState('');
   const [imageCaption, setImageCaption] = useState('');
+  const [isUploading, setIsUploading] = useState(false);
   const textareaRef = useRef(null);
   const fileInputRef = useRef(null);
 
@@ -102,11 +291,42 @@ export default function RichContentEditor({
     }, 50);
   };
 
-  const handleFileChange = (e) => {
-    const file = e.target.files?.[0];
+  const uploadAndInsertImage = async (file) => {
     if (!file) return;
 
-    // Optional client-side image compression to keep payload efficient
+    setIsUploading(true);
+    const caption = file.name.replace(/\.[^/.]+$/, '').replace(/[-_]/g, ' ');
+
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+
+      const token = localStorage.getItem('wht_auth_token');
+      const headers = {};
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+      }
+
+      const res = await fetch('/api/upload-image', {
+        method: 'POST',
+        headers,
+        body: formData
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        if (data.url) {
+          // Clean, readable markdown image syntax (no huge base64 strings!)
+          insertAtCursor(`\n\n![${caption}](${data.url})\n\n`);
+          setIsUploading(false);
+          return;
+        }
+      }
+    } catch (err) {
+      console.warn('Backend image upload error, using local fallback:', err);
+    }
+
+    // Client-side compressed data URL fallback if offline
     const reader = new FileReader();
     reader.onload = (event) => {
       const img = new Image();
@@ -131,23 +351,29 @@ export default function RichContentEditor({
         const ctx = canvas.getContext('2d');
         ctx.drawImage(img, 0, 0, width, height);
         
-        // Convert to optimal JPEG/WebP dataUrl
         const optimizedDataUrl = canvas.toDataURL('image/jpeg', 0.85);
-        const imgTag = `\n\n<img src="${optimizedDataUrl}" alt="${file.name.replace(/\.[^/.]+$/, '')}" style="max-width:100%;border-radius:10px;margin:1.8rem auto;display:block;box-shadow:0 4px 20px rgba(0,0,0,0.3);" />\n\n`;
-        insertAtCursor(imgTag);
+        insertAtCursor(`\n\n![${caption}](${optimizedDataUrl})\n\n`);
+        setIsUploading(false);
       };
       img.src = event.target.result;
     };
     reader.readAsDataURL(file);
-    e.target.value = ''; // Reset input so same file can be re-uploaded if desired
+  };
+
+  const handleFileChange = (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    uploadAndInsertImage(file);
+    e.target.value = '';
   };
 
   const handleInsertImageUrl = (e) => {
     e.preventDefault();
     if (!imageUrl.trim()) return;
 
-    const imgTag = `\n\n<img src="${imageUrl.trim()}" alt="${imageCaption.trim() || 'Newsletter illustration'}" style="max-width:100%;border-radius:10px;margin:1.8rem auto;display:block;box-shadow:0 4px 20px rgba(0,0,0,0.3);" />\n\n`;
-    insertAtCursor(imgTag);
+    const caption = imageCaption.trim() || 'Newsletter illustration';
+    // Clean markdown image syntax instead of bulky HTML
+    insertAtCursor(`\n\n![${caption}](${imageUrl.trim()})\n\n`);
     setImageUrl('');
     setImageCaption('');
     setShowImageUrlModal(false);
@@ -157,12 +383,7 @@ export default function RichContentEditor({
     e.preventDefault();
     const file = e.dataTransfer.files?.[0];
     if (file && file.type.startsWith('image/')) {
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        const imgTag = `\n\n<img src="${event.target.result}" alt="${file.name}" style="max-width:100%;border-radius:10px;margin:1.8rem auto;display:block;" />\n\n`;
-        insertAtCursor(imgTag);
-      };
-      reader.readAsDataURL(file);
+      uploadAndInsertImage(file);
     }
   };
 
@@ -236,6 +457,7 @@ export default function RichContentEditor({
           {/* Primary Action: Insert Image from Computer */}
           <button
             type="button"
+            disabled={isUploading}
             onClick={() => fileInputRef.current?.click()}
             title="Upload image from computer (inserts in-between text)"
             style={{
@@ -246,13 +468,14 @@ export default function RichContentEditor({
               padding: '0.35rem 0.75rem',
               fontSize: '0.8rem',
               fontWeight: 700,
-              cursor: 'pointer',
+              cursor: isUploading ? 'not-allowed' : 'pointer',
               display: 'inline-flex',
               alignItems: 'center',
-              gap: '0.4rem'
+              gap: '0.4rem',
+              opacity: isUploading ? 0.6 : 1
             }}
           >
-            <Upload size={14} /> Upload Image
+            <Upload size={14} /> {isUploading ? 'Uploading...' : 'Upload Image'}
           </button>
 
           {/* Hidden File Input */}

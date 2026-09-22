@@ -1,6 +1,7 @@
-from fastapi import FastAPI, Depends, HTTPException, status
+from fastapi import FastAPI, Depends, HTTPException, status, UploadFile, File, Response
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
+from fastapi.staticfiles import StaticFiles
 from sqlalchemy.orm import Session
 from pydantic import BaseModel, Field, field_validator
 from typing import List, Optional
@@ -10,6 +11,7 @@ import os
 import bcrypt
 import secrets
 import jwt
+import uuid
 from dotenv import load_dotenv
 
 # Load local environment variables if present
@@ -22,6 +24,11 @@ from models import User, BlogPost, Subscriber, Newsletter, EmailLog
 Base.metadata.create_all(bind=engine)
 
 app = FastAPI(title="WHT Practical AI Learning Platform API")
+
+# Mount uploads directory for images and media
+UPLOAD_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "uploads")
+os.makedirs(UPLOAD_DIR, exist_ok=True)
+app.mount("/uploads", StaticFiles(directory=UPLOAD_DIR), name="uploads")
 
 # ----------------- Environment & CORS Hardening ----------------- #
 ENVIRONMENT = os.getenv("ENVIRONMENT", os.getenv("ENV", "development")).lower()
@@ -253,20 +260,23 @@ class NewsletterUpdate(BaseModel):
     content: Optional[str] = None
 
 # ----------------- Helper Email Dispatcher ----------------- #
-def broadcast_email_to_subscribers(subject: str, message: str, email_type: str, db: Session) -> int:
+def broadcast_email_to_subscribers(subject: str, message: str, email_type: str, db: Session, newsletter_id: Optional[int] = None) -> int:
     subscribers = db.query(Subscriber).filter(Subscriber.is_active == True).all()
     count = 0
     for sub in subscribers:
+        token = uuid.uuid4().hex
         log = EmailLog(
             recipient_email=sub.email,
             subject=subject,
             email_type=email_type,
+            newsletter_id=newsletter_id,
+            tracking_token=token,
             status="DELIVERED"
         )
         db.add(log)
         count += 1
     db.commit()
-    print(f"[EMAIL BROADCAST] Sent '{subject}' to {count} active subscribers.")
+    print(f"[EMAIL BROADCAST] Sent '{subject}' to {count} active subscribers (newsletter_id={newsletter_id}).")
     return count
 
 # ----------------- Blog / Practical Tutorial Endpoints ----------------- #
@@ -444,22 +454,27 @@ def get_all_newsletters(db: Session = Depends(get_db)):
 
 @app.post("/api/newsletters")
 def create_and_send_newsletter(data: NewsletterCreate, db: Session = Depends(get_db), current_user: User = Depends(require_admin)):
-    recipient_count = broadcast_email_to_subscribers(
-        subject=data.subject,
-        message=data.content,
-        email_type="NEWSLETTER",
-        db=db
-    )
-
     new_newsletter = Newsletter(
         edition=data.edition,
         title=data.title,
         subject=data.subject,
         tech_spotlight=data.tech_spotlight,
         content=data.content,
-        recipient_count=recipient_count
+        recipient_count=0
     )
     db.add(new_newsletter)
+    db.commit()
+    db.refresh(new_newsletter)
+
+    recipient_count = broadcast_email_to_subscribers(
+        subject=data.subject,
+        message=data.content,
+        email_type="NEWSLETTER",
+        db=db,
+        newsletter_id=new_newsletter.id
+    )
+
+    new_newsletter.recipient_count = recipient_count
     db.commit()
     db.refresh(new_newsletter)
 
@@ -516,3 +531,154 @@ def delete_newsletter(
     db.commit()
     print(f"[RBAC ADMIN] User {current_user.email} deleted newsletter '{title}' (ID: {newsletter_id})")
     return {"success": True, "message": f"Newsletter '{title}' successfully deleted."}
+
+# ----------------- In-Between Image Upload Endpoint ----------------- #
+@app.post("/api/upload-image")
+async def upload_image(
+    file: UploadFile = File(...),
+    current_user: User = Depends(require_admin)
+):
+    ext = os.path.splitext(file.filename)[1].lower()
+    allowed_extensions = {".png", ".jpg", ".jpeg", ".webp", ".gif", ".svg"}
+    if ext not in allowed_extensions:
+        raise HTTPException(
+            status_code=400, 
+            detail=f"Invalid file type. Supported image extensions: {', '.join(allowed_extensions)}"
+        )
+
+    raw_name = os.path.splitext(file.filename)[0]
+    safe_base = re.sub(r'[^a-zA-Z0-9_-]', '', raw_name)[:25] or "diagram"
+    unique_name = f"{safe_base}_{uuid.uuid4().hex[:8]}{ext}"
+    dest_path = os.path.join(UPLOAD_DIR, unique_name)
+
+    content = await file.read()
+    if len(content) > 15 * 1024 * 1024:  # 15 MB
+        raise HTTPException(status_code=400, detail="Image size exceeds 15 MB limit.")
+
+    with open(dest_path, "wb") as f:
+        f.write(content)
+
+    print(f"[UPLOAD SUCCESS] {file.filename} saved as {unique_name} by {current_user.email}")
+    return {
+        "success": True,
+        "url": f"/uploads/{unique_name}",
+        "filename": unique_name
+    }
+
+# ----------------- Email Tracking & Analytics (MVP) ----------------- #
+# 43-byte Transparent 1x1 GIF for zero-latency email open tracking
+TRANSPARENT_1X1_GIF = (
+    b"GIF89a\x01\x00\x01\x00\x80\x00\x00\xff\xff\xff\x00\x00\x00"
+    b"!\xf9\x04\x01\x00\x00\x00\x00,\x00\x00\x00\x00\x01\x00\x01"
+    b"\x00\x00\x02\x02D\x01\x00;"
+)
+
+@app.get("/api/track/open/{token}.gif")
+def track_email_open(token: str, db: Session = Depends(get_db)):
+    """
+    Zero-overhead email open tracking pixel.
+    Updates the email log timestamp and open counter.
+    """
+    log = db.query(EmailLog).filter(EmailLog.tracking_token == token).first()
+    if log:
+        if not log.opened_at:
+            log.opened_at = datetime.now(timezone.utc)
+        log.open_count = (log.open_count or 0) + 1
+        db.commit()
+    
+    return Response(
+        content=TRANSPARENT_1X1_GIF,
+        media_type="image/gif",
+        headers={
+            "Cache-Control": "no-cache, no-store, must-revalidate, max-age=0",
+            "Pragma": "no-cache",
+            "Expires": "0"
+        }
+    )
+
+@app.get("/api/admin/analytics")
+def get_admin_analytics(db: Session = Depends(get_db), current_user: User = Depends(require_admin)):
+    """
+    Lightweight, high-performance aggregated metrics for the Admin Dashboard.
+    """
+    # 1. User metrics
+    total_users = db.query(User).count()
+    admin_count = db.query(User).filter(User.role == "ADMIN").count()
+    student_count = total_users - admin_count
+    recent_users = db.query(User).order_by(User.created_at.desc()).limit(8).all()
+    recent_users_data = [
+        {
+            "id": u.id,
+            "name": u.name,
+            "email": u.email,
+            "role": u.role,
+            "created_at": u.created_at.isoformat() if u.created_at else None
+        }
+        for u in recent_users
+    ]
+
+    # 2. Subscriber metrics
+    total_subscribers = db.query(Subscriber).count()
+    active_subscribers = db.query(Subscriber).filter(Subscriber.is_active == True).count()
+    unsubscribed = total_subscribers - active_subscribers
+    recent_subscribers = db.query(Subscriber).order_by(Subscriber.subscribed_at.desc()).limit(8).all()
+    recent_subscribers_data = [
+        {
+            "id": s.id,
+            "email": s.email,
+            "is_active": s.is_active,
+            "subscribed_at": s.subscribed_at.isoformat() if s.subscribed_at else None
+        }
+        for s in recent_subscribers
+    ]
+
+    # 3. Email log metrics
+    total_emails_sent = db.query(EmailLog).count()
+    total_opened = db.query(EmailLog).filter(EmailLog.open_count > 0).count()
+    overall_open_rate = round((total_opened / total_emails_sent * 100), 1) if total_emails_sent > 0 else 0.0
+
+    # 4. Per-Newsletter performance
+    newsletters = db.query(Newsletter).order_by(Newsletter.sent_at.desc()).all()
+    campaigns_data = []
+    for nl in newsletters:
+        nl_opens = db.query(EmailLog).filter(
+            EmailLog.newsletter_id == nl.id, 
+            EmailLog.open_count > 0
+        ).count()
+        
+        nl_sent = nl.recipient_count or db.query(EmailLog).filter(EmailLog.newsletter_id == nl.id).count() or 0
+        rate = round((nl_opens / nl_sent * 100), 1) if nl_sent > 0 else 0.0
+
+        campaigns_data.append({
+            "id": nl.id,
+            "edition": nl.edition,
+            "title": nl.title,
+            "subject": nl.subject,
+            "sent_at": nl.sent_at.isoformat() if nl.sent_at else None,
+            "recipient_count": nl_sent,
+            "opens": nl_opens,
+            "open_rate": rate
+        })
+
+    return {
+        "success": True,
+        "users": {
+            "total": total_users,
+            "admins": admin_count,
+            "students": student_count,
+            "recent": recent_users_data
+        },
+        "subscribers": {
+            "total": total_subscribers,
+            "active": active_subscribers,
+            "unsubscribed": unsubscribed,
+            "recent": recent_subscribers_data
+        },
+        "emails": {
+            "total_sent": total_emails_sent,
+            "total_opened": total_opened,
+            "overall_open_rate": overall_open_rate
+        },
+        "campaigns": campaigns_data
+    }
+

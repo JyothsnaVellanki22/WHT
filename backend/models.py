@@ -55,5 +55,10 @@ class EmailLog(Base):
     recipient_email = Column(String, nullable=False)
     subject = Column(String, nullable=False)
     email_type = Column(String, default="NEWSLETTER")  # NEWSLETTER, NEW_BLOG
+    newsletter_id = Column(Integer, nullable=True, index=True)
+    tracking_token = Column(String, unique=True, index=True, nullable=True)
     sent_at = Column(DateTime, server_default=func.now())
+    opened_at = Column(DateTime, nullable=True)
+    open_count = Column(Integer, default=0)
     status = Column(String, default="DELIVERED")
+

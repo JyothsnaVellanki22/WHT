@@ -13,6 +13,7 @@ import BlogsPage from './pages/BlogsPage';
 import ArticleDetailPage from './pages/ArticleDetailPage';
 import NewslettersPage from './pages/NewslettersPage';
 import About from './pages/About';
+import AdminAnalytics from './pages/AdminAnalytics';
 
 function App() {
   const [theme, setTheme] = useState(() => {
@@ -255,6 +256,16 @@ function App() {
             } 
           />
           <Route path="/about" element={<About />} />
+          <Route 
+            path="/admin/analytics" 
+            element={
+              <AdminAnalytics 
+                isAdmin={isAdmin}
+                onOpenNewNewsletterModal={handleOpenNewsletterModal}
+                onOpenNewTutorialModal={handleOpenTutorialModal}
+              />
+            } 
+          />
         </Routes>
       </main>
 

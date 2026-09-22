@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Plus, Mail, Sun, Moon, Menu, X, Lock, ShieldCheck, LogOut, User } from 'lucide-react';
+import { Plus, Mail, Sun, Moon, Menu, X, Lock, ShieldCheck, LogOut, User, BarChart2 } from 'lucide-react';
 
 export default function Navbar({ 
   onOpenNewTutorialModal, 
@@ -56,6 +56,23 @@ export default function Navbar({
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
             {isAdmin && (
               <>
+                <Link
+                  to="/admin/analytics"
+                  className="btn btn-outline"
+                  style={{ 
+                    padding: '0.45rem 0.95rem', 
+                    fontSize: '0.82rem',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '0.35rem',
+                    borderColor: location.pathname === '/admin/analytics' ? 'var(--color-yellow)' : undefined,
+                    color: location.pathname === '/admin/analytics' ? 'var(--color-yellow)' : undefined
+                  }}
+                  title="Admin Analytics & Open Rates"
+                >
+                  <BarChart2 size={14} color="var(--color-yellow)" /> ANALYTICS
+                </Link>
+
                 <button 
                   onClick={onOpenNewNewsletterModal}
                   className="btn btn-outline"
@@ -197,6 +214,23 @@ export default function Navbar({
 
             {isAdmin && (
               <div style={{ display: 'flex', flexDirection: 'column', gap: '0.8rem', marginTop: '1rem', paddingTop: '1rem', borderTop: 'var(--border-subtle)' }}>
+                <Link
+                  to="/admin/analytics"
+                  onClick={handleLinkClick}
+                  className="btn btn-outline"
+                  style={{ 
+                    width: '100%', 
+                    padding: '0.75rem', 
+                    fontSize: '0.9rem',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '0.5rem'
+                  }}
+                >
+                  <BarChart2 size={16} color="var(--color-yellow)" /> ANALYTICS DASHBOARD
+                </Link>
+
                 <button 
                   onClick={() => { setMobileMenuOpen(false); onOpenNewNewsletterModal(); }}
                   className="btn btn-outline"
