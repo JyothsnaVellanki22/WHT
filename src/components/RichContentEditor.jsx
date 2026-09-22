@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { 
   Image as ImageIcon, 
   Upload, 
@@ -12,6 +12,8 @@ import {
   Minus, 
   Eye, 
   Edit3,
+  Columns,
+  Trash2,
   X
 } from 'lucide-react';
 import DOMPurify from 'dompurify';
@@ -433,35 +435,47 @@ export function formatNewsletterContent(content = '') {
   const htmlBlocks = [];
   let i = 0;
 
+  const sanitizeAlt = (altText) => {
+    if (!altText) return 'Newsletter visual';
+    // Suppress raw filenames, camera dumps, or AI generation filenames
+    if (
+      /\.(jpe?g|png|gif|webp|svg|bmp|tiff)$/i.test(altText) ||
+      /^(chatgpt\s*image|screenshot|img_\d+|pasted\s*image|upload|file)/i.test(altText) ||
+      altText.includes('___') ||
+      /\d{4}[-_]\d{2}[-_]\d{2}/.test(altText)
+    ) {
+      return 'Newsletter visual';
+    }
+    return altText.trim();
+  };
+
   while (i < blocks.length) {
     const block = blocks[i];
 
     // 1. Markdown image: ![Caption](url)
     const mdImgMatch = block.match(/^!\[(.*?)\]\((.*?)\)$/);
     if (mdImgMatch) {
-      const alt = mdImgMatch[1] || '';
+      const alt = sanitizeAlt(mdImgMatch[1] || '');
       const src = mdImgMatch[2] || '';
       htmlBlocks.push(
         `<figure class="newsletter-img-figure">
           <img src="${src}" alt="${escapeHtml(alt)}" loading="lazy" />
-          ${alt && alt !== 'image' && alt !== 'illustration' ? `<figcaption class="newsletter-img-caption">${escapeHtml(alt)}</figcaption>` : ''}
         </figure>`
       );
       i++;
       continue;
     }
 
-    // 2. HTML <img> tag
-    if (block.startsWith('<img')) {
+    // 2. HTML <figure> or <img> tag
+    if (block.startsWith('<figure') || block.startsWith('<img')) {
       const srcMatch = block.match(/src=["'](.*?)["']/);
       const altMatch = block.match(/alt=["'](.*?)["']/);
       const src = srcMatch ? srcMatch[1] : '';
-      const alt = altMatch ? altMatch[1] : '';
+      const alt = sanitizeAlt(altMatch ? altMatch[1] : '');
       if (src) {
         htmlBlocks.push(
           `<figure class="newsletter-img-figure">
             <img src="${src}" alt="${escapeHtml(alt)}" loading="lazy" />
-            ${alt && alt !== 'image' ? `<figcaption class="newsletter-img-caption">${escapeHtml(alt)}</figcaption>` : ''}
           </figure>`
         );
       } else {
@@ -609,57 +623,153 @@ export function formatNewsletterContent(content = '') {
   });
 }
 
+export function parseContentToBlocks(content = '') {
+  if (!content || !content.trim()) {
+    return [{ id: 'txt-0', type: 'text', content: '' }];
+  }
+
+  // Matches <figure ...><img ...></figure> or <img ...> or ![alt](src)
+  const imgRegex = /(?:<figure[^>]*>\s*)?<img\s+[^>]*src=["']([^"']+)["'][^>]*>(?:\s*<figcaption[^>]*>.*?<\/figcaption>)?(?:\s*<\/figure>)?|!\[(.*?)\]\(([^)]+)\)/gi;
+
+  const blocks = [];
+  let lastIndex = 0;
+  let match;
+  let blockId = 0;
+
+  while ((match = imgRegex.exec(content)) !== null) {
+    const textBefore = content.substring(lastIndex, match.index);
+    if (textBefore.trim() || (blocks.length === 0 && textBefore)) {
+      blocks.push({
+        id: `txt-${blockId++}`,
+        type: 'text',
+        content: textBefore.trim()
+      });
+    }
+
+    const src = match[1] || match[3] || '';
+    const alt = match[2] || 'Newsletter visual';
+
+    if (src) {
+      blocks.push({
+        id: `img-${blockId++}`,
+        type: 'image',
+        src,
+        alt
+      });
+    }
+
+    lastIndex = match.index + match[0].length;
+  }
+
+  const remaining = content.substring(lastIndex);
+  if (remaining.trim() || blocks.length === 0) {
+    blocks.push({
+      id: `txt-${blockId++}`,
+      type: 'text',
+      content: remaining.trim()
+    });
+  }
+
+  if (blocks.length === 0) {
+    blocks.push({ id: `txt-0`, type: 'text', content: '' });
+  }
+
+  return blocks;
+}
+
+export function serializeBlocksToContent(blocks = []) {
+  return blocks
+    .map(block => {
+      if (block.type === 'image') {
+        const alt = block.alt && block.alt !== 'Newsletter visual' ? block.alt : 'reCAPTCHA Architecture Overview';
+        return `<figure class="newsletter-img-figure"><img src="${block.src}" alt="${alt}" loading="lazy" /></figure>`;
+      }
+      return (block.content || '').trim();
+    })
+    .filter(Boolean)
+    .join('\n\n');
+}
+
 export default function RichContentEditor({ 
   value = '', 
   onChange, 
   placeholder = 'Write newsletter content here...', 
-  rows = 10,
-  label = 'Content (Images and Markdown Supported)'
+  rows = 14,
+  label = 'Content & Media',
+  viewMode: controlledViewMode = null,
+  onViewModeChange = null,
+  hideTabs = false
 }) {
-  const [activeTab, setActiveTab] = useState('write'); // 'write' | 'preview'
-  const [showImageUrlModal, setShowImageUrlModal] = useState(false);
-  const [imageUrl, setImageUrl] = useState('');
-  const [imageCaption, setImageCaption] = useState('');
+  const [internalViewMode, setInternalViewMode] = useState('write'); // 'write' | 'split' | 'preview'
+  const activeViewMode = controlledViewMode || internalViewMode;
+  const setViewMode = onViewModeChange || setInternalViewMode;
+
+  const [blocks, setBlocks] = useState(() => parseContentToBlocks(value));
+  const [focusedBlockIndex, setFocusedBlockIndex] = useState(null);
   const [isUploading, setIsUploading] = useState(false);
-  const textareaRef = useRef(null);
+  const [uploadTargetIndex, setUploadTargetIndex] = useState(null);
+  const [replaceTargetIndex, setReplaceTargetIndex] = useState(null);
+
   const fileInputRef = useRef(null);
+  const replaceInputRef = useRef(null);
+  const textareaRefs = useRef({});
+  const lastSerializedRef = useRef(value);
 
-  const insertAtCursor = (textToInsert) => {
-    const textarea = textareaRef.current;
-    if (!textarea) {
-      onChange(value + textToInsert);
-      return;
+  // Sync external value changes into blocks (e.g. on newsletter load or reset)
+  useEffect(() => {
+    if (value !== lastSerializedRef.current) {
+      setBlocks(parseContentToBlocks(value));
+      lastSerializedRef.current = value;
     }
+  }, [value]);
 
-    const start = textarea.selectionStart;
-    const end = textarea.selectionEnd;
-    const before = value.substring(0, start);
-    const after = value.substring(end);
-
-    const newValue = before + textToInsert + after;
-    onChange(newValue);
-
-    setTimeout(() => {
-      textarea.focus();
-      textarea.setSelectionRange(start + textToInsert.length, start + textToInsert.length);
-    }, 50);
+  const updateBlocks = (newBlocks) => {
+    setBlocks(newBlocks);
+    const serialized = serializeBlocksToContent(newBlocks);
+    lastSerializedRef.current = serialized;
+    if (onChange) {
+      onChange(serialized);
+    }
   };
 
-  const uploadAndInsertImage = async (file) => {
-    if (!file) return;
+  const handleTextChange = (index, newText) => {
+    const newBlocks = [...blocks];
+    newBlocks[index] = { ...newBlocks[index], content: newText };
+    updateBlocks(newBlocks);
+  };
 
+  const insertImageBlock = (src, insertIndex = null) => {
+    const newImageBlock = {
+      id: `img-${Date.now()}`,
+      type: 'image',
+      src,
+      alt: 'Newsletter visual'
+    };
+    const newTextBlock = {
+      id: `txt-${Date.now() + 1}`,
+      type: 'text',
+      content: ''
+    };
+
+    const newBlocks = [...blocks];
+    if (insertIndex !== null && insertIndex >= 0 && insertIndex < newBlocks.length) {
+      newBlocks.splice(insertIndex + 1, 0, newImageBlock, newTextBlock);
+    } else {
+      newBlocks.push(newImageBlock, newTextBlock);
+    }
+    updateBlocks(newBlocks);
+  };
+
+  const handleUploadImage = async (file, insertIndex = null) => {
+    if (!file) return;
     setIsUploading(true);
-    const caption = file.name.replace(/\.[^/.]+$/, '').replace(/[-_]/g, ' ');
 
     try {
       const formData = new FormData();
       formData.append('file', file);
-
       const token = localStorage.getItem('wht_auth_token');
       const headers = {};
-      if (token) {
-        headers['Authorization'] = `Bearer ${token}`;
-      }
+      if (token) headers['Authorization'] = `Bearer ${token}`;
 
       const res = await fetch('/api/upload-image', {
         method: 'POST',
@@ -670,421 +780,551 @@ export default function RichContentEditor({
       if (res.ok) {
         const data = await res.json();
         if (data.url) {
-          // Clean, readable markdown image syntax (no huge base64 strings!)
-          insertAtCursor(`\n\n![${caption}](${data.url})\n\n`);
+          insertImageBlock(data.url, insertIndex);
           setIsUploading(false);
           return;
         }
       }
     } catch (err) {
-      console.warn('Backend image upload error, using local fallback:', err);
+      console.warn('Backend image upload error:', err);
     }
 
-    // Client-side compressed data URL fallback if offline
+    // Client-side fallback if offline
     const reader = new FileReader();
-    reader.onload = (event) => {
-      const img = new Image();
-      img.onload = () => {
-        const canvas = document.createElement('canvas');
-        let width = img.width;
-        let height = img.height;
-        const maxDimension = 1200;
-
-        if (width > maxDimension || height > maxDimension) {
-          if (width > height) {
-            height = Math.round((height * maxDimension) / width);
-            width = maxDimension;
-          } else {
-            width = Math.round((width * maxDimension) / height);
-            height = maxDimension;
-          }
-        }
-
-        canvas.width = width;
-        canvas.height = height;
-        const ctx = canvas.getContext('2d');
-        ctx.drawImage(img, 0, 0, width, height);
-        
-        const optimizedDataUrl = canvas.toDataURL('image/jpeg', 0.85);
-        insertAtCursor(`\n\n![${caption}](${optimizedDataUrl})\n\n`);
-        setIsUploading(false);
-      };
-      img.src = event.target.result;
+    reader.onload = (e) => {
+      insertImageBlock(e.target.result, insertIndex);
+      setIsUploading(false);
     };
     reader.readAsDataURL(file);
   };
 
-  const handleFileChange = (e) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    uploadAndInsertImage(file);
-    e.target.value = '';
+  const handleReplaceImage = async (file, imageIndex) => {
+    if (!file || imageIndex === null) return;
+    setIsUploading(true);
+
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+      const token = localStorage.getItem('wht_auth_token');
+      const headers = {};
+      if (token) headers['Authorization'] = `Bearer ${token}`;
+
+      const res = await fetch('/api/upload-image', {
+        method: 'POST',
+        headers,
+        body: formData
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        if (data.url) {
+          const newBlocks = [...blocks];
+          newBlocks[imageIndex] = { ...newBlocks[imageIndex], src: data.url };
+          updateBlocks(newBlocks);
+          setIsUploading(false);
+          return;
+        }
+      }
+    } catch (err) {
+      console.warn('Backend replace error:', err);
+    }
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const newBlocks = [...blocks];
+      newBlocks[imageIndex] = { ...newBlocks[imageIndex], src: e.target.result };
+      updateBlocks(newBlocks);
+      setIsUploading(false);
+    };
+    reader.readAsDataURL(file);
   };
 
-  const handleInsertImageUrl = (e) => {
-    e.preventDefault();
-    if (!imageUrl.trim()) return;
-
-    const caption = imageCaption.trim() || 'Newsletter illustration';
-    // Clean markdown image syntax instead of bulky HTML
-    insertAtCursor(`\n\n![${caption}](${imageUrl.trim()})\n\n`);
-    setImageUrl('');
-    setImageCaption('');
-    setShowImageUrlModal(false);
+  const handleRemoveImage = (imageIndex) => {
+    const newBlocks = [...blocks];
+    newBlocks.splice(imageIndex, 1);
+    if (newBlocks.length === 0) {
+      newBlocks.push({ id: `txt-${Date.now()}`, type: 'text', content: '' });
+    }
+    updateBlocks(newBlocks);
   };
 
-  const handleDrop = (e) => {
-    e.preventDefault();
-    const file = e.dataTransfer.files?.[0];
-    if (file && file.type.startsWith('image/')) {
-      uploadAndInsertImage(file);
+  const triggerUpload = (index = null) => {
+    setUploadTargetIndex(index);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+      fileInputRef.current.click();
     }
   };
 
+  const triggerReplace = (index) => {
+    setReplaceTargetIndex(index);
+    if (replaceInputRef.current) {
+      replaceInputRef.current.value = '';
+      replaceInputRef.current.click();
+    }
+  };
+
+  const applyFormat = (prefix, suffix = '') => {
+    const textBlockIndices = blocks
+      .map((b, i) => b.type === 'text' ? i : -1)
+      .filter(i => i !== -1);
+    const targetIndex = (focusedBlockIndex !== null && blocks[focusedBlockIndex]?.type === 'text')
+      ? focusedBlockIndex
+      : (textBlockIndices[textBlockIndices.length - 1] ?? 0);
+
+    const block = blocks[targetIndex];
+    if (!block) return;
+
+    const textarea = textareaRefs.current[block.id];
+    let newContent = block.content || '';
+    if (textarea) {
+      const start = textarea.selectionStart;
+      const end = textarea.selectionEnd;
+      const selected = newContent.substring(start, end) || 'text';
+      newContent = newContent.substring(0, start) + prefix + selected + suffix + newContent.substring(end);
+      handleTextChange(targetIndex, newContent);
+      setTimeout(() => {
+        textarea.focus();
+        textarea.setSelectionRange(start + prefix.length, start + prefix.length + selected.length);
+      }, 50);
+    } else {
+      newContent = (newContent ? newContent + '\n' : '') + prefix + 'text' + suffix;
+      handleTextChange(targetIndex, newContent);
+    }
+  };
+
+  const totalChars = blocks.reduce((sum, b) => sum + (b.type === 'text' ? (b.content?.length || 0) : 0), 0);
+  const imageCount = blocks.filter(b => b.type === 'image').length;
+
   return (
-    <div>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.6rem' }}>
-        <label style={{ display: 'block', fontWeight: 700, fontSize: '0.85rem', color: 'var(--text-main)', textTransform: 'uppercase' }}>
-          {label}
-        </label>
+    <div className="rich-editor-wrapper">
+      {/* Hidden file inputs for uploading & replacing */}
+      <input
+        type="file"
+        ref={fileInputRef}
+        onChange={(e) => {
+          const file = e.target.files?.[0];
+          if (file) handleUploadImage(file, uploadTargetIndex);
+        }}
+        accept="image/png,image/jpeg,image/webp,image/gif"
+        style={{ display: 'none' }}
+      />
+      <input
+        type="file"
+        ref={replaceInputRef}
+        onChange={(e) => {
+          const file = e.target.files?.[0];
+          if (file) handleReplaceImage(file, replaceTargetIndex);
+        }}
+        accept="image/png,image/jpeg,image/webp,image/gif"
+        style={{ display: 'none' }}
+      />
 
-        {/* Tab switch: Write vs Preview */}
-        <div style={{ display: 'flex', gap: '0.3rem', background: 'var(--bg-card-hover)', padding: '0.2rem', borderRadius: '6px' }}>
-          <button
-            type="button"
-            onClick={() => setActiveTab('write')}
-            style={{
-              background: activeTab === 'write' ? 'var(--color-yellow)' : 'transparent',
-              color: activeTab === 'write' ? '#0D0D0D' : 'var(--text-muted)',
-              border: 'none',
-              borderRadius: '4px',
-              padding: '0.25rem 0.75rem',
-              fontSize: '0.78rem',
-              fontWeight: 700,
-              cursor: 'pointer',
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '0.3rem'
-            }}
-          >
-            <Edit3 size={12} /> Write
-          </button>
-          <button
-            type="button"
-            onClick={() => setActiveTab('preview')}
-            style={{
-              background: activeTab === 'preview' ? 'var(--color-yellow)' : 'transparent',
-              color: activeTab === 'preview' ? '#0D0D0D' : 'var(--text-muted)',
-              border: 'none',
-              borderRadius: '4px',
-              padding: '0.25rem 0.75rem',
-              fontSize: '0.78rem',
-              fontWeight: 700,
-              cursor: 'pointer',
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '0.3rem'
-            }}
-          >
-            <Eye size={12} /> Preview
-          </button>
-        </div>
-      </div>
+      {/* Editor Header Bar with Label & View Tabs */}
+      {!hideTabs && (
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.65rem' }}>
+          <label style={{ display: 'block', fontWeight: 700, fontSize: '0.85rem', color: 'var(--text-main)', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+            {label}
+          </label>
 
-      {/* Editor Container */}
-      <div style={{
-        border: 'var(--border-subtle)',
-        borderRadius: '10px',
-        overflow: 'hidden',
-        background: 'var(--bg-card-hover)'
-      }}>
-        {/* LinkedIn-Inspired Formatting & Image Toolbar */}
-        <div style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: '0.4rem',
-          padding: '0.5rem 0.8rem',
-          borderBottom: 'var(--border-subtle)',
-          background: 'rgba(0, 0, 0, 0.2)',
-          flexWrap: 'wrap'
-        }}>
-          {/* Primary Action: Insert Image from Computer */}
-          <button
-            type="button"
-            disabled={isUploading}
-            onClick={() => fileInputRef.current?.click()}
-            title="Upload image from computer (inserts in-between text)"
-            style={{
-              background: 'rgba(255, 207, 42, 0.12)',
-              border: '1px solid rgba(255, 207, 42, 0.3)',
-              borderRadius: '6px',
-              color: 'var(--color-yellow)',
-              padding: '0.35rem 0.75rem',
-              fontSize: '0.8rem',
-              fontWeight: 700,
-              cursor: isUploading ? 'not-allowed' : 'pointer',
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '0.4rem',
-              opacity: isUploading ? 0.6 : 1
-            }}
-          >
-            <Upload size={14} /> {isUploading ? 'Uploading...' : 'Upload Image'}
-          </button>
-
-          {/* Hidden File Input */}
-          <input
-            type="file"
-            ref={fileInputRef}
-            onChange={handleFileChange}
-            accept="image/png,image/jpeg,image/webp,image/gif"
-            style={{ display: 'none' }}
-          />
-
-          {/* Secondary Action: Insert Image via URL */}
-          <button
-            type="button"
-            onClick={() => setShowImageUrlModal(true)}
-            title="Insert image from web URL"
-            style={{
-              background: 'transparent',
-              border: 'var(--border-subtle)',
-              borderRadius: '6px',
-              color: 'var(--text-main)',
-              padding: '0.35rem 0.65rem',
-              fontSize: '0.8rem',
-              cursor: 'pointer',
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '0.35rem'
-            }}
-          >
-            <ImageIcon size={14} /> Image URL
-          </button>
-
-          <div style={{ width: '1px', height: '18px', background: 'var(--border-subtle)', margin: '0 0.3rem' }} />
-
-          {/* Formatting Quick Tools */}
-          <button
-            type="button"
-            onClick={() => insertAtCursor('\n\n## Section Headline\n')}
-            title="Add Heading"
-            style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', padding: '0.3rem', borderRadius: '4px' }}
-          >
-            <Heading2 size={16} />
-          </button>
-
-          <button
-            type="button"
-            onClick={() => insertAtCursor('**bold text**')}
-            title="Bold"
-            style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', padding: '0.3rem', borderRadius: '4px' }}
-          >
-            <Bold size={15} />
-          </button>
-
-          <button
-            type="button"
-            onClick={() => insertAtCursor('*italic text*')}
-            title="Italic"
-            style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', padding: '0.3rem', borderRadius: '4px' }}
-          >
-            <Italic size={15} />
-          </button>
-
-          <button
-            type="button"
-            onClick={() => insertAtCursor('\n- List item 1\n- List item 2\n')}
-            title="Bullet List"
-            style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', padding: '0.3rem', borderRadius: '4px' }}
-          >
-            <List size={15} />
-          </button>
-
-          <button
-            type="button"
-            onClick={() => insertAtCursor('\n> Memorable key takeaway quote\n')}
-            title="Quote Block"
-            style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', padding: '0.3rem', borderRadius: '4px' }}
-          >
-            <Quote size={15} />
-          </button>
-
-          <button
-            type="button"
-            onClick={() => insertAtCursor('\n```python\n# Practical code snippet\n```\n')}
-            title="Code Block"
-            style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', padding: '0.3rem', borderRadius: '4px' }}
-          >
-            <Code size={15} />
-          </button>
-
-          <button
-            type="button"
-            onClick={() => insertAtCursor('\n---\n')}
-            title="Divider Line"
-            style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', padding: '0.3rem', borderRadius: '4px' }}
-          >
-            <Minus size={15} />
-          </button>
-
-          <button
-            type="button"
-            onClick={() => insertAtCursor('[Link text](https://example.com)')}
-            title="Hyperlink"
-            style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', padding: '0.3rem', borderRadius: '4px' }}
-          >
-            <LinkIcon size={15} />
-          </button>
-        </div>
-
-        {/* Content Area */}
-        {activeTab === 'write' ? (
-          <textarea
-            ref={textareaRef}
-            rows={rows}
-            value={value}
-            onChange={(e) => onChange(e.target.value)}
-            onDrop={handleDrop}
-            placeholder={placeholder}
-            style={{
-              width: '100%',
-              padding: '1.2rem',
-              background: 'transparent',
-              border: 'none',
-              color: 'var(--text-main)',
-              fontSize: '0.98rem',
-              lineHeight: 1.7,
-              outline: 'none',
-              fontFamily: 'var(--font-body)',
-              resize: 'vertical',
-              minHeight: '220px'
-            }}
-          />
-        ) : (
-          <div 
-            style={{
-              padding: '1.5rem',
-              minHeight: '220px',
-              color: 'var(--text-muted)',
-              fontSize: '0.98rem',
-              lineHeight: 1.75
-            }}
-            dangerouslySetInnerHTML={{
-              __html: formatNewsletterContent(value) || '<p style="color:var(--text-subtle);font-style:italic;">Nothing to preview yet. Start writing or insert an image to see it here.</p>'
-            }}
-          />
-        )}
-      </div>
-
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '0.4rem', fontSize: '0.78rem', color: 'var(--text-subtle)' }}>
-        <span>Tip: Drag & drop images directly or use <strong>Upload Image</strong> to insert diagrams in-between text.</span>
-        <span>{value.length} characters</span>
-      </div>
-
-      {/* Modal for inserting image from web URL */}
-      {showImageUrlModal && (
-        <div style={{
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          background: 'rgba(0, 0, 0, 0.75)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          zIndex: 10000,
-          padding: '1rem'
-        }}>
-          <div style={{
-            background: 'var(--bg-card)',
-            border: '1px solid rgba(255, 207, 42, 0.3)',
-            borderRadius: '12px',
-            padding: '2rem',
-            width: '100%',
-            maxWidth: '480px',
-            boxShadow: 'var(--shadow-hover)'
-          }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.2rem' }}>
-              <h3 style={{ fontSize: '1.2rem', margin: 0, color: 'var(--text-main)' }}>Insert Image via URL</h3>
-              <button
-                type="button"
-                onClick={() => setShowImageUrlModal(false)}
-                style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer' }}
-              >
-                <X size={18} />
-              </button>
-            </div>
-
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-              <div>
-                <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 700, color: 'var(--text-subtle)', marginBottom: '0.3rem' }}>
-                  Image URL *
-                </label>
-                <input
-                  type="url"
-                  required
-                  placeholder="https://images.unsplash.com/..."
-                  value={imageUrl}
-                  onChange={(e) => setImageUrl(e.target.value)}
-                  style={{
-                    width: '100%',
-                    padding: '0.75rem 1rem',
-                    background: 'var(--bg-card-hover)',
-                    border: 'var(--border-subtle)',
-                    borderRadius: '8px',
-                    color: 'var(--text-main)',
-                    fontSize: '0.92rem',
-                    outline: 'none'
-                  }}
-                />
-              </div>
-
-              <div>
-                <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 700, color: 'var(--text-subtle)', marginBottom: '0.3rem' }}>
-                  Caption / Alt Text
-                </label>
-                <input
-                  type="text"
-                  placeholder="e.g. Architecture Diagram of Reasoning Model"
-                  value={imageCaption}
-                  onChange={(e) => setImageCaption(e.target.value)}
-                  style={{
-                    width: '100%',
-                    padding: '0.75rem 1rem',
-                    background: 'var(--bg-card-hover)',
-                    border: 'var(--border-subtle)',
-                    borderRadius: '8px',
-                    color: 'var(--text-main)',
-                    fontSize: '0.92rem',
-                    outline: 'none'
-                  }}
-                />
-              </div>
-
-              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.8rem', marginTop: '0.5rem' }}>
-                <button
-                  type="button"
-                  onClick={() => setShowImageUrlModal(false)}
-                  className="btn btn-outline"
-                  style={{ padding: '0.6rem 1.2rem', fontSize: '0.85rem' }}
-                >
-                  Cancel
-                </button>
-                <button
-                  type="button"
-                  onClick={handleInsertImageUrl}
-                  className="btn btn-primary"
-                  style={{ padding: '0.6rem 1.4rem', fontSize: '0.85rem' }}
-                >
-                  Insert Image
-                </button>
-              </div>
-            </div>
+          <div style={{ display: 'flex', gap: '0.25rem', background: 'var(--bg-card)', padding: '0.2rem', borderRadius: '8px', border: 'var(--border-subtle)' }}>
+            <button
+              type="button"
+              onClick={() => setViewMode('write')}
+              style={{
+                background: activeViewMode === 'write' ? 'var(--color-yellow)' : 'transparent',
+                color: activeViewMode === 'write' ? '#0D0D0D' : 'var(--text-muted)',
+                border: 'none',
+                borderRadius: '6px',
+                padding: '0.3rem 0.75rem',
+                fontSize: '0.78rem',
+                fontWeight: 700,
+                cursor: 'pointer',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '0.35rem',
+                transition: 'all 0.15s ease'
+              }}
+            >
+              <Edit3 size={13} /> Visual Editor
+            </button>
+            <button
+              type="button"
+              onClick={() => setViewMode('split')}
+              style={{
+                background: activeViewMode === 'split' ? 'var(--color-yellow)' : 'transparent',
+                color: activeViewMode === 'split' ? '#0D0D0D' : 'var(--text-muted)',
+                border: 'none',
+                borderRadius: '6px',
+                padding: '0.3rem 0.75rem',
+                fontSize: '0.78rem',
+                fontWeight: 700,
+                cursor: 'pointer',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '0.35rem',
+                transition: 'all 0.15s ease'
+              }}
+            >
+              <Columns size={13} /> Split View
+            </button>
+            <button
+              type="button"
+              onClick={() => setViewMode('preview')}
+              style={{
+                background: activeViewMode === 'preview' ? 'var(--color-yellow)' : 'transparent',
+                color: activeViewMode === 'preview' ? '#0D0D0D' : 'var(--text-muted)',
+                border: 'none',
+                borderRadius: '6px',
+                padding: '0.3rem 0.75rem',
+                fontSize: '0.78rem',
+                fontWeight: 700,
+                cursor: 'pointer',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '0.35rem',
+                transition: 'all 0.15s ease'
+              }}
+            >
+              <Eye size={13} /> Reader Preview
+            </button>
           </div>
         </div>
       )}
+
+      {/* Editor Body */}
+      <div style={{
+        border: 'var(--border-subtle)',
+        borderRadius: '12px',
+        overflow: 'hidden',
+        background: 'var(--bg-card)',
+        boxShadow: 'var(--shadow-card)'
+      }}>
+        {/* Formatting Toolbar */}
+        {activeViewMode !== 'preview' && (
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.4rem',
+            padding: '0.65rem 1rem',
+            borderBottom: 'var(--border-subtle)',
+            background: 'rgba(0, 0, 0, 0.15)',
+            flexWrap: 'wrap'
+          }}>
+            {/* Primary Action: Upload Image from Computer */}
+            <button
+              type="button"
+              disabled={isUploading}
+              onClick={() => triggerUpload(null)}
+              title="Upload image from computer (inserts visually in edition)"
+              style={{
+                background: 'rgba(255, 207, 42, 0.14)',
+                border: '1px solid rgba(255, 207, 42, 0.35)',
+                borderRadius: '6px',
+                color: 'var(--color-yellow)',
+                padding: '0.35rem 0.85rem',
+                fontSize: '0.8rem',
+                fontWeight: 700,
+                cursor: isUploading ? 'not-allowed' : 'pointer',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '0.45rem',
+                opacity: isUploading ? 0.6 : 1
+              }}
+            >
+              <Upload size={14} /> {isUploading ? 'Uploading Image...' : '+ Insert Image'}
+            </button>
+
+            <div style={{ width: '1px', height: '18px', background: 'var(--border-subtle)', margin: '0 0.3rem' }} />
+
+            {/* Quick Text Formatting Tools */}
+            <button
+              type="button"
+              onClick={() => applyFormat('\n\n## ')}
+              title="Add Section Heading"
+              style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', padding: '0.35rem', borderRadius: '4px' }}
+            >
+              <Heading2 size={16} />
+            </button>
+
+            <button
+              type="button"
+              onClick={() => applyFormat('**', '**')}
+              title="Bold Text"
+              style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', padding: '0.35rem', borderRadius: '4px' }}
+            >
+              <Bold size={15} />
+            </button>
+
+            <button
+              type="button"
+              onClick={() => applyFormat('*', '*')}
+              title="Italic Text"
+              style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', padding: '0.35rem', borderRadius: '4px' }}
+            >
+              <Italic size={15} />
+            </button>
+
+            <button
+              type="button"
+              onClick={() => applyFormat('\n- ')}
+              title="Bullet List"
+              style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', padding: '0.35rem', borderRadius: '4px' }}
+            >
+              <List size={15} />
+            </button>
+
+            <button
+              type="button"
+              onClick={() => applyFormat('\n> ')}
+              title="Takeaway Quote Block"
+              style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', padding: '0.35rem', borderRadius: '4px' }}
+            >
+              <Quote size={15} />
+            </button>
+
+            <button
+              type="button"
+              onClick={() => applyFormat('\n```python\n# Practical code snippet\n', '\n```\n')}
+              title="Code Block"
+              style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', padding: '0.35rem', borderRadius: '4px' }}
+            >
+              <Code size={15} />
+            </button>
+
+            <button
+              type="button"
+              onClick={() => applyFormat('\n---\n')}
+              title="Divider Line"
+              style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', padding: '0.35rem', borderRadius: '4px' }}
+            >
+              <Minus size={15} />
+            </button>
+          </div>
+        )}
+
+        {/* Content View Modes */}
+        {activeViewMode === 'preview' ? (
+          /* 1. Full Reader Preview */
+          <div 
+            style={{
+              padding: '2.5rem',
+              minHeight: '400px',
+              color: 'var(--text-muted)',
+              fontSize: '1rem',
+              lineHeight: 1.8
+            }}
+            dangerouslySetInnerHTML={{
+              __html: formatNewsletterContent(serializeBlocksToContent(blocks)) || '<p style="color:var(--text-subtle);font-style:italic;">Nothing to preview yet. Start writing or insert an image to see it here.</p>'
+            }}
+          />
+        ) : activeViewMode === 'split' ? (
+          /* 2. Split View (Left: Visual Blocks, Right: Live Reader Preview) */
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', minHeight: '520px', borderTop: 'none' }}>
+            <div style={{ padding: '1.5rem', borderRight: 'var(--border-subtle)', maxHeight: '780px', overflowY: 'auto' }}>
+              {renderBlockEditor()}
+            </div>
+            <div style={{ padding: '1.5rem 2rem', maxHeight: '780px', overflowY: 'auto', background: 'var(--bg-main)' }}>
+              <div style={{ fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.06em', color: 'var(--color-yellow)', fontWeight: 700, marginBottom: '1rem' }}>
+                Live Reader Preview
+              </div>
+              <div 
+                dangerouslySetInnerHTML={{
+                  __html: formatNewsletterContent(serializeBlocksToContent(blocks)) || '<p style="color:var(--text-subtle);font-style:italic;">Preview will update live as you type...</p>'
+                }}
+              />
+            </div>
+          </div>
+        ) : (
+          /* 3. Visual Block Editor (Spacious Full Width) */
+          <div style={{ padding: '1.5rem', minHeight: '360px' }}>
+            {renderBlockEditor()}
+          </div>
+        )}
+      </div>
+
+      {/* Footer Info Bar */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '0.6rem', fontSize: '0.78rem', color: 'var(--text-subtle)' }}>
+        <span>Images are displayed visually without exposing raw file names or URLs. Drag & drop or use <strong>+ Insert Image</strong>.</span>
+        <span>{imageCount} {imageCount === 1 ? 'image' : 'images'} • {totalChars} characters</span>
+      </div>
     </div>
   );
+
+  function renderBlockEditor() {
+    return (
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '1.2rem' }}>
+        {blocks.map((block, index) => {
+          if (block.type === 'image') {
+            return (
+              <div 
+                key={block.id}
+                style={{
+                  background: 'var(--bg-card-hover)',
+                  border: '1px solid rgba(255, 207, 42, 0.25)',
+                  borderRadius: '12px',
+                  padding: '1.2rem',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '0.8rem',
+                  position: 'relative'
+                }}
+              >
+                {/* Visual Image Preview */}
+                <div style={{ textAlign: 'center', background: 'rgba(0, 0, 0, 0.2)', borderRadius: '8px', padding: '0.75rem', overflow: 'hidden' }}>
+                  <img 
+                    src={block.src} 
+                    alt={block.alt || 'Newsletter visual'}
+                    style={{
+                      maxHeight: '220px',
+                      maxWidth: '100%',
+                      objectFit: 'contain',
+                      borderRadius: '6px',
+                      boxShadow: '0 4px 16px rgba(0,0,0,0.3)',
+                      display: 'block',
+                      margin: '0 auto'
+                    }}
+                  />
+                </div>
+
+                {/* Image Management Actions (NO URL SHOWN) */}
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.6rem' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                    <span style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '0.35rem',
+                      background: 'rgba(255, 207, 42, 0.1)',
+                      color: 'var(--color-yellow)',
+                      padding: '0.25rem 0.65rem',
+                      borderRadius: '9999px',
+                      fontSize: '0.75rem',
+                      fontWeight: 700
+                    }}>
+                      Visual Illustration
+                    </span>
+                    <span style={{ fontSize: '0.78rem', color: 'var(--text-subtle)' }}>
+                      Embedded cleanly in edition
+                    </span>
+                  </div>
+
+                  <div style={{ display: 'flex', gap: '0.5rem' }}>
+                    <button
+                      type="button"
+                      onClick={() => triggerReplace(index)}
+                      className="btn btn-outline"
+                      style={{ padding: '0.3rem 0.75rem', fontSize: '0.75rem', borderRadius: '6px', display: 'inline-flex', alignItems: 'center', gap: '0.3rem' }}
+                      title="Upload a new image to replace this one"
+                    >
+                      <Upload size={12} /> Replace Image
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleRemoveImage(index)}
+                      style={{
+                        background: 'rgba(239, 68, 68, 0.1)',
+                        border: '1px solid rgba(239, 68, 68, 0.3)',
+                        color: '#f87171',
+                        padding: '0.3rem 0.65rem',
+                        fontSize: '0.75rem',
+                        borderRadius: '6px',
+                        cursor: 'pointer',
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '0.3rem'
+                      }}
+                      title="Remove image from newsletter"
+                    >
+                      <Trash2 size={12} /> Delete
+                    </button>
+                  </div>
+                </div>
+
+                {/* Subtle Divider with Option to Add Text or Another Image */}
+                <div style={{ textAlign: 'center', marginTop: '0.2rem' }}>
+                  <button
+                    type="button"
+                    onClick={() => triggerUpload(index)}
+                    style={{
+                      background: 'transparent',
+                      border: '1px dashed var(--border-subtle)',
+                      borderRadius: '6px',
+                      color: 'var(--text-muted)',
+                      padding: '0.25rem 0.75rem',
+                      fontSize: '0.74rem',
+                      cursor: 'pointer',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '0.35rem'
+                    }}
+                  >
+                    + Insert Image After This
+                  </button>
+                </div>
+              </div>
+            );
+          }
+
+          // Text block
+          return (
+            <div key={block.id} style={{ position: 'relative' }}>
+              <textarea
+                ref={(el) => { if (el) textareaRefs.current[block.id] = el; }}
+                rows={Math.max(4, Math.min(22, (block.content.split('\n').length || 1) + 2))}
+                value={block.content}
+                onFocus={() => setFocusedBlockIndex(index)}
+                onChange={(e) => handleTextChange(index, e.target.value)}
+                onDrop={(e) => {
+                  e.preventDefault();
+                  const file = e.dataTransfer.files?.[0];
+                  if (file && file.type.startsWith('image/')) {
+                    handleUploadImage(file, index);
+                  }
+                }}
+                placeholder={index === 0 ? placeholder : 'Continue writing paragraphs, notes, or logic diagrams...'}
+                style={{
+                  width: '100%',
+                  padding: '1rem',
+                  background: 'transparent',
+                  border: '1px solid var(--border-subtle)',
+                  borderRadius: '8px',
+                  color: 'var(--text-main)',
+                  fontSize: '0.98rem',
+                  lineHeight: 1.7,
+                  outline: 'none',
+                  fontFamily: 'var(--font-body)',
+                  resize: 'vertical',
+                  minHeight: '120px'
+                }}
+              />
+
+              {/* Inline button to insert an image after this text block */}
+              {index < blocks.length - 1 && blocks[index + 1]?.type !== 'image' && (
+                <div style={{ textAlign: 'center', margin: '0.4rem 0' }}>
+                  <button
+                    type="button"
+                    onClick={() => triggerUpload(index)}
+                    style={{
+                      background: 'transparent',
+                      border: '1px dashed var(--border-subtle)',
+                      borderRadius: '6px',
+                      color: 'var(--text-muted)',
+                      padding: '0.2rem 0.7rem',
+                      fontSize: '0.72rem',
+                      cursor: 'pointer',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '0.3rem'
+                    }}
+                  >
+                    + Insert Image Here
+                  </button>
+                </div>
+              )}
+            </div>
+          );
+        })}
+      </div>
+    );
+  }
 }

@@ -73,8 +73,8 @@ export default function Navbar({
                   <BarChart2 size={14} color="var(--color-yellow)" /> ANALYTICS
                 </Link>
 
-                <button 
-                  onClick={onOpenNewNewsletterModal}
+                <Link 
+                  to="/newsletters/new"
                   className="btn btn-outline"
                   style={{ 
                     padding: '0.45rem 1rem', 
@@ -83,9 +83,10 @@ export default function Navbar({
                     alignItems: 'center',
                     gap: '0.35rem'
                   }}
+                  title="Create and broadcast new newsletter edition"
                 >
-                  <Mail size={14} color="var(--color-yellow)" /> SEND NEWSLETTER
-                </button>
+                  <Mail size={14} color="var(--color-yellow)" /> NEWSLETTER
+                </Link>
 
                 <button 
                   onClick={onOpenNewTutorialModal}
@@ -231,13 +232,14 @@ export default function Navbar({
                   <BarChart2 size={16} color="var(--color-yellow)" /> ANALYTICS DASHBOARD
                 </Link>
 
-                <button 
-                  onClick={() => { setMobileMenuOpen(false); onOpenNewNewsletterModal(); }}
+                <Link 
+                  to="/newsletters/new"
+                  onClick={() => setMobileMenuOpen(false)}
                   className="btn btn-outline"
-                  style={{ width: '100%', padding: '0.75rem', fontSize: '0.9rem' }}
+                  style={{ width: '100%', padding: '0.75rem', fontSize: '0.9rem', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}
                 >
                   <Mail size={16} color="var(--color-yellow)" /> SEND NEWSLETTER
-                </button>
+                </Link>
 
                 <button 
                   onClick={() => { setMobileMenuOpen(false); onOpenNewTutorialModal(); }}

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { 
   Users, 
   Mail, 
@@ -225,23 +226,21 @@ export default function AdminAnalytics({ isAdmin = false, onOpenNewNewsletterMod
                 <RefreshCw size={14} className={loading ? 'spin' : ''} /> {loading ? 'Checking...' : 'Refresh'}
               </button>
 
-              {onOpenNewNewsletterModal && (
-                <button
-                  onClick={onOpenNewNewsletterModal}
-                  className="btn btn-primary"
-                  style={{
-                    padding: '0.6rem 1.3rem',
-                    fontSize: '0.88rem',
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    gap: '0.45rem',
-                    borderRadius: '10px',
-                    boxShadow: '0 4px 15px rgba(255, 207, 42, 0.3)'
-                  }}
-                >
-                  <Send size={14} /> Write to Subscribers
-                </button>
-              )}
+              <button
+                onClick={() => navigate('/newsletters/new')}
+                className="btn btn-primary"
+                style={{
+                  padding: '0.6rem 1.3rem',
+                  fontSize: '0.88rem',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '0.45rem',
+                  borderRadius: '10px',
+                  boxShadow: '0 4px 15px rgba(255, 207, 42, 0.3)'
+                }}
+              >
+                <Send size={14} /> Write to Subscribers
+              </button>
             </div>
           </div>
         </div>
@@ -805,22 +804,20 @@ export default function AdminAnalytics({ isAdmin = false, onOpenNewNewsletterMod
                 <BookOpen size={14} /> New Tutorial
               </button>
             )}
-            {onOpenNewNewsletterModal && (
-              <button
-                onClick={onOpenNewNewsletterModal}
-                className="btn btn-primary"
-                style={{
-                  padding: '0.55rem 1.2rem',
-                  fontSize: '0.85rem',
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '0.4rem',
-                  borderRadius: '8px'
-                }}
-              >
-                <Send size={14} /> Send Newsletter
-              </button>
-            )}
+            <button
+              onClick={() => navigate('/newsletters/new')}
+              className="btn btn-primary"
+              style={{
+                padding: '0.55rem 1.2rem',
+                fontSize: '0.85rem',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '0.4rem',
+                borderRadius: '8px'
+              }}
+            >
+              <Send size={14} /> Send Newsletter
+            </button>
           </div>
         </div>
 

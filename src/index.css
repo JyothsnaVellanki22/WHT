@@ -1087,11 +1087,7 @@ li {
 }
 
 .newsletter-img-caption {
-  margin-top: 0.75rem;
-  font-size: 0.84rem;
-  color: var(--text-subtle);
-  font-style: italic;
-  letter-spacing: 0.01em;
+  display: none !important;
 }
 
 /* Logic Diagrams & Visual Architecture Flowcharts */

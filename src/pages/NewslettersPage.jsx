@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Mail, Send, Check, Sparkles, Plus, Inbox, Edit2 } from 'lucide-react';
 import { formatNewsletterContent } from '../components/RichContentEditor';
 
@@ -10,6 +11,7 @@ export default function NewslettersPage({
   onEditNewsletter,
   isAdmin = false
 }) {
+  const navigate = useNavigate();
   const [email, setEmail] = useState('');
   const [subscribed, setSubscribed] = useState(false);
   const [subscribing, setSubscribing] = useState(false);
@@ -59,7 +61,7 @@ export default function NewslettersPage({
 
           {isAdmin && (
             <div style={{ display: 'flex', justifyContent: 'center', gap: '1rem', flexWrap: 'wrap' }}>
-              <button onClick={onOpenNewNewsletterModal} className="btn btn-primary">
+              <button onClick={() => navigate('/newsletters/new')} className="btn btn-primary">
                 <Mail size={16} /> SEND NEW NEWSLETTER
               </button>
             </div>
@@ -139,7 +141,7 @@ export default function NewslettersPage({
               </p>
 
               {isAdmin && (
-                <button onClick={onOpenNewNewsletterModal} className="btn btn-outline" style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem' }}>
+                <button onClick={() => navigate('/newsletters/new')} className="btn btn-outline" style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem' }}>
                   <Plus size={16} color="var(--color-yellow)" /> Draft & Send First Newsletter
                 </button>
               )}
@@ -156,32 +158,25 @@ export default function NewslettersPage({
                 </span>
               </div>
 
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-                {newsletters.map((item, idx) => (
-                  <div 
-                    key={item.id || idx}
-                    style={{
-                      background: 'var(--bg-card)',
-                      border: 'var(--border-subtle)',
-                      borderRadius: '12px',
-                      padding: '2rem'
-                    }}
-                  >
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '1rem', marginBottom: '1rem' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '2.5rem' }}>
+                {newsletters.map((item) => (
+                  <div key={item.id} className="newsletter-card" style={{ textAlign: 'left', position: 'relative' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '1rem', marginBottom: '1.2rem' }}>
                       <div>
-                        <span style={{ color: 'var(--color-yellow)', fontSize: '0.78rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                          {item.edition || `Edition #${newsletters.length - idx}`}
-                        </span>
-                        <h3 style={{ fontSize: '1.3rem', color: 'var(--text-main)', marginTop: '0.3rem' }}>
-                          {item.title}
-                        </h3>
+                        <span className="section-label" style={{ marginBottom: '0.3rem' }}>{item.edition}</span>
+                        <h3 style={{ fontSize: '1.6rem', color: 'var(--text-main)', margin: '0.2rem 0' }}>{item.title}</h3>
+                        {item.subject && (
+                          <div style={{ fontSize: '0.88rem', color: 'var(--color-yellow)', fontStyle: 'italic', marginTop: '0.2rem' }}>
+                            Subject: "{item.subject}"
+                          </div>
+                        )}
                       </div>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem', flexWrap: 'wrap' }}>
+                      <div style={{ display: 'flex', gap: '0.6rem', alignItems: 'center' }}>
                         {item.tech_spotlight && (
                           <span style={{ 
-                            background: 'rgba(255, 207, 42, 0.1)', 
-                            color: 'var(--color-yellow)', 
-                            border: '1px solid rgba(255, 207, 42, 0.25)', 
+                            background: 'var(--bg-card-hover)', 
+                            border: 'var(--border-subtle)', 
+                            color: 'var(--text-muted)', 
                             borderRadius: '9999px', 
                             padding: '0.25rem 0.75rem', 
                             fontSize: '0.75rem', 
@@ -190,9 +185,9 @@ export default function NewslettersPage({
                             {item.tech_spotlight}
                           </span>
                         )}
-                        {isAdmin && onEditNewsletter && (
+                        {isAdmin && (
                           <button
-                            onClick={() => onEditNewsletter(item)}
+                            onClick={() => navigate(`/newsletters/edit/${item.id}`)}
                             className="btn btn-outline"
                             style={{
                               padding: '0.3rem 0.8rem',
@@ -202,7 +197,7 @@ export default function NewslettersPage({
                               gap: '0.35rem',
                               borderRadius: '9999px'
                             }}
-                            title="Edit Newsletter (Admin Only)"
+                            title="Edit Newsletter (Admin Only - Opens Dedicated Page)"
                           >
                             <Edit2 size={13} color="var(--color-yellow)" /> Edit
                           </button>

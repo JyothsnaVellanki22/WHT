@@ -12,6 +12,7 @@ import Home from './pages/Home';
 import BlogsPage from './pages/BlogsPage';
 import ArticleDetailPage from './pages/ArticleDetailPage';
 import NewslettersPage from './pages/NewslettersPage';
+import NewsletterEditorPage from './pages/NewsletterEditorPage';
 import About from './pages/About';
 import AdminAnalytics from './pages/AdminAnalytics';
 
@@ -163,8 +164,7 @@ function App() {
 
   const handleOpenEditNewsletter = (newsletter) => {
     if (!isAdmin) return;
-    setEditingNewsletter(newsletter);
-    setIsEditNewsletterModalOpen(true);
+    window.location.href = `/newsletters/edit/${newsletter.id}`;
   };
 
   const handleNewsletterUpdated = (updatedNewsletter) => {
@@ -189,7 +189,7 @@ function App() {
     if (!isAdmin) {
       setIsAuthModalOpen(true);
     } else {
-      setIsNewsletterModalOpen(true);
+      window.location.href = '/newsletters/new';
     }
   };
 
@@ -252,6 +252,38 @@ function App() {
                 onOpenNewNewsletterModal={handleOpenNewsletterModal}
                 onEditNewsletter={handleOpenEditNewsletter}
                 isAdmin={isAdmin}
+              />
+            } 
+          />
+          <Route 
+            path="/newsletters/new" 
+            element={
+              <NewsletterEditorPage 
+                mode="new" 
+                subscriberCount={subscriberCount}
+                onNewsletterSent={handleNewsletterSent} 
+              />
+            } 
+          />
+          <Route 
+            path="/newsletters/edit/:id" 
+            element={
+              <NewsletterEditorPage 
+                mode="edit" 
+                subscriberCount={subscriberCount}
+                onNewsletterUpdated={handleNewsletterUpdated}
+                onNewsletterDeleted={handleNewsletterDeleted}
+              />
+            } 
+          />
+          <Route 
+            path="/newsletters/:id/edit" 
+            element={
+              <NewsletterEditorPage 
+                mode="edit" 
+                subscriberCount={subscriberCount}
+                onNewsletterUpdated={handleNewsletterUpdated}
+                onNewsletterDeleted={handleNewsletterDeleted}
               />
             } 
           />

@@ -452,6 +452,13 @@ def get_subscriber_count(db: Session = Depends(get_db)):
 def get_all_newsletters(db: Session = Depends(get_db)):
     return db.query(Newsletter).order_by(Newsletter.sent_at.desc()).all()
 
+@app.get("/api/newsletters/{newsletter_id}")
+def get_newsletter_by_id(newsletter_id: int, db: Session = Depends(get_db)):
+    nl = db.query(Newsletter).filter(Newsletter.id == newsletter_id).first()
+    if not nl:
+        raise HTTPException(status_code=404, detail="Newsletter not found.")
+    return nl
+
 @app.post("/api/newsletters")
 def create_and_send_newsletter(data: NewsletterCreate, db: Session = Depends(get_db), current_user: User = Depends(require_admin)):
     new_newsletter = Newsletter(
