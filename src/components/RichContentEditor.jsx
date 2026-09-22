@@ -40,21 +40,393 @@ function formatInline(text = '') {
   return t;
 }
 
+// Dedent utility: strips common leading whitespace across all non-empty lines
+function dedentText(text = '') {
+  const lines = text.split('\n');
+  let minIndent = Infinity;
+  for (const line of lines) {
+    if (line.trim().length > 0) {
+      const match = line.match(/^(\s*)/);
+      const indent = match ? match[1].length : 0;
+      if (indent < minIndent) {
+        minIndent = indent;
+      }
+    }
+  }
+  if (minIndent === Infinity || minIndent === 0) return text.trimEnd();
+  return lines.map(line => line.length >= minIndent ? line.slice(minIndent) : line).join('\n').trim();
+}
+
+function renderVisualFlowchart(title = '', ascii = '') {
+  const t = title.toLowerCase();
+
+  const renderArrow = (label = '') => `
+    <div class="logic-flow-arrow">
+      <div class="logic-arrow-line"></div>
+      <div class="logic-arrow-tip">▼</div>
+      ${label ? `<span class="logic-arrow-label">${escapeHtml(label)}</span>` : ''}
+    </div>
+  `;
+
+  let visualHtml = '';
+
+  // Case 1: Diagram 1 - The Problem
+  if (t.includes('the problem') || t.includes('diagram 1')) {
+    visualHtml = `
+      <div class="logic-visual-canvas">
+        <div class="logic-flow-node logic-node-primary">
+          <div class="logic-node-icon">🌐</div>
+          <div class="logic-node-content">
+            <span class="logic-node-title">Web Application</span>
+            <span class="logic-node-subtitle">Receives incoming HTTP interactions</span>
+          </div>
+        </div>
+
+        ${renderArrow('Incoming Request')}
+
+        <div class="logic-flow-node logic-node-security">
+          <div class="logic-node-icon">🛡️</div>
+          <div class="logic-node-content">
+            <span class="logic-node-title">Behavior & Risk Check</span>
+            <span class="logic-node-subtitle">Evaluates request context & automated patterns</span>
+          </div>
+        </div>
+
+        ${renderArrow('Traffic Classification')}
+
+        <div class="logic-flow-fork">
+          <div class="logic-flow-branch logic-branch-success">
+            <div class="logic-branch-badge">✅ Legitimate Activity</div>
+            <div class="logic-flow-node">
+              <div class="logic-node-icon">👤</div>
+              <div class="logic-node-content">
+                <span class="logic-node-title">Normal Interaction</span>
+                <span class="logic-node-subtitle">Human user browsing smoothly</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="logic-flow-branch logic-branch-danger">
+            <div class="logic-branch-badge">⚠️ Automated Activity</div>
+            <div class="logic-flow-node">
+              <div class="logic-node-icon">🤖</div>
+              <div class="logic-node-content">
+                <span class="logic-node-title">Potential Abuse</span>
+                <span class="logic-node-subtitle">Scraping, brute-force or spam bot</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+  // Case 2: Diagram 2 - Where reCAPTCHA Enters the Request Flow
+  else if (t.includes('where recaptcha enters') || t.includes('request flow') || t.includes('diagram 2')) {
+    visualHtml = `
+      <div class="logic-visual-canvas">
+        <div class="logic-flow-node">
+          <div class="logic-node-icon">👤</div>
+          <div class="logic-node-content">
+            <span class="logic-node-title">User / Client Browser</span>
+            <span class="logic-node-subtitle">Navigates to protected web page</span>
+          </div>
+        </div>
+
+        ${renderArrow()}
+
+        <div class="logic-flow-node logic-node-primary">
+          <div class="logic-node-icon">🌐</div>
+          <div class="logic-node-content">
+            <span class="logic-node-title">Web Application</span>
+            <span class="logic-node-subtitle">Handles frontend presentation & API routes</span>
+          </div>
+        </div>
+
+        ${renderArrow('Trigger Sensitive Action')}
+
+        <div class="logic-flow-node logic-node-highlight">
+          <div class="logic-node-icon">⚡</div>
+          <div class="logic-node-content">
+            <span class="logic-node-title">Sensitive Action Initiated</span>
+            <span class="logic-node-subtitle">Login • Signup • Form Submit • Transaction</span>
+          </div>
+        </div>
+
+        ${renderArrow('Client Verification')}
+
+        <div class="logic-flow-node logic-node-security">
+          <div class="logic-node-icon">🛡️</div>
+          <div class="logic-node-content">
+            <span class="logic-node-title">reCAPTCHA Assessment</span>
+            <span class="logic-node-subtitle">Evaluates user interaction telemetry & risk score</span>
+          </div>
+        </div>
+
+        ${renderArrow('Risk Decision')}
+
+        <div class="logic-flow-node">
+          <div class="logic-node-icon">⚖️</div>
+          <div class="logic-node-content">
+            <span class="logic-node-title">Security Decision Engine</span>
+            <span class="logic-node-subtitle">Compare risk score against configured policy</span>
+          </div>
+        </div>
+
+        ${renderArrow('Policy Branch')}
+
+        <div class="logic-flow-fork">
+          <div class="logic-flow-branch logic-branch-success">
+            <div class="logic-branch-badge">✅ Low Risk (Pass)</div>
+            <div class="logic-flow-node">
+              <div class="logic-node-icon">🔓</div>
+              <div class="logic-node-content">
+                <span class="logic-node-title">Continue Action</span>
+                <span class="logic-node-subtitle">Allow access & process protected request</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="logic-flow-branch logic-branch-warning">
+            <div class="logic-branch-badge">⚠️ High Risk / Suspicious</div>
+            <div class="logic-flow-node">
+              <div class="logic-node-icon">🧩</div>
+              <div class="logic-node-content">
+                <span class="logic-node-title">Additional Action</span>
+                <span class="logic-node-subtitle">Prompt visual challenge, MFA, or reject</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+  // Case 3: Diagram 3 - The Security Trade-Off
+  else if (t.includes('security trade-off') || t.includes('trade-off') || t.includes('diagram 3')) {
+    visualHtml = `
+      <div class="logic-visual-canvas">
+        <div class="logic-flow-node">
+          <div class="logic-node-icon">⚖️</div>
+          <div class="logic-node-content">
+            <span class="logic-node-title">Security Policy Decision</span>
+            <span class="logic-node-subtitle">Balancing system security against user friction</span>
+          </div>
+        </div>
+
+        ${renderArrow('Architectural Dilemma')}
+
+        <div class="logic-flow-fork">
+          <div class="logic-flow-branch logic-branch-warning">
+            <div class="logic-branch-badge">🔓 Too Permissive Policy</div>
+            <div class="logic-flow-node">
+              <div class="logic-node-icon">⚠️</div>
+              <div class="logic-node-content">
+                <span class="logic-node-title">Abuse Gets Through</span>
+                <span class="logic-node-subtitle">Fake signups & credential stuffing degrade service</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="logic-flow-branch logic-branch-danger">
+            <div class="logic-branch-badge">🔒 Too Restrictive Policy</div>
+            <div class="logic-flow-node">
+              <div class="logic-node-icon">🛑</div>
+              <div class="logic-node-content">
+                <span class="logic-node-title">Real Users Suffer</span>
+                <span class="logic-node-subtitle">High false positives & annoying challenges cause drop-off</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        ${renderArrow('Engineering Target')}
+
+        <div class="logic-flow-node logic-node-highlight">
+          <div class="logic-node-icon">🎯</div>
+          <div class="logic-node-content">
+            <span class="logic-node-title">Balanced Protection</span>
+            <span class="logic-node-subtitle">Adaptive background risk scoring without disrupting genuine users</span>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+  // Case 4: Diagram 4 - reCAPTCHA Inside the Application
+  else if (t.includes('inside the application') || t.includes('diagram 4')) {
+    visualHtml = `
+      <div class="logic-visual-canvas">
+        <div class="logic-flow-node">
+          <div class="logic-node-icon">💻</div>
+          <div class="logic-node-content">
+            <span class="logic-node-title">Browser Client</span>
+            <span class="logic-node-subtitle">Executes frontend client code & generates challenge token</span>
+          </div>
+        </div>
+
+        ${renderArrow('1. Submit Form + Client Token')}
+
+        <div class="logic-flow-node logic-node-primary">
+          <div class="logic-node-icon">🌐</div>
+          <div class="logic-node-content">
+            <span class="logic-node-title">Web Application Backend</span>
+            <span class="logic-node-subtitle">Holds server Secret Key, intercepting payload</span>
+          </div>
+        </div>
+
+        ${renderArrow('2. Verify Token with Secret Key')}
+
+        <div class="logic-flow-node logic-node-security">
+          <div class="logic-node-icon">🛡️</div>
+          <div class="logic-node-content">
+            <span class="logic-node-title">reCAPTCHA Cloud Service</span>
+            <span class="logic-node-subtitle">Backend-to-backend cryptographic verification</span>
+          </div>
+        </div>
+
+        ${renderArrow('3. If Token Valid & Score Passed')}
+
+        <div class="logic-flow-node logic-node-highlight">
+          <div class="logic-node-icon">⚙️</div>
+          <div class="logic-node-content">
+            <span class="logic-node-title">Application Core Logic</span>
+            <span class="logic-node-subtitle">Processes account creation, payment, or data update</span>
+          </div>
+        </div>
+
+        ${renderArrow('Executed Safely')}
+
+        <div class="logic-flow-node">
+          <div class="logic-node-icon">✅</div>
+          <div class="logic-node-content">
+            <span class="logic-node-title">Protected Action Completed</span>
+            <span class="logic-node-subtitle">Protected resources returned to authentic user</span>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+  // Case 5: Diagram 5 - Layered Application Security
+  else if (t.includes('layered') || t.includes('defense in depth') || t.includes('diagram 5')) {
+    visualHtml = `
+      <div class="logic-visual-canvas">
+        <div class="logic-flow-node">
+          <div class="logic-node-icon">🌍</div>
+          <div class="logic-node-content">
+            <span class="logic-node-title">User / Internet Traffic</span>
+            <span class="logic-node-subtitle">Mixed stream of authentic learners & malicious bots</span>
+          </div>
+        </div>
+
+        ${renderArrow('Gateway Ingress')}
+
+        <div class="logic-flow-node logic-node-primary">
+          <div class="logic-node-icon">🌐</div>
+          <div class="logic-node-content">
+            <span class="logic-node-title">Web Application Edge</span>
+            <span class="logic-node-subtitle">Enforces defense-in-depth architecture</span>
+          </div>
+        </div>
+
+        ${renderArrow('Parallel Defensive Controls')}
+
+        <div class="logic-defense-grid">
+          <div class="logic-defense-col">
+            <span class="logic-defense-pill">LAYER 1</span>
+            <div class="logic-flow-node">
+              <div class="logic-node-icon">🔑</div>
+              <div class="logic-node-content">
+                <span class="logic-node-title">Auth</span>
+                <span class="logic-node-subtitle">JWT & Passwords</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="logic-defense-col">
+            <span class="logic-defense-pill">LAYER 2</span>
+            <div class="logic-flow-node">
+              <div class="logic-node-icon">🛡️</div>
+              <div class="logic-node-content">
+                <span class="logic-node-title">Bot Defense</span>
+                <span class="logic-node-subtitle">reCAPTCHA Score</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="logic-defense-col">
+            <span class="logic-defense-pill">LAYER 3</span>
+            <div class="logic-flow-node">
+              <div class="logic-node-icon">⏱️</div>
+              <div class="logic-node-content">
+                <span class="logic-node-title">Rate Limits</span>
+                <span class="logic-node-subtitle">IP & Burst Throttle</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        ${renderArrow('All Controls Passed')}
+
+        <div class="logic-flow-node logic-node-highlight">
+          <div class="logic-node-icon">⚙️</div>
+          <div class="logic-node-content">
+            <span class="logic-node-title">Application Core Logic</span>
+            <span class="logic-node-subtitle">Business operations executing with confidence</span>
+          </div>
+        </div>
+
+        ${renderArrow()}
+
+        <div class="logic-flow-node">
+          <div class="logic-node-icon">💎</div>
+          <div class="logic-node-content">
+            <span class="logic-node-title">Protected Data & State</span>
+            <span class="logic-node-subtitle">Secure platform database and user records</span>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  const cleanAscii = dedentText(ascii);
+
+  return `
+    <div class="logic-diagram-card">
+      <div class="logic-diagram-header">
+        <div class="logic-diagram-header-left">
+          <span class="logic-diagram-pill">LOGIC DIAGRAM</span>
+          <span class="logic-diagram-title">${escapeHtml(title)}</span>
+        </div>
+      </div>
+
+      ${visualHtml ? visualHtml : ''}
+
+      ${cleanAscii ? `
+        <details class="logic-ascii-details" ${!visualHtml ? 'open' : ''}>
+          <summary class="logic-ascii-summary">
+            <span>${visualHtml ? '▶ View Raw Architecture Diagram (ASCII)' : 'Architecture Diagram (Monospace)'}</span>
+          </summary>
+          <pre class="logic-diagram-pre"><code>${escapeHtml(cleanAscii)}</code></pre>
+        </details>
+      ` : ''}
+    </div>
+  `;
+}
+
 export function formatNewsletterContent(content = '') {
   if (!content) return '';
 
   // If content was already fully compiled into our structured classes, sanitize and return
   if (content.includes('class="logic-diagram-card"') || content.includes('class="key-takeaway-card"')) {
     return DOMPurify.sanitize(content, {
-      ADD_TAGS: ['figure', 'figcaption', 'pre', 'code', 'blockquote', 'hr', 'h1', 'h2', 'h3', 'span', 'strong', 'em', 'img'],
-      ADD_ATTR: ['src', 'alt', 'style', 'class', 'width', 'height', 'target', 'rel', 'loading']
+      ADD_TAGS: ['figure', 'figcaption', 'pre', 'code', 'blockquote', 'hr', 'h1', 'h2', 'h3', 'span', 'strong', 'em', 'img', 'details', 'summary', 'p', 'div', 'a'],
+      ADD_ATTR: ['src', 'alt', 'style', 'class', 'width', 'height', 'target', 'rel', 'loading', 'open']
     });
   }
 
-  // Pre-process: ensure HTML <img> tags and markdown images have surrounding double newlines
+  // Pre-process: ensure HTML <img> tags, markdown images, and diagram titles have surrounding double newlines
   let raw = content;
   raw = raw.replace(/(!\[.*?\]\(.*?\))/g, '\n\n$1\n\n');
   raw = raw.replace(/(<img\b[^>]*\/?>)/gi, '\n\n$1\n\n');
+  raw = raw.replace(/(Logic Diagram \d+[^\n]*)\n(?!\n)/gi, '$1\n\n');
 
   // Split into raw blocks by 2 or more newlines
   const blocks = raw.split(/\n\s*\n/).map(b => b.trim()).filter(Boolean);
@@ -100,7 +472,6 @@ export function formatNewsletterContent(content = '') {
     }
 
     // 3. Logic Diagrams
-    // Case A: Explicit title like "Logic Diagram 1 — The Problem" or "Architecture Diagram"
     const isDiagramTitle = /^Logic Diagram \d+|^Architecture Diagram|^Flow Diagram/i.test(block);
     const hasBoxChars = /[│─┌┐└┘┴┬┼►◄▼▲├┤]/.test(block);
 
@@ -110,7 +481,6 @@ export function formatNewsletterContent(content = '') {
 
       if (i + 1 < blocks.length) {
         const nextBlock = blocks[i + 1];
-        // If next block contains box characters or multiple lines
         if (/[│─┌┐└┘┴┬┼►◄▼▲├┤|]/.test(nextBlock) || nextBlock.split('\n').length >= 2) {
           diagramCode = nextBlock;
           i += 2;
@@ -122,29 +492,13 @@ export function formatNewsletterContent(content = '') {
         i++;
       }
 
-      htmlBlocks.push(
-        `<div class="logic-diagram-card">
-          <div class="logic-diagram-header">
-            <span class="logic-diagram-pill">LOGIC DIAGRAM</span>
-            <span class="logic-diagram-title">${escapeHtml(title)}</span>
-          </div>
-          ${diagramCode ? `<pre class="logic-diagram-pre"><code>${escapeHtml(diagramCode)}</code></pre>` : ''}
-        </div>`
-      );
+      htmlBlocks.push(renderVisualFlowchart(title, diagramCode));
       continue;
     }
 
-    // Case B: Block containing box-drawing characters without a preceding title
+    // Block containing box-drawing characters without a preceding title
     if (hasBoxChars && block.split('\n').length >= 2) {
-      htmlBlocks.push(
-        `<div class="logic-diagram-card">
-          <div class="logic-diagram-header">
-            <span class="logic-diagram-pill">LOGIC DIAGRAM</span>
-            <span class="logic-diagram-title">System Architecture Flow</span>
-          </div>
-          <pre class="logic-diagram-pre"><code>${escapeHtml(block)}</code></pre>
-        </div>`
-      );
+      htmlBlocks.push(renderVisualFlowchart('System Architecture Flow', block));
       i++;
       continue;
     }
@@ -250,8 +604,8 @@ export function formatNewsletterContent(content = '') {
 
   const finalHtml = htmlBlocks.join('\n');
   return DOMPurify.sanitize(finalHtml, {
-    ADD_TAGS: ['figure', 'figcaption', 'pre', 'code', 'blockquote', 'hr', 'h1', 'h2', 'h3', 'span', 'strong', 'em', 'img', 'p', 'div', 'a'],
-    ADD_ATTR: ['src', 'alt', 'style', 'class', 'width', 'height', 'target', 'rel', 'loading', 'href']
+    ADD_TAGS: ['figure', 'figcaption', 'pre', 'code', 'blockquote', 'hr', 'h1', 'h2', 'h3', 'span', 'strong', 'em', 'img', 'p', 'div', 'a', 'details', 'summary'],
+    ADD_ATTR: ['src', 'alt', 'style', 'class', 'width', 'height', 'target', 'rel', 'loading', 'href', 'open']
   });
 }
 
