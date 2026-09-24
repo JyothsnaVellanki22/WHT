@@ -65,6 +65,7 @@ export default function Navbar({
                     display: 'inline-flex',
                     alignItems: 'center',
                     gap: '0.35rem',
+                    textDecoration: 'none',
                     borderColor: location.pathname === '/admin/analytics' ? 'var(--color-yellow)' : undefined,
                     color: location.pathname === '/admin/analytics' ? 'var(--color-yellow)' : undefined
                   }}
@@ -81,7 +82,8 @@ export default function Navbar({
                     fontSize: '0.82rem',
                     display: 'inline-flex',
                     alignItems: 'center',
-                    gap: '0.35rem'
+                    gap: '0.35rem',
+                    textDecoration: 'none'
                   }}
                   title="Create and broadcast new newsletter edition"
                 >

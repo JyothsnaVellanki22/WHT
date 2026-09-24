@@ -188,7 +188,8 @@ a {
   gap: 1.8rem;
 }
 
-.nav-links a {
+.nav-links > a,
+.nav-links a:not(.btn) {
   font-size: 0.92rem;
   font-weight: 600;
   letter-spacing: 0.04em;
@@ -196,13 +197,16 @@ a {
   text-transform: uppercase;
   position: relative;
   padding: 0.3rem 0;
+  text-decoration: none;
 }
 
-.nav-links a:hover {
+.nav-links > a:hover,
+.nav-links a:not(.btn):hover {
   color: var(--color-yellow);
 }
 
-.nav-links a::after {
+.nav-links > a::after,
+.nav-links a:not(.btn)::after {
   content: '';
   position: absolute;
   bottom: 0;
@@ -213,8 +217,25 @@ a {
   transition: width 0.25s ease;
 }
 
-.nav-links a:hover::after {
+.nav-links > a:hover::after,
+.nav-links a:not(.btn):hover::after {
   width: 100%;
+}
+
+/* Ensure buttons in navbar never inherit navigation link underline or styling */
+.nav-links .btn,
+.nav-links a.btn {
+  text-decoration: none !important;
+}
+
+.nav-links .btn::after,
+.nav-links a.btn::after,
+.nav-links .btn:hover::after,
+.nav-links a.btn:hover::after {
+  display: none !important;
+  content: none !important;
+  width: 0 !important;
+  height: 0 !important;
 }
 
 /* --- Theme Toggle Button --- */
