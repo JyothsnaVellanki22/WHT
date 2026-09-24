@@ -153,7 +153,7 @@ export default function NewslettersPage({
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2.5rem', flexWrap: 'wrap', gap: '1rem' }}>
                 <div>
                   <span className="section-label">EDITORIAL ARCHIVE</span>
-                  <h2 style={{ fontSize: '1.8rem', color: 'var(--text-main)', margin: 0 }}>The AI Stack Publications</h2>
+                  <h2 style={{ fontSize: '1.8rem', color: 'var(--text-main)', margin: 0 }}>Newsletter Publications</h2>
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
                   <span style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>
