@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Mail, Send, Check, Sparkles, Plus, Inbox, Edit2, ExternalLink, Share2 } from 'lucide-react';
+import { Mail, Send, Check, Sparkles, Plus, Inbox, ExternalLink, Share2 } from 'lucide-react';
 import { formatNewsletterContent } from '../components/RichContentEditor';
 
 export default function NewslettersPage({ 
@@ -232,16 +232,6 @@ export default function NewslettersPage({
                           <span>View on LinkedIn</span>
                           <ExternalLink size={13} />
                         </a>
-
-                        {isAdmin && (
-                          <button
-                            onClick={() => navigate(`/newsletters/edit/${item.id}`)}
-                            className="btn btn-outline newsletter-admin-edit-pill"
-                            title="Edit Newsletter (Admin Only - Opens Dedicated Page)"
-                          >
-                            <Edit2 size={13} color="var(--color-yellow)" /> Edit
-                          </button>
-                        )}
                       </div>
                     </div>
 
