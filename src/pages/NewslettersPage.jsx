@@ -197,89 +197,37 @@ export default function NewslettersPage({
                       </p>
                     )}
 
-                    {/* LinkedIn Author Byline */}
-                    <div className="newsletter-linkedin-byline">
-                      <div className="newsletter-author-left">
-                        <div className="newsletter-author-avatar-badge">
-                          <span>JV</span>
-                        </div>
-                        <div>
-                          <div className="newsletter-author-name-row">
-                            <span className="newsletter-author-name">Jyothsna V.</span>
-                            <span className="newsletter-author-title-pill">Author</span>
-                          </div>
-                          <div className="newsletter-author-credentials">
-                            <span>Founder & Lead Tech Writer @ WHT</span>
-                            <span className="newsletter-meta-sep">•</span>
-                            <span>Published on LinkedIn</span>
-                            <span className="newsletter-meta-sep">•</span>
-                            <span>5 min read</span>
-                          </div>
-                        </div>
-                      </div>
-
-                      <div className="newsletter-byline-actions">
-                        <a
-                          href="https://www.linkedin.com/pulse/ai-stack-security-journey-jyothsna-vellanki-11txf/"
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="newsletter-linkedin-link-btn"
-                          title="View original article on LinkedIn"
-                        >
-                          <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor">
-                            <path d="M19 3a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h14m-.5 15.5v-5.3a3.26 3.26 0 0 0-3.26-3.26c-.85 0-1.84.52-2.28 1.3v-1.11h-2.79v8.37h2.79v-4.93c0-.77.62-1.4 1.39-1.4a1.4 1.4 0 0 1 1.4 1.4v4.93h2.75M6.88 8.56a1.68 1.68 0 0 0 1.68-1.68c0-.93-.75-1.69-1.68-1.69a1.69 1.69 0 0 0-1.69 1.69c0 .93.76 1.68 1.69 1.68m1.39 9.94v-8.37H5.5v8.37h2.77z"/>
-                          </svg>
-                          <span>View on LinkedIn</span>
-                          <ExternalLink size={13} />
-                        </a>
-                      </div>
-                    </div>
-
                     {/* Article Body Content */}
                     <div 
                       className="newsletter-content"
                       dangerouslySetInnerHTML={{ __html: formatNewsletterContent(item.content) }}
                     />
 
-                    {/* LinkedIn Series & Publication Card */}
-                    <div className="newsletter-linkedin-footer-card">
-                      <div className="newsletter-footer-header">
-                        <div className="newsletter-author-avatar-badge small">
-                          <span>JV</span>
-                        </div>
-                        <div>
-                          <h4 className="newsletter-footer-series-title">The AI Stack — Security Journey</h4>
-                          <p className="newsletter-footer-author-subtitle">By Jyothsna V. • Published on WHT & LinkedIn</p>
-                        </div>
-                      </div>
-                      <p className="newsletter-footer-desc">
-                        A dedicated technical series exploring modern web architecture, cloud systems, and the evolving security boundaries when software meets adversarial behavior and AI.
-                      </p>
-                      <div className="newsletter-footer-actions">
-                        <a
-                          href="https://www.linkedin.com/pulse/ai-stack-security-journey-jyothsna-vellanki-11txf/"
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="btn btn-primary"
-                          style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.88rem' }}
-                        >
-                          <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor">
-                            <path d="M19 3a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h14m-.5 15.5v-5.3a3.26 3.26 0 0 0-3.26-3.26c-.85 0-1.84.52-2.28 1.3v-1.11h-2.79v8.37h2.79v-4.93c0-.77.62-1.4 1.39-1.4a1.4 1.4 0 0 1 1.4 1.4v4.93h2.75M6.88 8.56a1.68 1.68 0 0 0 1.68-1.68c0-.93-.75-1.69-1.68-1.69a1.69 1.69 0 0 0-1.69 1.69c0 .93.76 1.68 1.69 1.68m1.39 9.94v-8.37H5.5v8.37h2.77z"/>
-                          </svg>
-                          Read & Connect on LinkedIn
-                          <ExternalLink size={14} />
-                        </a>
-                        <button
-                          onClick={() => {
-                            navigator.clipboard.writeText(window.location.href);
-                            alert('Article link copied to clipboard!');
-                          }}
-                          className="btn btn-outline"
-                          style={{ display: 'inline-flex', alignItems: 'center', gap: '0.45rem', fontSize: '0.88rem' }}
-                        >
-                          <Share2 size={14} /> Share Article
-                        </button>
-                      </div>
+                    {/* Action Buttons (LinkedIn & Share) */}
+                    <div style={{ marginTop: '2.8rem', display: 'flex', alignItems: 'center', gap: '1rem', flexWrap: 'wrap' }}>
+                      <a
+                        href="https://www.linkedin.com/pulse/ai-stack-security-journey-jyothsna-vellanki-11txf/"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="btn btn-primary"
+                        style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.9rem', padding: '0.6rem 1.4rem', textDecoration: 'none' }}
+                      >
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor">
+                          <path d="M19 3a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h14m-.5 15.5v-5.3a3.26 3.26 0 0 0-3.26-3.26c-.85 0-1.84.52-2.28 1.3v-1.11h-2.79v8.37h2.79v-4.93c0-.77.62-1.4 1.39-1.4a1.4 1.4 0 0 1 1.4 1.4v4.93h2.75M6.88 8.56a1.68 1.68 0 0 0 1.68-1.68c0-.93-.75-1.69-1.68-1.69a1.69 1.69 0 0 0-1.69 1.69c0 .93.76 1.68 1.69 1.68m1.39 9.94v-8.37H5.5v8.37h2.77z"/>
+                        </svg>
+                        Read & Connect on LinkedIn
+                        <ExternalLink size={14} />
+                      </a>
+                      <button
+                        onClick={() => {
+                          navigator.clipboard.writeText(window.location.href);
+                          alert('Article link copied to clipboard!');
+                        }}
+                        className="btn btn-outline"
+                        style={{ display: 'inline-flex', alignItems: 'center', gap: '0.45rem', fontSize: '0.9rem', padding: '0.6rem 1.4rem' }}
+                      >
+                        <Share2 size={14} /> Share Article
+                      </button>
                     </div>
 
                     {/* Metadata Footer */}
