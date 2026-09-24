@@ -69,39 +69,41 @@ export default function NewslettersPage({
         </div>
       </section>
 
-      {/* Subscription Card */}
-      <section className="section-padding">
-        <div className="container" style={{ maxWidth: '800px' }}>
-          <div className="newsletter-card">
-            <span className="section-label">JOIN {subscriberCount}+ STUDENT BUILDERS</span>
-            <h2 style={{ fontSize: 'clamp(1.8rem, 3vw, 2.5rem)', marginBottom: '1rem' }}>
-              Subscribe to the Next Weekly Edition
-            </h2>
-            <p style={{ color: 'var(--text-muted)', fontSize: '1rem', maxWidth: '500px', margin: '0 auto 2rem auto' }}>
-              Zero spam. Only practical code walkthroughs, tool updates, and local AI recipes.
-            </p>
+      {/* Top Subscription Card (only displayed when no articles exist) */}
+      {newsletters.length === 0 && (
+        <section className="section-padding">
+          <div className="container" style={{ maxWidth: '800px' }}>
+            <div className="newsletter-card">
+              <span className="section-label">JOIN {subscriberCount}+ STUDENT BUILDERS</span>
+              <h2 style={{ fontSize: 'clamp(1.8rem, 3vw, 2.5rem)', marginBottom: '1rem' }}>
+                Subscribe to the Next Weekly Edition
+              </h2>
+              <p style={{ color: 'var(--text-muted)', fontSize: '1rem', maxWidth: '500px', margin: '0 auto 2rem auto' }}>
+                Zero spam. Only practical code walkthroughs, tool updates, and local AI recipes.
+              </p>
 
-            {subscribed ? (
-              <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.6rem', background: 'rgba(255, 207, 42, 0.15)', color: 'var(--color-yellow)', padding: '0.8rem 1.8rem', borderRadius: '9999px', fontWeight: 700 }}>
-                <Check size={20} /> YOU ARE SUBSCRIBED TO THE WHT NEWSLETTER!
-              </div>
-            ) : (
-              <form onSubmit={handleSubscribe} className="newsletter-form-dark">
-                <input 
-                  type="email" 
-                  required 
-                  placeholder="Enter your student email..."
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                />
-                <button type="submit" disabled={subscribing}>
-                  {subscribing ? 'SUBSCRIBING...' : 'SUBSCRIBE'}
-                </button>
-              </form>
-            )}
+              {subscribed ? (
+                <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.6rem', background: 'rgba(255, 207, 42, 0.15)', color: 'var(--color-yellow)', padding: '0.8rem 1.8rem', borderRadius: '9999px', fontWeight: 700 }}>
+                  <Check size={20} /> YOU ARE SUBSCRIBED TO THE WHT NEWSLETTER!
+                </div>
+              ) : (
+                <form onSubmit={handleSubscribe} className="newsletter-form-dark">
+                  <input 
+                    type="email" 
+                    required 
+                    placeholder="Enter your student email..."
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                  />
+                  <button type="submit" disabled={subscribing}>
+                    {subscribing ? 'SUBSCRIBING...' : 'SUBSCRIBE'}
+                  </button>
+                </form>
+              )}
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
+      )}
 
       {/* Newsletters Archive or Empty Uploads Coming Soon State */}
       <section className="section-padding">
@@ -172,18 +174,16 @@ export default function NewslettersPage({
               <div style={{ display: 'flex', flexDirection: 'column', gap: '3.5rem' }}>
                 {newsletters.map((item) => (
                   <article key={item.id} className="newsletter-article-card">
-                    {/* Top Series & Edition Badge */}
-                    <div className="newsletter-series-badge">
-                      <span className="newsletter-series-tag">THE AI STACK</span>
-                      <span className="newsletter-series-divider">•</span>
-                      <span>{item.tech_spotlight || 'SECURITY JOURNEY'}</span>
-                      {item.edition && (
-                        <>
+                    {/* Top Edition & Spotlight Badge */}
+                    {(item.tech_spotlight || item.edition) && (
+                      <div className="newsletter-series-badge">
+                        {item.tech_spotlight && <span>{item.tech_spotlight}</span>}
+                        {item.tech_spotlight && item.edition && (
                           <span className="newsletter-series-divider">•</span>
-                          <span>{item.edition}</span>
-                        </>
-                      )}
-                    </div>
+                        )}
+                        {item.edition && <span>{item.edition}</span>}
+                      </div>
+                    )}
 
                     {/* Article Headline */}
                     <h1 className="newsletter-article-headline">
@@ -234,6 +234,36 @@ export default function NewslettersPage({
                     <div style={{ marginTop: '1.8rem', fontSize: '0.8rem', color: 'var(--text-subtle)', display: 'flex', gap: '1.4rem', borderTop: '1px solid rgba(255, 255, 255, 0.06)', paddingTop: '1.2rem' }}>
                       <span>Dispatched to {item.recipient_count || subscriberCount} subscribers</span>
                       {item.sent_at && <span>Published {new Date(item.sent_at).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' })}</span>}
+                    </div>
+
+                    {/* Subscription Box at the Bottom of the Article */}
+                    <div className="newsletter-card" style={{ marginTop: '3rem', width: '100%' }}>
+                      <span className="section-label">JOIN {subscriberCount}+ STUDENT BUILDERS</span>
+                      <h2 style={{ fontSize: 'clamp(1.7rem, 2.5vw, 2.3rem)', marginBottom: '1rem', color: 'var(--text-main)' }}>
+                        Subscribe to the Next Weekly Edition
+                      </h2>
+                      <p style={{ color: 'var(--text-muted)', fontSize: '1rem', maxWidth: '500px', margin: '0 auto 2rem auto', lineHeight: 1.6 }}>
+                        Zero spam. Only practical code walkthroughs, tool updates, and local AI recipes.
+                      </p>
+
+                      {subscribed ? (
+                        <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.6rem', background: 'rgba(255, 207, 42, 0.15)', color: 'var(--color-yellow)', padding: '0.8rem 1.8rem', borderRadius: '9999px', fontWeight: 700 }}>
+                          <Check size={20} /> YOU ARE SUBSCRIBED TO THE WHT NEWSLETTER!
+                        </div>
+                      ) : (
+                        <form onSubmit={handleSubscribe} className="newsletter-form-dark">
+                          <input 
+                            type="email" 
+                            required 
+                            placeholder="Enter your student email..."
+                            value={email}
+                            onChange={(e) => setEmail(e.target.value)}
+                          />
+                          <button type="submit" disabled={subscribing}>
+                            {subscribing ? 'SUBSCRIBING...' : 'SUBSCRIBE'}
+                          </button>
+                        </form>
+                      )}
                     </div>
                   </article>
                 ))}
