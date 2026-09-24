@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Mail, Send, Check, Sparkles, Plus, Inbox, Edit2 } from 'lucide-react';
+import { Mail, Send, Check, Sparkles, Plus, Inbox, Edit2, ExternalLink, Share2 } from 'lucide-react';
 import { formatNewsletterContent } from '../components/RichContentEditor';
 
 export default function NewslettersPage({ 
@@ -147,56 +147,96 @@ export default function NewslettersPage({
               )}
             </div>
           ) : (
-            <div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem', flexWrap: 'wrap', gap: '1rem' }}>
+            <div className="newsletter-article-wrapper">
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2.5rem', flexWrap: 'wrap', gap: '1rem' }}>
                 <div>
-                  <span className="section-label">PAST DISPATCHES</span>
-                  <h2 style={{ fontSize: '1.8rem', color: 'var(--text-main)', margin: 0 }}>Newsletter Archive</h2>
+                  <span className="section-label">EDITORIAL ARCHIVE</span>
+                  <h2 style={{ fontSize: '1.8rem', color: 'var(--text-main)', margin: 0 }}>The AI Stack Publications</h2>
                 </div>
-                <span style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>
-                  {newsletters.length} {newsletters.length === 1 ? 'Edition' : 'Editions'} Published
-                </span>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                  <span style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>
+                    {newsletters.length} {newsletters.length === 1 ? 'Edition' : 'Editions'} Published
+                  </span>
+                  {isAdmin && (
+                    <button 
+                      onClick={() => navigate('/newsletters/new')} 
+                      className="btn btn-outline" 
+                      style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', padding: '0.4rem 0.9rem', fontSize: '0.82rem' }}
+                    >
+                      <Plus size={14} color="var(--color-yellow)" /> New Edition
+                    </button>
+                  )}
+                </div>
               </div>
 
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '2.5rem' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '3.5rem' }}>
                 {newsletters.map((item) => (
-                  <div key={item.id} className="newsletter-card" style={{ textAlign: 'left', position: 'relative' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '1rem', marginBottom: '1.2rem' }}>
-                      <div>
-                        <span className="section-label" style={{ marginBottom: '0.3rem' }}>{item.edition}</span>
-                        <h3 style={{ fontSize: '1.6rem', color: 'var(--text-main)', margin: '0.2rem 0' }}>{item.title}</h3>
-                        {item.subject && (
-                          <div style={{ fontSize: '0.88rem', color: 'var(--color-yellow)', fontStyle: 'italic', marginTop: '0.2rem' }}>
-                            Subject: "{item.subject}"
+                  <article key={item.id} className="newsletter-article-card">
+                    {/* Top Series & Edition Badge */}
+                    <div className="newsletter-series-badge">
+                      <span className="newsletter-series-tag">THE AI STACK</span>
+                      <span className="newsletter-series-divider">•</span>
+                      <span>{item.tech_spotlight || 'SECURITY JOURNEY'}</span>
+                      {item.edition && (
+                        <>
+                          <span className="newsletter-series-divider">•</span>
+                          <span>{item.edition}</span>
+                        </>
+                      )}
+                    </div>
+
+                    {/* Article Headline */}
+                    <h1 className="newsletter-article-headline">
+                      {item.title}
+                    </h1>
+
+                    {/* Subtitle / Deck */}
+                    {item.subject && (
+                      <p className="newsletter-article-deck">
+                        {item.subject}
+                      </p>
+                    )}
+
+                    {/* LinkedIn Author Byline */}
+                    <div className="newsletter-linkedin-byline">
+                      <div className="newsletter-author-left">
+                        <div className="newsletter-author-avatar-badge">
+                          <span>JV</span>
+                        </div>
+                        <div>
+                          <div className="newsletter-author-name-row">
+                            <span className="newsletter-author-name">Jyothsna V.</span>
+                            <span className="newsletter-author-title-pill">Author</span>
                           </div>
-                        )}
+                          <div className="newsletter-author-credentials">
+                            <span>Founder & Lead Tech Writer @ WHT</span>
+                            <span className="newsletter-meta-sep">•</span>
+                            <span>Published on LinkedIn</span>
+                            <span className="newsletter-meta-sep">•</span>
+                            <span>5 min read</span>
+                          </div>
+                        </div>
                       </div>
-                      <div style={{ display: 'flex', gap: '0.6rem', alignItems: 'center' }}>
-                        {item.tech_spotlight && (
-                          <span style={{ 
-                            background: 'var(--bg-card-hover)', 
-                            border: 'var(--border-subtle)', 
-                            color: 'var(--text-muted)', 
-                            borderRadius: '9999px', 
-                            padding: '0.25rem 0.75rem', 
-                            fontSize: '0.75rem', 
-                            fontWeight: 700 
-                          }}>
-                            {item.tech_spotlight}
-                          </span>
-                        )}
+
+                      <div className="newsletter-byline-actions">
+                        <a
+                          href="https://www.linkedin.com/pulse/ai-stack-security-journey-jyothsna-vellanki-11txf/"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="newsletter-linkedin-link-btn"
+                          title="View original article on LinkedIn"
+                        >
+                          <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M19 3a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h14m-.5 15.5v-5.3a3.26 3.26 0 0 0-3.26-3.26c-.85 0-1.84.52-2.28 1.3v-1.11h-2.79v8.37h2.79v-4.93c0-.77.62-1.4 1.39-1.4a1.4 1.4 0 0 1 1.4 1.4v4.93h2.75M6.88 8.56a1.68 1.68 0 0 0 1.68-1.68c0-.93-.75-1.69-1.68-1.69a1.69 1.69 0 0 0-1.69 1.69c0 .93.76 1.68 1.69 1.68m1.39 9.94v-8.37H5.5v8.37h2.77z"/>
+                          </svg>
+                          <span>View on LinkedIn</span>
+                          <ExternalLink size={13} />
+                        </a>
+
                         {isAdmin && (
                           <button
                             onClick={() => navigate(`/newsletters/edit/${item.id}`)}
-                            className="btn btn-outline"
-                            style={{
-                              padding: '0.3rem 0.8rem',
-                              fontSize: '0.78rem',
-                              display: 'inline-flex',
-                              alignItems: 'center',
-                              gap: '0.35rem',
-                              borderRadius: '9999px'
-                            }}
+                            className="btn btn-outline newsletter-admin-edit-pill"
                             title="Edit Newsletter (Admin Only - Opens Dedicated Page)"
                           >
                             <Edit2 size={13} color="var(--color-yellow)" /> Edit
@@ -204,16 +244,60 @@ export default function NewslettersPage({
                         )}
                       </div>
                     </div>
+
+                    {/* Article Body Content */}
                     <div 
                       className="newsletter-content"
-                      style={{ marginBottom: '1.4rem' }}
                       dangerouslySetInnerHTML={{ __html: formatNewsletterContent(item.content) }}
                     />
-                    <div style={{ fontSize: '0.78rem', color: 'var(--text-subtle)', display: 'flex', gap: '1.2rem' }}>
-                      <span>Dispatched to {item.recipient_count || subscriberCount} subscribers</span>
-                      {item.sent_at && <span>{new Date(item.sent_at).toLocaleDateString()}</span>}
+
+                    {/* LinkedIn Series & Publication Card */}
+                    <div className="newsletter-linkedin-footer-card">
+                      <div className="newsletter-footer-header">
+                        <div className="newsletter-author-avatar-badge small">
+                          <span>JV</span>
+                        </div>
+                        <div>
+                          <h4 className="newsletter-footer-series-title">The AI Stack — Security Journey</h4>
+                          <p className="newsletter-footer-author-subtitle">By Jyothsna V. • Published on WHT & LinkedIn</p>
+                        </div>
+                      </div>
+                      <p className="newsletter-footer-desc">
+                        A dedicated technical series exploring modern web architecture, cloud systems, and the evolving security boundaries when software meets adversarial behavior and AI.
+                      </p>
+                      <div className="newsletter-footer-actions">
+                        <a
+                          href="https://www.linkedin.com/pulse/ai-stack-security-journey-jyothsna-vellanki-11txf/"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="btn btn-primary"
+                          style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.88rem' }}
+                        >
+                          <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M19 3a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h14m-.5 15.5v-5.3a3.26 3.26 0 0 0-3.26-3.26c-.85 0-1.84.52-2.28 1.3v-1.11h-2.79v8.37h2.79v-4.93c0-.77.62-1.4 1.39-1.4a1.4 1.4 0 0 1 1.4 1.4v4.93h2.75M6.88 8.56a1.68 1.68 0 0 0 1.68-1.68c0-.93-.75-1.69-1.68-1.69a1.69 1.69 0 0 0-1.69 1.69c0 .93.76 1.68 1.69 1.68m1.39 9.94v-8.37H5.5v8.37h2.77z"/>
+                          </svg>
+                          Read & Connect on LinkedIn
+                          <ExternalLink size={14} />
+                        </a>
+                        <button
+                          onClick={() => {
+                            navigator.clipboard.writeText(window.location.href);
+                            alert('Article link copied to clipboard!');
+                          }}
+                          className="btn btn-outline"
+                          style={{ display: 'inline-flex', alignItems: 'center', gap: '0.45rem', fontSize: '0.88rem' }}
+                        >
+                          <Share2 size={14} /> Share Article
+                        </button>
+                      </div>
                     </div>
-                  </div>
+
+                    {/* Metadata Footer */}
+                    <div style={{ marginTop: '1.8rem', fontSize: '0.8rem', color: 'var(--text-subtle)', display: 'flex', gap: '1.4rem', borderTop: '1px solid rgba(255, 255, 255, 0.06)', paddingTop: '1.2rem' }}>
+                      <span>Dispatched to {item.recipient_count || subscriberCount} subscribers</span>
+                      {item.sent_at && <span>Published {new Date(item.sent_at).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' })}</span>}
+                    </div>
+                  </article>
                 ))}
               </div>
             </div>

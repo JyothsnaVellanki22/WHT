@@ -424,8 +424,9 @@ export function formatNewsletterContent(content = '') {
     });
   }
 
-  // Pre-process: ensure HTML <img> tags, markdown images, and diagram titles have surrounding double newlines
+  // Pre-process: strip existing enclosing figure tags to avoid orphaned tags when splitting
   let raw = content;
+  raw = raw.replace(/<\/?figure[^>]*>/gi, '');
   raw = raw.replace(/(!\[.*?\]\(.*?\))/g, '\n\n$1\n\n');
   raw = raw.replace(/(<img\b[^>]*\/?>)/gi, '\n\n$1\n\n');
   raw = raw.replace(/(Logic Diagram \d+[^\n]*)\n(?!\n)/gi, '$1\n\n');
@@ -436,7 +437,7 @@ export function formatNewsletterContent(content = '') {
   let i = 0;
 
   const sanitizeAlt = (altText) => {
-    if (!altText) return 'Newsletter visual';
+    if (!altText) return 'reCAPTCHA Architecture Overview';
     // Suppress raw filenames, camera dumps, or AI generation filenames
     if (
       /\.(jpe?g|png|gif|webp|svg|bmp|tiff)$/i.test(altText) ||
@@ -444,7 +445,7 @@ export function formatNewsletterContent(content = '') {
       altText.includes('___') ||
       /\d{4}[-_]\d{2}[-_]\d{2}/.test(altText)
     ) {
-      return 'Newsletter visual';
+      return 'reCAPTCHA Architecture Overview';
     }
     return altText.trim();
   };
@@ -466,7 +467,7 @@ export function formatNewsletterContent(content = '') {
       continue;
     }
 
-    // 2. HTML <figure> or <img> tag
+    // 2. HTML <img> tag (or <figure> if any remained)
     if (block.startsWith('<figure') || block.startsWith('<img')) {
       const srcMatch = block.match(/src=["'](.*?)["']/);
       const altMatch = block.match(/alt=["'](.*?)["']/);
@@ -478,8 +479,6 @@ export function formatNewsletterContent(content = '') {
             <img src="${src}" alt="${escapeHtml(alt)}" loading="lazy" />
           </figure>`
         );
-      } else {
-        htmlBlocks.push(block);
       }
       i++;
       continue;
@@ -490,10 +489,16 @@ export function formatNewsletterContent(content = '') {
     const hasBoxChars = /[│─┌┐└┘┴┬┼►◄▼▲├┤]/.test(block);
 
     if (isDiagramTitle) {
-      const title = block.replace(/^Logic Diagram \d+\s*[-—:]?\s*/i, '').trim() || block;
+      let title = block;
       let diagramCode = '';
 
-      if (i + 1 < blocks.length) {
+      if (block.includes('\n')) {
+        // Diagram title and ASCII art share the same block
+        const firstLineBreak = block.indexOf('\n');
+        title = block.substring(0, firstLineBreak).trim();
+        diagramCode = block.substring(firstLineBreak).trim();
+        i++;
+      } else if (i + 1 < blocks.length) {
         const nextBlock = blocks[i + 1];
         if (/[│─┌┐└┘┴┬┼►◄▼▲├┤|]/.test(nextBlock) || nextBlock.split('\n').length >= 2) {
           diagramCode = nextBlock;
@@ -506,7 +511,8 @@ export function formatNewsletterContent(content = '') {
         i++;
       }
 
-      htmlBlocks.push(renderVisualFlowchart(title, diagramCode));
+      const cleanTitle = title.replace(/^Logic Diagram \d+\s*[-—:]?\s*/i, '').trim() || title;
+      htmlBlocks.push(renderVisualFlowchart(cleanTitle, diagramCode));
       continue;
     }
 
@@ -536,8 +542,8 @@ export function formatNewsletterContent(content = '') {
       htmlBlocks.push(
         `<div class="key-takeaway-card">
           <div class="key-takeaway-badge">
-            <span class="key-takeaway-dot"></span>
-            KEY TAKEAWAY
+            <span class="key-takeaway-icon">💡</span>
+            <span>KEY TAKEAWAY</span>
           </div>
           <p class="key-takeaway-body">${formatInline(escapeHtml(takeawayText))}</p>
         </div>`

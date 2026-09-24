@@ -1030,47 +1030,255 @@ li {
    Newsletter Editorial, Logic Diagrams & In-Between Media
    ========================================================================== */
 
-.newsletter-content {
-  font-size: 1.05rem;
-  line-height: 1.8;
+.newsletter-article-wrapper {
+  max-width: 860px;
+  margin: 0 auto;
+  text-align: left;
+}
+
+.newsletter-article-card {
+  background: var(--bg-card);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 20px;
+  padding: 3.5rem 3rem;
+  text-align: left !important;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.35);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  margin-bottom: 3.5rem;
+}
+
+[data-theme="light"] .newsletter-article-card {
+  background: #ffffff;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.06);
+}
+
+.newsletter-article-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, var(--color-yellow), var(--color-red));
+}
+
+/* Series Badge */
+.newsletter-series-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-yellow);
+  margin-bottom: 1.2rem;
+  flex-wrap: wrap;
+}
+
+.newsletter-series-tag {
+  background: rgba(255, 207, 42, 0.12);
+  padding: 0.25rem 0.7rem;
+  border-radius: 6px;
+  border: 1px solid rgba(255, 207, 42, 0.3);
+  color: var(--color-yellow);
+}
+
+.newsletter-series-divider {
+  color: var(--text-subtle);
+}
+
+/* Article Headline & Deck */
+.newsletter-article-headline {
+  font-size: 2.35rem;
+  font-weight: 800;
+  line-height: 1.25;
+  color: var(--text-main);
+  margin: 0 0 1rem 0;
+  letter-spacing: -0.025em;
+  text-align: left !important;
+}
+
+.newsletter-article-deck {
+  font-size: 1.2rem;
+  line-height: 1.6;
   color: var(--text-muted);
+  margin: 0 0 2rem 0;
+  text-align: left !important;
+  font-weight: 400;
+}
+
+/* LinkedIn Author Byline */
+.newsletter-linkedin-byline {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1.2rem;
+  padding: 1.2rem 1.4rem;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 14px;
+  margin-bottom: 2.5rem;
+  text-align: left;
+}
+
+[data-theme="light"] .newsletter-linkedin-byline {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+}
+
+.newsletter-author-left {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.newsletter-author-avatar-badge {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--color-yellow), #e67e22);
+  color: #0b0c10;
+  font-weight: 800;
+  font-size: 1.1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 14px rgba(255, 207, 42, 0.35);
+  flex-shrink: 0;
+}
+
+.newsletter-author-avatar-badge.small {
+  width: 40px;
+  height: 40px;
+  font-size: 0.95rem;
+}
+
+.newsletter-author-name-row {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.newsletter-author-name {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--text-main);
+}
+
+.newsletter-author-title-pill {
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  background: rgba(255, 207, 42, 0.15);
+  color: var(--color-yellow);
+  padding: 0.15rem 0.55rem;
+  border-radius: 9999px;
+  border: 1px solid rgba(255, 207, 42, 0.25);
+}
+
+.newsletter-author-credentials {
+  font-size: 0.82rem;
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  margin-top: 0.25rem;
+}
+
+.newsletter-meta-sep {
+  color: var(--text-subtle);
+}
+
+.newsletter-byline-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.newsletter-linkedin-link-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.5rem 1rem;
+  background: #0a66c2;
+  color: #ffffff !important;
+  border-radius: 9999px;
+  font-size: 0.84rem;
+  font-weight: 600;
+  text-decoration: none;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 12px rgba(10, 102, 194, 0.3);
+}
+
+.newsletter-linkedin-link-btn:hover {
+  background: #084e96;
+  transform: translateY(-1px);
+  color: #ffffff !important;
+}
+
+.newsletter-admin-edit-pill {
+  padding: 0.4rem 0.85rem !important;
+  font-size: 0.78rem !important;
+  border-radius: 9999px !important;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+/* Editorial Body Typography */
+.newsletter-content {
+  font-size: 1.1rem;
+  line-height: 1.85;
+  color: var(--text-muted);
+  text-align: left !important;
 }
 
 .newsletter-p {
-  margin-bottom: 1.35rem;
-  font-size: 1.02rem;
-  line-height: 1.8;
+  margin-bottom: 1.4rem;
+  font-size: 1.06rem;
+  line-height: 1.85;
   color: var(--text-muted);
+  text-align: left !important;
 }
 
 .newsletter-h1 {
-  font-size: 2rem;
+  font-size: 2.1rem;
   font-weight: 800;
   color: var(--text-main);
-  margin: 2.5rem 0 1.2rem 0;
+  margin: 2.8rem 0 1.2rem 0;
   letter-spacing: -0.02em;
+  text-align: left !important;
 }
 
 .newsletter-h2 {
-  font-size: 1.45rem;
+  font-size: 1.55rem;
   font-weight: 800;
   color: var(--text-main);
-  margin: 2.2rem 0 1rem 0;
-  letter-spacing: -0.01em;
-  padding-bottom: 0.4rem;
-  border-bottom: 1px solid rgba(255, 207, 42, 0.15);
+  margin: 2.8rem 0 1.1rem 0;
+  letter-spacing: -0.015em;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid rgba(255, 207, 42, 0.2);
+  text-align: left !important;
 }
 
 .newsletter-h3 {
-  font-size: 1.25rem;
+  font-size: 1.3rem;
   font-weight: 700;
   color: var(--text-main);
-  margin: 1.8rem 0 0.8rem 0;
+  margin: 2.2rem 0 0.9rem 0;
+  text-align: left !important;
 }
 
 /* Image Figures */
 .newsletter-img-figure {
-  margin: 2.2rem 0;
+  margin: 2.5rem 0;
   padding: 0;
   display: block;
   text-align: center;
@@ -1467,16 +1675,46 @@ li {
   border-bottom: 1px solid rgba(255, 207, 42, 0.15);
 }
 
+.key-takeaway-card {
+  margin: 2.5rem 0;
+  padding: 1.5rem 1.8rem;
+  background: linear-gradient(90deg, rgba(255, 207, 42, 0.08) 0%, rgba(255, 207, 42, 0.02) 100%);
+  border-left: 5px solid var(--color-yellow);
+  border-radius: 0 12px 12px 0;
+  border-top: 1px solid rgba(255, 207, 42, 0.2);
+  border-right: 1px solid rgba(255, 207, 42, 0.15);
+  border-bottom: 1px solid rgba(255, 207, 42, 0.2);
+  text-align: left !important;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+}
+
+[data-theme="light"] .key-takeaway-card {
+  background: #fffdf5;
+  border-top: 1px solid rgba(212, 155, 0, 0.2);
+  border-right: 1px solid rgba(212, 155, 0, 0.15);
+  border-bottom: 1px solid rgba(212, 155, 0, 0.2);
+  border-left: 5px solid #d49b00;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.04);
+}
+
 .key-takeaway-badge {
-  font-size: 0.74rem;
+  font-size: 0.78rem;
   font-weight: 800;
   letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--color-yellow);
   display: inline-flex;
   align-items: center;
-  gap: 0.4rem;
-  margin-bottom: 0.55rem;
+  gap: 0.45rem;
+  margin-bottom: 0.65rem;
+}
+
+[data-theme="light"] .key-takeaway-badge {
+  color: #b38000;
+}
+
+.key-takeaway-icon {
+  font-size: 0.95rem;
 }
 
 .key-takeaway-dot {
@@ -1488,28 +1726,48 @@ li {
 }
 
 .key-takeaway-body {
-  font-size: 1.04rem;
-  line-height: 1.7;
+  font-size: 1.08rem;
+  line-height: 1.8;
   color: var(--text-main);
   font-weight: 500;
   margin: 0;
+  text-align: left !important;
 }
 
 /* Quotes, hr, and code */
 .newsletter-blockquote {
-  border-left: 3px solid var(--color-yellow);
-  padding: 0.9rem 1.2rem;
-  margin: 1.8rem 0;
-  background: rgba(255, 207, 42, 0.05);
-  border-radius: 0 8px 8px 0;
+  border-left: 4px solid var(--color-yellow);
+  padding: 1.1rem 1.5rem;
+  margin: 2.2rem 0;
+  background: rgba(255, 207, 42, 0.04);
+  border-radius: 0 10px 10px 0;
   font-style: italic;
-  color: var(--text-muted);
+  font-size: 1.12rem;
+  line-height: 1.75;
+  color: var(--text-main);
+  text-align: left !important;
+  border-top: 1px solid rgba(255, 207, 42, 0.08);
+  border-right: 1px solid rgba(255, 207, 42, 0.06);
+  border-bottom: 1px solid rgba(255, 207, 42, 0.08);
+}
+
+.newsletter-callout-quote {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--color-yellow);
+  background: rgba(255, 207, 42, 0.08);
+  padding: 1.4rem 1.8rem;
+  border-left: 5px solid var(--color-yellow);
 }
 
 .newsletter-hr {
   border: none;
   border-top: 1px solid rgba(255, 255, 255, 0.1);
-  margin: 2.2rem 0;
+  margin: 2.8rem 0;
+}
+
+[data-theme="light"] .newsletter-hr {
+  border-top: 1px solid rgba(0, 0, 0, 0.1);
 }
 
 .newsletter-inline-code {
@@ -1519,5 +1777,56 @@ li {
   border-radius: 4px;
   font-size: 0.9em;
   color: var(--color-yellow);
+}
+
+/* LinkedIn Publication Footer Card */
+.newsletter-linkedin-footer-card {
+  margin-top: 3.5rem;
+  padding: 2.2rem;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.03) 0%, rgba(255, 207, 42, 0.06) 100%);
+  border: 1px solid rgba(255, 207, 42, 0.25);
+  border-radius: 16px;
+  text-align: left;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+}
+
+[data-theme="light"] .newsletter-linkedin-footer-card {
+  background: #fdfaf0;
+  border: 1px solid rgba(212, 155, 0, 0.25);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.04);
+}
+
+.newsletter-footer-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.newsletter-footer-series-title {
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: var(--text-main);
+  margin: 0 0 0.2rem 0;
+}
+
+.newsletter-footer-author-subtitle {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  margin: 0;
+}
+
+.newsletter-footer-desc {
+  font-size: 0.95rem;
+  line-height: 1.6;
+  color: var(--text-muted);
+  margin: 0 0 1.5rem 0;
+}
+
+.newsletter-footer-actions {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
 }
 
