@@ -2,13 +2,8 @@ import sys
 import os
 
 current_dir = os.path.dirname(os.path.abspath(__file__))
-backend_dir = os.path.join(current_dir, "..", "backend")
-
-# Ensure the api directory is primary in sys.path
 if current_dir not in sys.path:
     sys.path.insert(0, current_dir)
-if os.path.isdir(backend_dir) and backend_dir not in sys.path:
-    sys.path.append(backend_dir)
 
 try:
     from main import app
