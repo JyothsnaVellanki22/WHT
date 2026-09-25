@@ -1,21 +1,38 @@
 {
-  "functions": {
-    "api/index.py": {
-      "maxDuration": 15
+  "services": {
+    "frontend": {
+      "root": "./",
+      "framework": "vite"
+    },
+    "backend": {
+      "root": "backend/",
+      "entrypoint": "main:app"
     }
   },
   "rewrites": [
     {
+      "source": "/api",
+      "destination": {
+        "service": "backend"
+      }
+    },
+    {
       "source": "/api/(.*)",
-      "destination": "/api/index.py"
+      "destination": {
+        "service": "backend"
+      }
     },
     {
       "source": "/uploads/(.*)",
-      "destination": "/api/index.py"
+      "destination": {
+        "service": "backend"
+      }
     },
     {
       "source": "/(.*)",
-      "destination": "/index.html"
+      "destination": {
+        "service": "frontend"
+      }
     }
   ]
 }
