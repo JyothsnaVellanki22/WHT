@@ -63,6 +63,7 @@ app.add_middleware(
 )
 
 @app.get("/")
+@app.get("/index.py")
 def root():
     return {
         "status": "healthy",
