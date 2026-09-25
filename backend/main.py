@@ -62,6 +62,17 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+@app.get("/")
+def root():
+    return {
+        "status": "healthy",
+        "service": "WHT FastAPI Backend",
+        "version": "1.0.0",
+        "environment": ENVIRONMENT,
+        "docs": "/docs",
+        "health": "/api/health"
+    }
+
 @app.get("/api/health")
 @app.get("/health")
 def health_check():

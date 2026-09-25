@@ -29,41 +29,36 @@ def sanitize_postgres_url(raw_url: str) -> str:
     except Exception:
         return raw_url
 
-# Determine database URL: Supabase PostgreSQL (Production / Cloud)
-SUPABASE_FALLBACK_URL = "postgres://postgres.bpsjdreelzcjhjjwbpfc:ZSq4LxlPjlcFWhkf@aws-0-us-east-1.pooler.supabase.com:5432/postgres?sslmode=require"
-
+# Determine database URL: Supabase PostgreSQL (Production / Cloud) or SQLite (Local fallback)
 raw_db_url = (
     os.getenv("DATABASE_URL")
     or os.getenv("POSTGRES_URL_NON_POOLING")
     or os.getenv("POSTGRES_URL")
     or os.getenv("POSTGRES_PRISMA_URL")
     or os.getenv("SUPABASE_DATABASE_URL")
-    or SUPABASE_FALLBACK_URL
 )
 
 from sqlalchemy.pool import NullPool
 
-db_url = sanitize_postgres_url(raw_db_url)
 is_serverless = bool(os.getenv("VERCEL") or os.getenv("AWS_LAMBDA_FUNCTION_NAME") or os.getenv("VERCEL_ENV"))
 
-if is_serverless:
-    engine = create_engine(
-        db_url,
-        poolclass=NullPool
-    )
-    print("[DATABASE] Connected to Supabase PostgreSQL (Serverless NullPool).")
-else:
-    engine = create_engine(
-        db_url,
-        pool_pre_ping=True,
-        pool_recycle=300,
-        pool_size=5,
-        max_overflow=10
-    )
-    print("[DATABASE] Connected to Supabase PostgreSQL.")
-
-
-
+if raw_db_url:
+    db_url = sanitize_postgres_url(raw_db_url)
+    if is_serverless:
+        engine = create_engine(
+            db_url,
+            poolclass=NullPool
+        )
+        print("[DATABASE] Connected to Supabase PostgreSQL (Serverless NullPool).")
+    else:
+        engine = create_engine(
+            db_url,
+            pool_pre_ping=True,
+            pool_recycle=300,
+            pool_size=5,
+            max_overflow=10
+        )
+        print("[DATABASE] Connected to Supabase PostgreSQL.")
 else:
     DB_PATH = os.path.join(BASE_DIR, "wht.db")
     SQLALCHEMY_DATABASE_URL = f"sqlite:///{DB_PATH}"
