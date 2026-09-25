@@ -9,6 +9,26 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 load_dotenv(os.path.join(BASE_DIR, ".env"))
 load_dotenv(os.path.join(os.path.dirname(BASE_DIR), ".env"))
 
+from urllib.parse import urlparse, parse_qs, urlencode, urlunparse
+
+def sanitize_postgres_url(raw_url: str) -> str:
+    """Strip Prisma/JS-specific parameters like supa= or pgbouncer= that break psycopg2."""
+    if raw_url.startswith("postgres://"):
+        raw_url = raw_url.replace("postgres://", "postgresql://", 1)
+    try:
+        parsed = urlparse(raw_url)
+        if not parsed.query:
+            return raw_url
+        VALID_PARAMS = {"sslmode", "connect_timeout", "application_name", "sslcert", "sslkey", "sslrootcert"}
+        query_params = parse_qs(parsed.query)
+        clean_params = {k: v for k, v in query_params.items() if k.lower() in VALID_PARAMS}
+        if "sslmode" not in clean_params:
+            clean_params["sslmode"] = ["require"]
+        clean_query = urlencode(clean_params, doseq=True)
+        return urlunparse(parsed._replace(query=clean_query))
+    except Exception:
+        return raw_url
+
 # Determine database URL: Supabase PostgreSQL (Production / Cloud) or SQLite (Local fallback)
 raw_db_url = (
     os.getenv("DATABASE_URL")
@@ -18,20 +38,18 @@ raw_db_url = (
 )
 
 if raw_db_url:
-    # Normalize protocol for SQLAlchemy / psycopg2
-    db_url = raw_db_url
-    if db_url.startswith("postgres://"):
-        db_url = db_url.replace("postgres://", "postgresql://", 1)
+    db_url = sanitize_postgres_url(raw_db_url)
     
     # Supabase / PostgreSQL Engine with connection health checking
     engine = create_engine(
         db_url,
         pool_pre_ping=True,
         pool_recycle=300,
-        pool_size=10,
-        max_overflow=20
+        pool_size=5,
+        max_overflow=10
     )
     print("[DATABASE] Connected to Supabase PostgreSQL.")
+
 else:
     DB_PATH = os.path.join(BASE_DIR, "wht.db")
     SQLALCHEMY_DATABASE_URL = f"sqlite:///{DB_PATH}"
