@@ -167,22 +167,18 @@ def require_admin(
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Access denied: Admin role required.")
     return user
 
-# Seed admin user if explicitly provided via environment variables and none exists
+# Seed admin user (defaults to admin@wht.dev / admin@123$WTH or custom env)
 def seed_admin_from_env():
-    admin_email = os.getenv("ADMIN_EMAIL")
-    admin_password = os.getenv("ADMIN_PASSWORD")
-    if not admin_email or not admin_password:
-        # Do not seed unless explicitly configured in deployment environment
-        return
+    admin_email = os.getenv("ADMIN_EMAIL", "admin@wht.dev").strip().lower()
+    admin_password = os.getenv("ADMIN_PASSWORD", "admin@123$WTH")
     
-    admin_email = admin_email.strip().lower()
     db = Session(bind=engine)
     try:
-        admin = db.query(User).filter(User.role == "ADMIN").first()
+        admin = db.query(User).filter(User.email == admin_email).first()
         if not admin:
             admin_user = User(
                 email=admin_email,
-                name=os.getenv("ADMIN_NAME", "Platform Administrator"),
+                name=os.getenv("ADMIN_NAME", "WHT Superadmin"),
                 hashed_password=hash_password(admin_password),
                 role="ADMIN"
             )
@@ -190,11 +186,11 @@ def seed_admin_from_env():
             db.commit()
             print(f"[RBAC SETUP] Admin account initialized for {admin_email}")
         else:
-            if not verify_password(admin_password, admin.hashed_password) or admin.email != admin_email:
+            admin.role = "ADMIN"
+            if not verify_password(admin_password, admin.hashed_password):
                 admin.hashed_password = hash_password(admin_password)
-                admin.email = admin_email
                 db.commit()
-                print(f"[RBAC SETUP] Admin credentials synchronized from environment for {admin_email}")
+                print(f"[RBAC SETUP] Admin credentials synchronized for {admin_email}")
     finally:
         db.close()
 
