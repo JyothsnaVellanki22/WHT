@@ -30,43 +30,51 @@ def sanitize_postgres_url(raw_url: str) -> str:
         return raw_url
 
 # Determine database URL: Supabase PostgreSQL (Production / Cloud) or SQLite (Local fallback)
+DEFAULT_DATABASE_URL = "postgres://postgres.bpsjdreelzcjhjjwbpfc:ZSq4LxlPjlcFWhkf@aws-0-us-east-1.pooler.supabase.com:5432/postgres?sslmode=require"
+
 raw_db_url = (
     os.getenv("DATABASE_URL")
     or os.getenv("POSTGRES_URL_NON_POOLING")
     or os.getenv("POSTGRES_URL")
     or os.getenv("POSTGRES_PRISMA_URL")
     or os.getenv("SUPABASE_DATABASE_URL")
+    or DEFAULT_DATABASE_URL
 )
 
 from sqlalchemy.pool import NullPool
 
 is_serverless = bool(os.getenv("VERCEL") or os.getenv("AWS_LAMBDA_FUNCTION_NAME") or os.getenv("VERCEL_ENV"))
 
-if raw_db_url:
-    db_url = sanitize_postgres_url(raw_db_url)
-    if is_serverless:
-        engine = create_engine(
-            db_url,
-            poolclass=NullPool
-        )
-        print("[DATABASE] Connected to Supabase PostgreSQL (Serverless NullPool).")
+try:
+    if raw_db_url:
+        db_url = sanitize_postgres_url(raw_db_url)
+        if is_serverless:
+            engine = create_engine(
+                db_url,
+                poolclass=NullPool
+            )
+            print("[DATABASE] Connected to Supabase PostgreSQL (Serverless NullPool).")
+        else:
+            engine = create_engine(
+                db_url,
+                pool_pre_ping=True,
+                pool_recycle=300,
+                pool_size=5,
+                max_overflow=10
+            )
+            print("[DATABASE] Connected to Supabase PostgreSQL.")
     else:
+        DB_PATH = "/tmp/wht.db" if is_serverless else os.path.join(BASE_DIR, "wht.db")
+        SQLALCHEMY_DATABASE_URL = f"sqlite:///{DB_PATH}"
         engine = create_engine(
-            db_url,
-            pool_pre_ping=True,
-            pool_recycle=300,
-            pool_size=5,
-            max_overflow=10
+            SQLALCHEMY_DATABASE_URL,
+            connect_args={"check_same_thread": False}
         )
-        print("[DATABASE] Connected to Supabase PostgreSQL.")
-else:
+        print(f"[DATABASE] Connected to SQLite database at {DB_PATH}")
+except Exception as e:
+    print(f"[DATABASE WARNING] Primary connection failed: {e}. Using /tmp SQLite fallback.")
     DB_PATH = "/tmp/wht.db" if is_serverless else os.path.join(BASE_DIR, "wht.db")
-    SQLALCHEMY_DATABASE_URL = f"sqlite:///{DB_PATH}"
-    engine = create_engine(
-        SQLALCHEMY_DATABASE_URL,
-        connect_args={"check_same_thread": False}
-    )
-    print(f"[DATABASE] Connected to SQLite database at {DB_PATH}")
+    engine = create_engine(f"sqlite:///{DB_PATH}", connect_args={"check_same_thread": False})
 
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
