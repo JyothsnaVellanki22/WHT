@@ -1,3 +1,10 @@
+import sys
+import os
+
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+if BASE_DIR not in sys.path:
+    sys.path.insert(0, BASE_DIR)
+
 from fastapi import FastAPI, Depends, HTTPException, status, UploadFile, File, Response
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
@@ -7,7 +14,6 @@ from pydantic import BaseModel, Field, field_validator
 from typing import List, Optional
 from datetime import datetime, timedelta, timezone
 import re
-import os
 import bcrypt
 import secrets
 import jwt
@@ -62,8 +68,8 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-@app.get("/")
-@app.get("/index.py")
+@app.api_route("/", methods=["GET", "HEAD"])
+@app.api_route("/index.py", methods=["GET", "HEAD"])
 def root():
     return {
         "status": "healthy",
@@ -74,8 +80,8 @@ def root():
         "health": "/api/health"
     }
 
-@app.get("/api/health")
-@app.get("/health")
+@app.api_route("/api/health", methods=["GET", "HEAD"])
+@app.api_route("/health", methods=["GET", "HEAD"])
 def health_check():
     return {
         "status": "healthy",

@@ -176,9 +176,9 @@ export default function ArticleDetailPage({ blogs = [], isAdmin = false, onDelet
               style={{ fontSize: '1.05rem', color: 'var(--text-muted)', lineHeight: 1.8 }}
               dangerouslySetInnerHTML={{ 
                 __html: DOMPurify.sanitize(
-                  tutorial.content.includes('<') 
-                    ? tutorial.content 
-                    : `<p>${tutorial.content.replace(/\n\n/g, '</p><p>').replace(/\n/g, '<br/>')}</p>`
+                  (tutorial.content || '').includes('<') 
+                    ? (tutorial.content || '') 
+                    : `<p>${(tutorial.content || '').replace(/\n\n/g, '</p><p>').replace(/\n/g, '<br/>')}</p>`
                 )
               }} 
             />
