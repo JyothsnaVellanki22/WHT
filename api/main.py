@@ -29,13 +29,14 @@ except Exception as e:
 app = FastAPI(title="WHT Practical AI Learning Platform API")
 
 
-# Mount uploads directory for images and media
-UPLOAD_DIR = os.getenv(
-    "UPLOAD_DIR",
-    "/tmp/uploads" if os.getenv("VERCEL") else os.path.join(os.path.dirname(os.path.abspath(__file__)), "uploads")
-)
-os.makedirs(UPLOAD_DIR, exist_ok=True)
-app.mount("/uploads", StaticFiles(directory=UPLOAD_DIR), name="uploads")
+# Mount uploads directory for images and media (/tmp is always writable on serverless)
+UPLOAD_DIR = "/tmp/uploads"
+try:
+    os.makedirs(UPLOAD_DIR, exist_ok=True)
+    app.mount("/uploads", StaticFiles(directory=UPLOAD_DIR), name="uploads")
+except Exception as e:
+    print(f"[STARTUP NOTICE] Upload directory mount: {e}")
+
 
 
 # ----------------- Environment & CORS Hardening ----------------- #
