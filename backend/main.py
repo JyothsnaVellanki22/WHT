@@ -21,9 +21,13 @@ from database import get_db, engine, Base
 from models import User, BlogPost, Subscriber, Newsletter, EmailLog
 
 # Create database tables if they do not exist
-Base.metadata.create_all(bind=engine)
+try:
+    Base.metadata.create_all(bind=engine)
+except Exception as e:
+    print(f"[STARTUP NOTICE] Table initialization: {e}")
 
 app = FastAPI(title="WHT Practical AI Learning Platform API")
+
 
 # Mount uploads directory for images and media
 UPLOAD_DIR = os.getenv(
@@ -171,7 +175,11 @@ def seed_admin_from_env():
     finally:
         db.close()
 
-seed_admin_from_env()
+try:
+    seed_admin_from_env()
+except Exception as e:
+    print(f"[STARTUP NOTICE] Admin seeding check: {e}")
+
 
 # Seed curated blogs if database has none
 def seed_initial_blogs():

@@ -37,18 +37,28 @@ raw_db_url = (
     or os.getenv("POSTGRES_PRISMA_URL")
 )
 
+from sqlalchemy.pool import NullPool
+
 if raw_db_url:
     db_url = sanitize_postgres_url(raw_db_url)
     
-    # Supabase / PostgreSQL Engine with connection health checking
-    engine = create_engine(
-        db_url,
-        pool_pre_ping=True,
-        pool_recycle=300,
-        pool_size=5,
-        max_overflow=10
-    )
-    print("[DATABASE] Connected to Supabase PostgreSQL.")
+    # In serverless environments (Vercel), use NullPool to prevent connection exhaustion
+    if os.getenv("VERCEL"):
+        engine = create_engine(
+            db_url,
+            poolclass=NullPool
+        )
+        print("[DATABASE] Connected to Supabase PostgreSQL (Serverless NullPool).")
+    else:
+        engine = create_engine(
+            db_url,
+            pool_pre_ping=True,
+            pool_recycle=300,
+            pool_size=5,
+            max_overflow=10
+        )
+        print("[DATABASE] Connected to Supabase PostgreSQL.")
+
 
 else:
     DB_PATH = os.path.join(BASE_DIR, "wht.db")
