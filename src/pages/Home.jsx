@@ -223,20 +223,23 @@ export default function Home({
               borderRadius: '16px', 
               overflow: 'hidden',
               display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fit, minmax(360px, 1fr))'
+              gridTemplateColumns: (featuredBlog.image_url || featuredBlog.image) ? 'repeat(auto-fit, minmax(360px, 1fr))' : '1fr'
             }}>
-              <div style={{ height: '380px', overflow: 'hidden', position: 'relative' }}>
-                <img 
-                  src={featuredBlog.image_url || featuredBlog.image} 
-                  alt={featuredBlog.title} 
-                  style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                />
-                <span className="blog-tag" style={{ top: '1.5rem', left: '1.5rem' }}>
-                  FEATURED SPOTLIGHT
-                </span>
-              </div>
+              {(featuredBlog.image_url || featuredBlog.image) && (
+                <div style={{ height: '380px', overflow: 'hidden', position: 'relative' }}>
+                  <img 
+                    src={featuredBlog.image_url || featuredBlog.image} 
+                    alt={featuredBlog.title} 
+                    style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
+                  />
+                  <span className="blog-tag" style={{ top: '1.5rem', left: '1.5rem' }}>
+                    FEATURED SPOTLIGHT
+                  </span>
+                </div>
+              )}
 
               <div style={{ padding: '3rem', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+
                 <div>
                   <div style={{ display: 'flex', gap: '0.8rem', alignItems: 'center', marginBottom: '1rem' }}>
                     <span style={{ fontSize: '0.8rem', fontWeight: 800, color: 'var(--color-red)' }}>{featuredBlog.difficulty || 'INTERMEDIATE'}</span>

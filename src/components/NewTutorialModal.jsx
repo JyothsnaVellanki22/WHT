@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { X, Plus, Sparkles, Image, BookOpen, Tag, User, Code, Layers } from 'lucide-react';
+import React, { useState, useRef } from 'react';
+import { X, Plus, Sparkles, Image, BookOpen, Tag, User, Code, Layers, Upload, Linkedin, Trash2 } from 'lucide-react';
 
 export default function NewTutorialModal({ isOpen, onClose, onAddBlog }) {
   const [formData, setFormData] = useState({
@@ -9,14 +9,56 @@ export default function NewTutorialModal({ isOpen, onClose, onAddBlog }) {
     category: 'AI TUTORIAL',
     read_time: '6 MIN READ',
     author: 'Jyothsna Vellanki',
-    image_url: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=1200&q=80',
+    image_url: '',
+    linkedin_url: '',
     summary: '',
     content: '',
     notify_subscribers: true
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isUploadingImage, setIsUploadingImage] = useState(false);
+  const fileInputRef = useRef(null);
 
   if (!isOpen) return null;
+
+  const handleImageFileChange = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setIsUploadingImage(true);
+    try {
+      const uploadData = new FormData();
+      uploadData.append('file', file);
+      const token = localStorage.getItem('wht_auth_token');
+      const headers = {};
+      if (token) headers['Authorization'] = `Bearer ${token}`;
+
+      const res = await fetch('/api/upload-image', {
+        method: 'POST',
+        headers,
+        body: uploadData
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        if (data.url) {
+          setFormData((prev) => ({ ...prev, image_url: data.url }));
+          setIsUploadingImage(false);
+          return;
+        }
+      }
+    } catch (err) {
+      console.warn('Backend image upload error, using local data URL fallback:', err);
+    }
+
+    // Local DataURL fallback
+    const reader = new FileReader();
+    reader.onload = (loadEvt) => {
+      setFormData((prev) => ({ ...prev, image_url: loadEvt.target.result }));
+      setIsUploadingImage(false);
+    };
+    reader.readAsDataURL(file);
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -75,13 +117,15 @@ export default function NewTutorialModal({ isOpen, onClose, onAddBlog }) {
         category: 'AI TUTORIAL',
         read_time: '6 MIN READ',
         author: 'Jyothsna Vellanki',
-        image_url: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=1200&q=80',
+        image_url: '',
+        linkedin_url: '',
         summary: '',
         content: '',
         notify_subscribers: true
       });
     }
   };
+
 
   return (
     <div style={{
@@ -298,13 +342,13 @@ export default function NewTutorialModal({ isOpen, onClose, onAddBlog }) {
 
             <div>
               <label style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', fontWeight: 700, fontSize: '0.85rem', marginBottom: '0.4rem', color: 'var(--text-main)', textTransform: 'uppercase' }}>
-                <Image size={13} color="var(--color-yellow)" /> Cover Image URL
+                <Linkedin size={13} color="#0A66C2" /> LinkedIn Post URL (Optional)
               </label>
               <input
-                type="text"
-                placeholder="https://images.unsplash.com/..."
-                value={formData.image_url}
-                onChange={(e) => setFormData({ ...formData, image_url: e.target.value })}
+                type="url"
+                placeholder="https://www.linkedin.com/pulse/..."
+                value={formData.linkedin_url}
+                onChange={(e) => setFormData({ ...formData, linkedin_url: e.target.value })}
                 style={{
                   width: '100%',
                   padding: '0.85rem',
@@ -318,6 +362,81 @@ export default function NewTutorialModal({ isOpen, onClose, onAddBlog }) {
               />
             </div>
           </div>
+
+          {/* Manual Cover Image Upload / URL */}
+          <div style={{ background: 'var(--bg-card-hover)', border: 'var(--border-subtle)', borderRadius: '10px', padding: '1.2rem' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.8rem' }}>
+              <label style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontWeight: 700, fontSize: '0.85rem', color: 'var(--text-main)', textTransform: 'uppercase', margin: 0 }}>
+                <Image size={14} color="var(--color-yellow)" /> Cover Image (Optional)
+              </label>
+              
+              <div style={{ display: 'flex', gap: '0.6rem' }}>
+                <input
+                  type="file"
+                  ref={fileInputRef}
+                  accept="image/*"
+                  onChange={handleImageFileChange}
+                  style={{ display: 'none' }}
+                />
+                <button
+                  type="button"
+                  onClick={() => fileInputRef.current?.click()}
+                  disabled={isUploadingImage}
+                  className="btn btn-outline"
+                  style={{ padding: '0.3rem 0.8rem', fontSize: '0.8rem', display: 'inline-flex', alignItems: 'center', gap: '0.35rem' }}
+                >
+                  <Upload size={13} /> {isUploadingImage ? 'Uploading...' : 'Upload Image File'}
+                </button>
+                {formData.image_url && (
+                  <button
+                    type="button"
+                    onClick={() => setFormData({ ...formData, image_url: '' })}
+                    style={{
+                      background: 'rgba(230, 57, 70, 0.15)',
+                      border: '1px solid var(--color-red)',
+                      color: 'var(--color-red)',
+                      borderRadius: '6px',
+                      padding: '0.3rem 0.7rem',
+                      fontSize: '0.8rem',
+                      cursor: 'pointer',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '0.3rem'
+                    }}
+                  >
+                    <Trash2 size={13} /> Remove Image
+                  </button>
+                )}
+              </div>
+            </div>
+
+            <input
+              type="text"
+              placeholder="Or paste an image URL directly (e.g. https://...)"
+              value={formData.image_url}
+              onChange={(e) => setFormData({ ...formData, image_url: e.target.value })}
+              style={{
+                width: '100%',
+                padding: '0.75rem 0.9rem',
+                border: 'var(--border-subtle)',
+                borderRadius: '8px',
+                fontSize: '0.88rem',
+                background: 'var(--bg-card)',
+                color: 'var(--text-main)',
+                outline: 'none'
+              }}
+            />
+
+            {formData.image_url && (
+              <div style={{ marginTop: '0.8rem', display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                <div style={{ width: '80px', height: '48px', borderRadius: '6px', overflow: 'hidden', border: 'var(--border-subtle)', background: '#000' }}>
+                  <img src={formData.image_url} alt="Cover preview" style={{ width: '100%', height: '100%', objectFit: 'cover' }} onError={(e) => { e.target.style.display = 'none'; }} />
+                </div>
+                <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>Image ready for publication</span>
+              </div>
+            )}
+          </div>
+
 
 
           <div>

@@ -25,7 +25,8 @@ class BlogPost(Base):
     category = Column(String, default="AI TUTORIAL")   # AI TUTORIAL, TOOLS & FRAMEWORKS, HANDS-ON GUIDE, CAREER DEV
     author = Column(String, default="WHT Tech Team")
     read_time = Column(String, default="5 MIN READ")
-    image_url = Column(String)
+    image_url = Column(String, nullable=True)
+    linkedin_url = Column(String, nullable=True)
     created_at = Column(DateTime, server_default=func.now())
 
 class Subscriber(Base):
@@ -45,8 +46,10 @@ class Newsletter(Base):
     subject = Column(String, nullable=False)
     tech_spotlight = Column(String)                    # e.g. "Ollama 0.5 + DeepSeek-R1"
     content = Column(Text, nullable=False)
+    linkedin_url = Column(String, nullable=True)
     recipient_count = Column(Integer, default=0)
     sent_at = Column(DateTime, server_default=func.now())
+
 
 class EmailLog(Base):
     __tablename__ = "email_logs"

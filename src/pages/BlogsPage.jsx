@@ -192,10 +192,23 @@ export default function BlogsPage({ blogs = [], onOpenNewTutorialModal, isAdmin 
             <div className="grid-editorial">
               {filteredBlogs.map((blog, idx) => (
                 <article key={blog.id || idx} className="blog-card">
-                  <div className="blog-img-wrap">
-                    <img src={blog.image_url || blog.image} alt={blog.title} />
-                    <span className="blog-tag">{blog.difficulty || 'PRACTICAL'}</span>
-                  </div>
+                  {(blog.image_url || blog.image) ? (
+                    <div className="blog-img-wrap">
+                      <img src={blog.image_url || blog.image} alt={blog.title} />
+                      <span className="blog-tag">{blog.difficulty || 'PRACTICAL'}</span>
+                    </div>
+                  ) : (
+                    <div className="blog-img-wrap" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'radial-gradient(circle at 50% 50%, rgba(255, 207, 42, 0.08) 0%, rgba(20, 20, 20, 0.95) 100%)', minHeight: '180px' }}>
+                      <div style={{ textAlign: 'center', padding: '1.2rem' }}>
+                        <Terminal size={28} color="var(--color-yellow)" style={{ margin: '0 auto 0.4rem auto', opacity: 0.85 }} />
+                        <div style={{ fontSize: '0.72rem', fontWeight: 800, letterSpacing: '0.08em', color: 'var(--text-subtle)', textTransform: 'uppercase' }}>
+                          {blog.category || 'PRACTICAL GUIDE'}
+                        </div>
+                      </div>
+                      <span className="blog-tag">{blog.difficulty || 'PRACTICAL'}</span>
+                    </div>
+                  )}
+
 
                   <div className="blog-content">
                     <div className="blog-meta">

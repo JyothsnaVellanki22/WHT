@@ -26,9 +26,13 @@ Base.metadata.create_all(bind=engine)
 app = FastAPI(title="WHT Practical AI Learning Platform API")
 
 # Mount uploads directory for images and media
-UPLOAD_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "uploads")
+UPLOAD_DIR = os.getenv(
+    "UPLOAD_DIR",
+    "/tmp/uploads" if os.getenv("VERCEL") else os.path.join(os.path.dirname(os.path.abspath(__file__)), "uploads")
+)
 os.makedirs(UPLOAD_DIR, exist_ok=True)
 app.mount("/uploads", StaticFiles(directory=UPLOAD_DIR), name="uploads")
+
 
 # ----------------- Environment & CORS Hardening ----------------- #
 ENVIRONMENT = os.getenv("ENVIRONMENT", os.getenv("ENV", "development")).lower()
@@ -231,7 +235,8 @@ class BlogPostCreate(BaseModel):
     category: Optional[str] = Field("AI TUTORIAL", max_length=100)
     author: Optional[str] = Field("WHT Tech Team", max_length=100)
     read_time: Optional[str] = Field("5 MIN READ", max_length=50)
-    image_url: Optional[str] = Field("https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=800&q=80", max_length=500)
+    image_url: Optional[str] = Field(None, max_length=1000)
+    linkedin_url: Optional[str] = Field(None, max_length=1000)
     notify_subscribers: Optional[bool] = True
 
 class SubscriberCreate(BaseModel):
@@ -251,6 +256,7 @@ class NewsletterCreate(BaseModel):
     edition: Optional[str] = "Weekly Edition"
     tech_spotlight: Optional[str] = "Practical AI Tools"
     content: str
+    linkedin_url: Optional[str] = None
 
 class NewsletterUpdate(BaseModel):
     title: Optional[str] = None
@@ -258,6 +264,7 @@ class NewsletterUpdate(BaseModel):
     edition: Optional[str] = None
     tech_spotlight: Optional[str] = None
     content: Optional[str] = None
+    linkedin_url: Optional[str] = None
 
 # ----------------- Helper Email Dispatcher ----------------- #
 def broadcast_email_to_subscribers(subject: str, message: str, email_type: str, db: Session, newsletter_id: Optional[int] = None) -> int:
@@ -315,7 +322,8 @@ def create_blog(data: BlogPostCreate, db: Session = Depends(get_db), current_use
         category=data.category.upper(),
         author=data.author or current_user.name or "WHT Tech Team",
         read_time=data.read_time,
-        image_url=data.image_url
+        image_url=data.image_url,
+        linkedin_url=data.linkedin_url
     )
     db.add(new_blog)
     db.commit()
@@ -467,6 +475,7 @@ def create_and_send_newsletter(data: NewsletterCreate, db: Session = Depends(get
         subject=data.subject,
         tech_spotlight=data.tech_spotlight,
         content=data.content,
+        linkedin_url=data.linkedin_url,
         recipient_count=0
     )
     db.add(new_newsletter)
@@ -513,6 +522,8 @@ def update_newsletter(
         newsletter.tech_spotlight = data.tech_spotlight.strip()
     if data.content is not None:
         newsletter.content = data.content.strip()
+    if data.linkedin_url is not None:
+        newsletter.linkedin_url = data.linkedin_url.strip() if data.linkedin_url else None
 
     db.commit()
     db.refresh(newsletter)

@@ -132,12 +132,32 @@ export default function ArticleDetailPage({ blogs = [], isAdmin = false, onDelet
               <span style={{ display: 'flex', alignItems: 'center', gap: '0.3rem' }}><Clock size={14} /> {tutorial.read_time || tutorial.readTime || '5 MIN READ'}</span>
             </div>
             
-            <a href="https://www.linkedin.com" target="_blank" rel="noopener noreferrer" className="btn btn-outline" style={{ padding: '0.4rem 0.9rem', fontSize: '0.8rem' }}>
-              SHARE TUTORIAL <Linkedin size={14} />
-            </a>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem', flexWrap: 'wrap' }}>
+              {tutorial.linkedin_url && (
+                <a 
+                  href={tutorial.linkedin_url} 
+                  target="_blank" 
+                  rel="noopener noreferrer" 
+                  className="btn btn-primary" 
+                  style={{ padding: '0.4rem 0.9rem', fontSize: '0.8rem', display: 'inline-flex', alignItems: 'center', gap: '0.4rem' }}
+                >
+                  <Linkedin size={14} /> VIEW ON LINKEDIN
+                </a>
+              )}
+              <a 
+                href={`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(window.location.href)}`} 
+                target="_blank" 
+                rel="noopener noreferrer" 
+                className="btn btn-outline" 
+                style={{ padding: '0.4rem 0.9rem', fontSize: '0.8rem', display: 'inline-flex', alignItems: 'center', gap: '0.4rem' }}
+              >
+                <Share2 size={14} /> SHARE TUTORIAL
+              </a>
+            </div>
           </div>
         </div>
       </section>
+
 
       <section className="section-padding">
         <div className="container" style={{ maxWidth: '900px' }}>

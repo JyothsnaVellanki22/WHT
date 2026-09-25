@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { X, Save, Trash2, CheckCircle2, AlertCircle } from 'lucide-react';
+import { X, Save, Trash2, CheckCircle2, AlertCircle, Linkedin } from 'lucide-react';
 import RichContentEditor from './RichContentEditor';
 
 export default function EditNewsletterModal({ isOpen, onClose, newsletter, onNewsletterUpdated, onNewsletterDeleted }) {
@@ -8,6 +8,7 @@ export default function EditNewsletterModal({ isOpen, onClose, newsletter, onNew
     title: '',
     subject: '',
     tech_spotlight: '',
+    linkedin_url: '',
     content: ''
   });
   const [isSaving, setIsSaving] = useState(false);
@@ -22,12 +23,14 @@ export default function EditNewsletterModal({ isOpen, onClose, newsletter, onNew
         title: newsletter.title || '',
         subject: newsletter.subject || '',
         tech_spotlight: newsletter.tech_spotlight || '',
+        linkedin_url: newsletter.linkedin_url || '',
         content: newsletter.content || ''
       });
       setStatusMsg('');
       setIsError(false);
     }
   }, [newsletter]);
+
 
   if (!isOpen || !newsletter) return null;
 
@@ -292,7 +295,30 @@ export default function EditNewsletterModal({ isOpen, onClose, newsletter, onNew
             />
           </div>
 
+          <div>
+            <label style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.8rem', fontWeight: 700, color: 'var(--text-subtle)', marginBottom: '0.4rem', textTransform: 'uppercase' }}>
+              <Linkedin size={13} color="#0A66C2" /> LinkedIn Pulse / Article URL (Optional)
+            </label>
+            <input
+              type="url"
+              value={formData.linkedin_url || ''}
+              onChange={(e) => setFormData({ ...formData, linkedin_url: e.target.value })}
+              placeholder="https://www.linkedin.com/pulse/your-article-slug/"
+              style={{
+                width: '100%',
+                padding: '0.75rem 1rem',
+                background: 'var(--bg-card-hover)',
+                border: 'var(--border-subtle)',
+                borderRadius: '8px',
+                color: 'var(--text-main)',
+                fontSize: '0.95rem',
+                outline: 'none'
+              }}
+            />
+          </div>
+
           <RichContentEditor
+
             value={formData.content}
             onChange={(content) => setFormData({ ...formData, content })}
             label="Edition Content & In-Between Media"

@@ -13,7 +13,8 @@ import {
   Sparkles,
   Layers,
   Tag,
-  Mail
+  Mail,
+  Linkedin
 } from 'lucide-react';
 import RichContentEditor from '../components/RichContentEditor';
 
@@ -32,6 +33,7 @@ export default function NewsletterEditorPage({
     subject: '',
     edition: mode === 'new' ? `Edition #${Math.floor(Math.random() * 20) + 14}` : '',
     tech_spotlight: mode === 'new' ? 'Security & Cloud Systems' : '',
+    linkedin_url: '',
     content: ''
   });
 
@@ -66,10 +68,12 @@ export default function NewsletterEditorPage({
             subject: data.subject || '',
             edition: data.edition || '',
             tech_spotlight: data.tech_spotlight || '',
+            linkedin_url: data.linkedin_url || '',
             content: data.content || ''
           });
           setIsLoading(false);
         })
+
         .catch((err) => {
           console.error('Error loading newsletter:', err);
           setIsError(true);
@@ -511,8 +515,32 @@ export default function NewsletterEditorPage({
                 />
               </div>
             </div>
+
+            {/* LinkedIn Article / Post Link */}
+            <div>
+              <label style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.8rem', fontWeight: 700, color: 'var(--text-subtle)', textTransform: 'uppercase', marginBottom: '0.4rem', letterSpacing: '0.04em' }}>
+                <Linkedin size={13} color="#0A66C2" /> LinkedIn Pulse / Article URL (Optional)
+              </label>
+              <input
+                type="url"
+                value={formData.linkedin_url || ''}
+                onChange={(e) => setFormData({ ...formData, linkedin_url: e.target.value })}
+                placeholder="https://www.linkedin.com/pulse/your-article-slug/"
+                style={{
+                  width: '100%',
+                  padding: '0.75rem 1.1rem',
+                  background: 'var(--bg-card-hover)',
+                  border: 'var(--border-subtle)',
+                  borderRadius: '8px',
+                  color: 'var(--text-main)',
+                  fontSize: '0.92rem',
+                  outline: 'none'
+                }}
+              />
+            </div>
           </div>
         </section>
+
 
         {/* Content & Media Visual Workspace */}
         <section>

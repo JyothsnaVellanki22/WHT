@@ -1,17 +1,19 @@
 import React, { useState } from 'react';
-import { X, Send, Sparkles, Mail, Zap, CheckCircle2 } from 'lucide-react';
+import { X, Send, Sparkles, Mail, Zap, CheckCircle2, Linkedin } from 'lucide-react';
 import RichContentEditor from './RichContentEditor';
 
 export default function NewNewsletterModal({ isOpen, onClose, onNewsletterSent, subscriberCount = 0 }) {
   const [formData, setFormData] = useState({
     edition: 'Edition #' + (Math.floor(Math.random() * 20) + 14),
-    title: 'Hands-On Local LLMs & DeepSeek-R1 Distillations',
-    subject: 'WHT Weekly: Step-by-Step Python Agents & Local Tool Calling',
-    tech_spotlight: 'Ollama 0.5 + DeepSeek-R1',
-    content: `Welcome to this week's WHT Student Learning Dispatch!\n\nHere is what we are building this week:\n1. Local Tool Calling Deep-Dive with LangChain.\n2. 4-bit LoRA fine-tuning architecture on consumer hardware.\n3. Student Project of the Week: Terminal CLI code assistant.\n\nCode snippet & github repo link attached!`
+    title: '',
+    subject: '',
+    tech_spotlight: '',
+    linkedin_url: '',
+    content: ''
   });
   const [isSending, setIsSending] = useState(false);
   const [successResult, setSuccessResult] = useState(null);
+
 
   if (!isOpen) return null;
 
@@ -250,7 +252,30 @@ export default function NewNewsletterModal({ isOpen, onClose, onNewsletterSent, 
                 />
               </div>
 
+              <div>
+                <label style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontWeight: 700, fontSize: '0.85rem', marginBottom: '0.4rem', color: 'var(--text-main)', textTransform: 'uppercase' }}>
+                  <Linkedin size={13} color="#0A66C2" /> LinkedIn Pulse / Article URL (Optional)
+                </label>
+                <input
+                  type="url"
+                  placeholder="https://www.linkedin.com/pulse/your-article-slug/"
+                  value={formData.linkedin_url}
+                  onChange={(e) => setFormData({ ...formData, linkedin_url: e.target.value })}
+                  style={{
+                    width: '100%',
+                    padding: '0.85rem 1.1rem',
+                    border: 'var(--border-subtle)',
+                    borderRadius: '8px',
+                    fontSize: '0.95rem',
+                    background: 'var(--bg-card-hover)',
+                    color: 'var(--text-main)',
+                    outline: 'none'
+                  }}
+                />
+              </div>
+
               <RichContentEditor
+
                 value={formData.content}
                 onChange={(content) => setFormData({ ...formData, content })}
                 label="Newsletter Content & In-Between Images"
