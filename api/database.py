@@ -60,13 +60,13 @@ if raw_db_url:
         )
         print("[DATABASE] Connected to Supabase PostgreSQL.")
 else:
-    DB_PATH = os.path.join(BASE_DIR, "wht.db")
+    DB_PATH = "/tmp/wht.db" if is_serverless else os.path.join(BASE_DIR, "wht.db")
     SQLALCHEMY_DATABASE_URL = f"sqlite:///{DB_PATH}"
     engine = create_engine(
         SQLALCHEMY_DATABASE_URL,
         connect_args={"check_same_thread": False}
     )
-    print(f"[DATABASE] Connected to local SQLite database at {DB_PATH}")
+    print(f"[DATABASE] Connected to SQLite database at {DB_PATH}")
 
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 

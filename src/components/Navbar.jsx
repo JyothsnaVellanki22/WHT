@@ -174,7 +174,58 @@ export default function Navbar({
         </div>
 
         {/* Mobile Header Controls */}
-        <div className="mobile-only" style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+        <div className="mobile-only" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+          {currentUser ? (
+            <div 
+              style={{ 
+                display: 'inline-flex', 
+                alignItems: 'center', 
+                gap: '0.35rem', 
+                background: isAdmin ? 'rgba(255, 207, 42, 0.12)' : 'var(--bg-card-hover)', 
+                border: isAdmin ? '1px solid var(--color-yellow)' : 'var(--border-subtle)', 
+                borderRadius: '9999px', 
+                padding: '0.35rem 0.65rem', 
+                fontSize: '0.72rem', 
+                fontWeight: 800, 
+                color: isAdmin ? 'var(--color-yellow)' : 'var(--text-main)' 
+              }}
+            >
+              {isAdmin ? <ShieldCheck size={13} /> : <User size={13} />}
+              <span>{isAdmin ? 'ADMIN' : (currentUser.name || 'USER')}</span>
+              <button 
+                onClick={onLogout} 
+                title="Sign Out" 
+                style={{ 
+                  background: 'none', 
+                  border: 'none', 
+                  color: 'var(--text-muted)', 
+                  cursor: 'pointer', 
+                  display: 'flex', 
+                  alignItems: 'center', 
+                  padding: '0 0 0 0.2rem'
+                }}
+              >
+                <LogOut size={12} />
+              </button>
+            </div>
+          ) : (
+            <button 
+              onClick={onOpenAuthModal}
+              className="btn btn-outline"
+              title="Sign in or register"
+              style={{ 
+                padding: '0.35rem 0.65rem', 
+                fontSize: '0.75rem', 
+                fontWeight: 800,
+                display: 'inline-flex', 
+                alignItems: 'center', 
+                gap: '0.25rem'
+              }}
+            >
+              <User size={13} /> SIGN IN
+            </button>
+          )}
+
           <button 
             onClick={onToggleTheme}
             className="theme-toggle-btn"
@@ -215,8 +266,64 @@ export default function Navbar({
               </Link>
             ))}
 
+            {/* Mobile Auth Button / Session Details */}
+            <div style={{ marginTop: '0.5rem', paddingTop: '1rem', borderTop: 'var(--border-subtle)' }}>
+              {currentUser ? (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                  <div style={{ 
+                    display: 'flex', 
+                    alignItems: 'center', 
+                    justifyContent: 'space-between',
+                    padding: '0.65rem 0.85rem',
+                    background: 'var(--bg-card-hover)',
+                    borderRadius: '8px',
+                    border: 'var(--border-subtle)'
+                  }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontWeight: 700, fontSize: '0.9rem' }}>
+                      {isAdmin ? <ShieldCheck size={16} color="var(--color-yellow)" /> : <User size={16} />}
+                      <span>{currentUser.name || currentUser.email}</span>
+                      {isAdmin && <span style={{ fontSize: '0.7rem', color: 'var(--color-yellow)', background: 'rgba(255, 207, 42, 0.15)', padding: '0.15rem 0.4rem', borderRadius: '4px' }}>ADMIN</span>}
+                    </div>
+                    <button 
+                      onClick={() => { setMobileMenuOpen(false); onLogout(); }}
+                      style={{ 
+                        background: 'none', 
+                        border: 'none', 
+                        color: 'var(--color-red)', 
+                        cursor: 'pointer', 
+                        display: 'flex', 
+                        alignItems: 'center', 
+                        gap: '0.3rem',
+                        fontSize: '0.82rem',
+                        fontWeight: 700 
+                      }}
+                    >
+                      <LogOut size={14} /> SIGN OUT
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <button 
+                  onClick={() => { setMobileMenuOpen(false); onOpenAuthModal(); }}
+                  className="btn btn-post"
+                  style={{ 
+                    width: '100%', 
+                    padding: '0.75rem', 
+                    fontSize: '0.95rem',
+                    fontWeight: 800,
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '0.5rem'
+                  }}
+                >
+                  <User size={16} /> SIGN IN / SIGN UP
+                </button>
+              )}
+            </div>
+
             {isAdmin && (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.8rem', marginTop: '1rem', paddingTop: '1rem', borderTop: 'var(--border-subtle)' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.8rem', marginTop: '0.5rem', paddingTop: '1rem', borderTop: 'var(--border-subtle)' }}>
                 <Link
                   to="/admin/analytics"
                   onClick={handleLinkClick}
